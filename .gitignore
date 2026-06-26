@@ -1,0 +1,10 @@
+# gitignore
+.godot/
+*.translation
+*.import
+export_presets.cfg
+build/
+*.apk
+*.aab
+user://
+android/libs/

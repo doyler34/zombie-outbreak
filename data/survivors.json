@@ -1,0 +1,37 @@
+{
+  "first_names": [
+    "Alex", "Maria", "Jake", "Sarah", "David", "Emma", "Carlos",
+    "Yuki", "Olga", "Sam", "Priya", "Marco", "Hana", "Leo",
+    "Fatima", "Ivan", "Mei", "Omar", "Zara", "Kai"
+  ],
+  "last_names": [
+    "Reyes", "Chen", "Walker", "Patel", "Kim", "Rossi", "Silva",
+    "Tanaka", "Volkov", "O'Brien", "Singh", "Dubois", "Nkosi",
+    "Johansson", "Hassan", "Müller", "Zhang", "Garcia", "Khan", "Lee"
+  ],
+  "skills": [
+    {"id": "combat", "name": "Combat", "icon": "⚔️"},
+    {"id": "scavenging", "name": "Scavenging", "icon": "🔍"},
+    {"id": "farming", "name": "Farming", "icon": "🌾"},
+    {"id": "crafting", "name": "Crafting", "icon": "🔧"},
+    {"id": "medicine", "name": "Medicine", "icon": "💊"},
+    {"id": "leadership", "name": "Leadership", "icon": "⭐"}
+  ],
+  "moods": ["Happy", "Content", "Neutral", "Worried", "Angry", "Depressed"],
+  "starting_resources": {
+    "food": 30,
+    "water": 40,
+    "wood": 50,
+    "metal": 20,
+    "medicine": 10,
+    "ammo": 15
+  },
+  "survivor_base_stats": {
+    "max_health": 100,
+    "max_hunger": 100,
+    "hunger_decay": 8,
+    "starve_damage": 5,
+    "mood_decay_hungry": 3,
+    "mood_gain_fed": 2
+  }
+}

@@ -1,0 +1,31 @@
+; Zombie Outbreak: Colony Survival
+; Godot 4.4 Android Game
+
+config_version=5
+
+[application]
+config/name="ZombieOutbreak"
+config/description="Top-down zombie strategy game. Build, scavenge, survive."
+config/version="0.1.0"
+run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.4")
+config/icon="res://assets/icon.svg"
+
+[autoload]
+ResourceManager="*res://scripts/resource_manager.gd"
+GameState="*res://scripts/game_state.gd"
+EventBus="*res://scripts/event_bus.gd"
+
+[display]
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/mode=2
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[input_devices]
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+renderer/rendering_method="mobile"
+environment/defaults/default_clear_color=Color(0.05, 0.05, 0.08, 1)

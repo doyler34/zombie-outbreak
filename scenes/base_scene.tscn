@@ -1,0 +1,187 @@
+[gd_scene load_steps=2 format=3 uid="uid://base_scene"]
+
+[ext_resource type="Script" path="res://scripts/base_scene.gd" id="1_script"]
+
+[node name="BaseScene" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="BaseZone" type="Area2D" parent="."]
+
+[node name="BaseGround" type="ColorRect" parent="BaseZone"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250
+offset_top = -200
+offset_right = 250
+offset_bottom = 200
+color = Color(0.15, 0.25, 0.15, 1)
+
+[node name="BaseLabel" type="Label" parent="BaseZone"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80
+offset_top = -15
+offset_right = 80
+offset_bottom = 15
+text = "SAFE ZONE"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.3, 0.9, 0.3, 0.8)
+
+[node name="DayNightOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0.1, 0)
+
+[node name="UILayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="TopBar" type="HBoxContainer" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_bottom = 50
+theme_override_constants/separation = 10
+
+[node name="TopBg" type="ColorRect" parent="UILayer/TopBar"]
+layout_mode = 0
+offset_right = 720
+offset_bottom = 50
+color = Color(0.05, 0.05, 0.1, 0.9)
+mouse_filter = 2
+
+[node name="DayLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+text = "☀️ Day 1"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="PopLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+text = "👥0/4"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.8, 0.8, 1, 1)
+
+[node name="FoodLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "🍗0"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.9, 0.5, 0.2, 1)
+
+[node name="WaterLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "💧0"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.3, 0.6, 1, 1)
+
+[node name="WoodLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "🪵0"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.4, 0.2, 1)
+
+[node name="MetalLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "🔩0"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+
+[node name="MedicineLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "💊0"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+
+[node name="AmmoLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 0)
+text = "🔫0"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.9, 0.8, 0.2, 1)
+
+[node name="BottomBar" type="HBoxContainer" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -80
+offset_bottom = 0
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="BottomBg" type="ColorRect" parent="UILayer/BottomBar"]
+layout_mode = 0
+offset_right = 720
+offset_bottom = 80
+color = Color(0.05, 0.05, 0.1, 0.9)
+mouse_filter = 2
+
+[node name="BuildingsBtn" type="Button" parent="UILayer/BottomBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 60)
+text = "🏗️ Build"
+theme_override_font_sizes/font_size = 16
+
+[node name="SurvivorsBtn" type="Button" parent="UILayer/BottomBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 60)
+text = "👤 Survivors"
+theme_override_font_sizes/font_size = 16
+
+[node name="MissionBtn" type="Button" parent="UILayer/BottomBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 60)
+text = "🎯 Mission"
+theme_override_font_sizes/font_size = 16
+
+[node name="MenuBtn" type="Button" parent="UILayer/BottomBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 60)
+text = "⚙️ Menu"
+theme_override_font_sizes/font_size = 16
+
+[node name="NotificationLabel" type="Label" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250
+offset_top = -200
+offset_right = 250
+offset_bottom = -140
+text = ""
+horizontal_alignment = 1
+visible = false
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="NotificationTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+autostart = false

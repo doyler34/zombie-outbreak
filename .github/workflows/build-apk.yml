@@ -43,7 +43,7 @@ jobs:
 
       - name: Install Android Build Template
         run: |
-          unzip -q ~/.local/share/godot/export_templates/4.4.stable/android_source.zip -d android/
+          unzip -qo ~/.local/share/godot/export_templates/4.4.stable/android_source.zip -d android/
           echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
       - name: Build APK (Debug)

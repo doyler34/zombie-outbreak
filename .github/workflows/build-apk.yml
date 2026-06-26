@@ -41,18 +41,18 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.4.stable
           cp templates/* ~/.local/share/godot/export_templates/4.4.stable/
 
-      - name: Install Android Build Template
+      - name: Pre-heat Godot Cache
         run: |
-          unzip -qo ~/.local/share/godot/export_templates/4.4.stable/android_source.zip -d android/
-          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          ./Godot_v4.4-stable_linux.x86_64 --headless --editor --quit --path . || true
 
       - name: Build APK (Debug)
         run: |
-          ./Godot_v4.4-stable_linux.x86_64 --headless --export-debug "Android" build/zombie_outbreak-debug.apk --path .
+          mkdir -p build
+          ./Godot_v4.4-stable_linux.x86_64 --headless --install-android-build-template --export-debug "Android" build/zombie_outbreak-debug.apk --path .
 
       - name: Build APK (Release)
         run: |
-          ./Godot_v4.4-stable_linux.x86_64 --headless --export-release "Android" build/zombie_outbreak-release.apk --path .
+          ./Godot_v4.4-stable_linux.x86_64 --headless --install-android-build-template --export-release "Android" build/zombie_outbreak-release.apk --path .
 
       - name: Upload APKs
         uses: actions/upload-artifact@v4

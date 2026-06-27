@@ -35,14 +35,16 @@ var building_active: bool = false
 var glow_tween: Tween
 
 func _ready() -> void:
+	# Hide tscn bottom bar; _build_bottom_bar() creates the correctly-positioned one
+	$UILayer/BottomBg.visible = false
+	buildings_btn.visible = false
+	survivors_btn.visible = false
+	mission_btn.visible = false
+	menu_btn.visible = false
+
 	_build_bottom_bar()
 	_make_building_panel()
 	_make_menu_panel()
-
-	buildings_btn.pressed.connect(_show_building_panel)
-	survivors_btn.pressed.connect(func(): _show_notification("Crew panel coming soon", "#FFAA00"))
-	mission_btn.pressed.connect(func(): _show_notification("Mission panel coming soon", "#FFAA00"))
-	menu_btn.pressed.connect(func(): menu_panel.visible = true)
 
 	EventBus.resource_changed.connect(_on_resource_changed)
 	EventBus.day_passed.connect(_on_day_passed)
@@ -61,23 +63,31 @@ func _ready() -> void:
 # ── BOTTOM BAR ─────────────────────────────────────────────────────────────────
 
 func _build_bottom_bar() -> void:
+	var vp = get_viewport().get_visible_rect().size
+	var bar_h = 80
+	var bar_y = vp.y - bar_h
+	var vp_w = vp.x
+
 	var bar = ColorRect.new()
-	bar.set_position(Vector2(0, 1200))
-	bar.set_size(Vector2(720, 80))
+	bar.set_position(Vector2(0, bar_y))
+	bar.set_size(Vector2(vp_w, bar_h))
 	bar.color = Color(0.10, 0.09, 0.07, 0.97)
 	ui_layer.add_child(bar)
 
 	# Brass top edge line
 	var accent = ColorRect.new()
-	accent.set_position(Vector2(0, 1200))
-	accent.set_size(Vector2(720, 2))
+	accent.set_position(Vector2(0, bar_y))
+	accent.set_size(Vector2(vp_w, 2))
 	accent.color = Color(0.72, 0.52, 0.18, 1.0)
 	ui_layer.add_child(accent)
 
-	_build_one_button("BUILD",   30,  1210, 130, 62, _show_building_panel)
-	_build_one_button("CREW",   177,  1210, 110, 62, func(): _show_notification("Crew panel coming soon", "#C8A84B"))
-	_build_one_button("MISSION",304,  1210, 130, 62, func(): _show_notification("Mission panel coming soon", "#C8A84B"))
-	_build_one_button("MENU",   451,  1210, 100, 62, func(): menu_panel.visible = true)
+	# Center button group (widths 130+110+130+100 = 470, gaps 15x3 = 45, total 515)
+	var btn_y = bar_y + 9
+	var start_x = (vp_w - 515.0) / 2.0
+	_build_one_button("BUILD",   start_x,         btn_y, 130, 62, _show_building_panel)
+	_build_one_button("CREW",    start_x + 145.0, btn_y, 110, 62, func(): _show_notification("Crew panel coming soon", "#C8A84B"))
+	_build_one_button("MISSION", start_x + 270.0, btn_y, 130, 62, func(): _show_notification("Mission panel coming soon", "#C8A84B"))
+	_build_one_button("MENU",    start_x + 415.0, btn_y, 100, 62, func(): menu_panel.visible = true)
 
 func _build_one_button(text: String, x: float, y: float, w: float, h: float, callback: Callable) -> void:
 	var btn = Button.new()

@@ -19,7 +19,7 @@ float noise(vec2 p) {
 }
 
 void fragment() {
-	vec2 uv = FRAGCOORD.xy * 0.006;
+	vec2 uv = FRAGCOORD.xy * 0.014;
 	float n =  noise(uv)                          * 0.50
 	         + noise(uv * 2.3 + vec2(5.2,  1.3)) * 0.28
 	         + noise(uv * 5.7 + vec2(2.7,  8.4)) * 0.14

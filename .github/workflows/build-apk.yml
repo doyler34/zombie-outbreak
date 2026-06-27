@@ -58,13 +58,9 @@ jobs:
           mkdir -p build
           ./Godot_v4.4-stable_linux.x86_64 --headless --install-android-build-template --export-debug "Android" build/zombie_outbreak-debug.apk --path .
 
-      - name: Build APK (Release)
-        run: |
-          ./Godot_v4.4-stable_linux.x86_64 --headless --install-android-build-template --export-release "Android" build/zombie_outbreak-release.apk --path .
-
-      - name: Upload APKs
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: zombie-outbreak-apks
+          name: zombie-outbreak-apk
           path: build/*.apk
           retention-days: 30

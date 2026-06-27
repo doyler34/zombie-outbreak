@@ -108,44 +108,70 @@ func _make_building_panel() -> void:
 	building_panel = Control.new()
 	building_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	building_panel.visible = false
+	building_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
+	# Dim background — tap anywhere on it closes the panel
 	var dim = ColorRect.new()
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim.color = Color(0, 0, 0, 0.7)
+	dim.color = Color(0, 0, 0, 0.75)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	dim.gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton and event.pressed:
+			building_panel.visible = false
+	)
 	building_panel.add_child(dim)
 
+	# Panel box — centered MANUALLY (720x1280 viewport, 600x700 panel)
+	var bw = 600
+	var bh = 700
 	var box = Panel.new()
-	box.set_anchors_preset(Control.PRESET_CENTER)
-	box.offset_left = -310
-	box.offset_top = -370
-	box.offset_right = 310
-	box.offset_bottom = 370
+	box.set_position(Vector2((720 - bw) / 2, (1280 - bh) / 2))
+	box.set_size(Vector2(bw, bh))
+	# Solid dark background
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.08, 0.08, 0.15, 0.98)
+	panel_style.border_width_left = 2
+	panel_style.border_width_right = 2
+	panel_style.border_width_top = 2
+	panel_style.border_width_bottom = 2
+	panel_style.border_color = Color(0.3, 0.3, 0.5, 1)
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	box.add_theme_stylebox_override("panel", panel_style)
 	building_panel.add_child(box)
 
+	# Title
 	var title = Label.new()
-	title.layout_mode = 1
-	title.anchor_right = 1.0
-	title.offset_bottom = 40
-	title.text = "  BUILDINGS"
+	title.set_position(Vector2(15, 10))
+	title.set_size(Vector2(bw - 70, 30))
+	title.text = "BUILDINGS"
 	title.add_theme_font_size_override("font_size", 22)
 	title.add_theme_color_override("font_color", Color(1, 0.85, 0.3, 1))
 	box.add_child(title)
 
+	# Close button — bright red, easy to see and tap
 	var close = Button.new()
-	close.layout_mode = 1
-	close.anchor_left = 1.0
-	close.anchor_right = 1.0
-	close.offset_left = -50
-	close.offset_bottom = 40
-	close.text = "X"
-	close.add_theme_font_size_override("font_size", 20)
+	close.set_position(Vector2(bw - 55, 5))
+	close.set_size(Vector2(45, 35))
+	close.text = "✕"
+	close.add_theme_font_size_override("font_size", 18)
+	var close_style = StyleBoxFlat.new()
+	close_style.bg_color = Color(0.7, 0.15, 0.15, 1)
+	close_style.corner_radius_top_left = 4
+	close_style.corner_radius_top_right = 4
+	close_style.corner_radius_bottom_left = 4
+	close_style.corner_radius_bottom_right = 4
+	close.add_theme_stylebox_override("normal", close_style)
+	close.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	close.pressed.connect(func(): building_panel.visible = false)
 	box.add_child(close)
 
+	# Scroll container for building list
 	var scroll = ScrollContainer.new()
-	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
-	scroll.offset_top = 45
-	scroll.offset_bottom = -10
+	scroll.set_position(Vector2(10, 50))
+	scroll.set_size(Vector2(bw - 20, bh - 60))
 	box.add_child(scroll)
 
 	building_list = VBoxContainer.new()

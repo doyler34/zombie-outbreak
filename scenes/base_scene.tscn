@@ -5,6 +5,10 @@
 [node name="BaseScene" type="Node2D"]
 script = ExtResource("1_script")
 
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(360, 640)
+enabled = true
+
 [node name="BaseZone" type="Area2D" parent="."]
 
 [node name="BaseGround" type="ColorRect" parent="BaseZone"]

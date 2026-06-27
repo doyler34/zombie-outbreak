@@ -33,17 +33,20 @@ const FULL_CYCLE := 120.0
 
 func _ready() -> void:
 	# Load panel scenes
-	var bp_scene = load("res://ui/building_panel_ui.tscn") as PackedScene
-	building_panel = bp_scene.instantiate()
-	ui_layer.add_child(building_panel)
+	var bp_scene = load("res://ui/building_panel_ui.tscn")
+	if bp_scene:
+		building_panel = bp_scene.instantiate()
+		ui_layer.add_child(building_panel)
 
-	var sp_scene = load("res://ui/survivor_panel_ui.tscn") as PackedScene
-	survivor_panel = sp_scene.instantiate()
-	ui_layer.add_child(survivor_panel)
+	var sp_scene = load("res://ui/survivor_panel_ui.tscn")
+	if sp_scene:
+		survivor_panel = sp_scene.instantiate()
+		ui_layer.add_child(survivor_panel)
 
-	var mp_scene = load("res://ui/mission_panel_ui.tscn") as PackedScene
-	mission_panel = mp_scene.instantiate()
-	ui_layer.add_child(mission_panel)
+	var mp_scene = load("res://ui/mission_panel_ui.tscn")
+	if mp_scene:
+		mission_panel = mp_scene.instantiate()
+		ui_layer.add_child(mission_panel)
 
 	# Simple menu panel (back to menu)
 	_create_menu_panel()
@@ -57,10 +60,14 @@ func _ready() -> void:
 	EventBus.game_over.connect(_on_game_over)
 
 	# Connect UI button signals
-	buildings_btn.pressed.connect(func(): building_panel.show_panel())
-	survivors_btn.pressed.connect(func(): survivor_panel.show_panel())
-	mission_btn.pressed.connect(func(): mission_panel.show_panel())
-	menu_btn.pressed.connect(func(): menu_panel.visible = true)
+	if building_panel and buildings_btn:
+		buildings_btn.pressed.connect(func(): building_panel.show_panel())
+	if survivor_panel and survivors_btn:
+		survivors_btn.pressed.connect(func(): survivor_panel.show_panel())
+	if mission_panel and mission_btn:
+		mission_btn.pressed.connect(func(): mission_panel.show_panel())
+	if menu_btn:
+		menu_btn.pressed.connect(func(): menu_panel.visible = true)
 
 	# Connect notification timer
 	notification_timer.timeout.connect(_on_notification_timeout)

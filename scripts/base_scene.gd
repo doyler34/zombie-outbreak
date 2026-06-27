@@ -4,7 +4,6 @@ extends Node2D
 @onready var day_night_overlay: ColorRect = $DayNightOverlay
 @onready var ui_layer: Control = $UILayer
 @onready var top_bar: HBoxContainer = $UILayer/TopBar
-@onready var bottom_bar: HBoxContainer = $UILayer/BottomBar
 @onready var day_label: Label = $UILayer/TopBar/DayLabel
 @onready var food_label: Label = $UILayer/TopBar/FoodLabel
 @onready var water_label: Label = $UILayer/TopBar/WaterLabel
@@ -16,10 +15,10 @@ extends Node2D
 @onready var notification_label: Label = $UILayer/NotificationLabel
 @onready var notification_timer: Timer = $NotificationTimer
 
-@onready var buildings_btn: Button = $UILayer/BottomBar/BuildingsBtn
-@onready var survivors_btn: Button = $UILayer/BottomBar/SurvivorsBtn
-@onready var mission_btn: Button = $UILayer/BottomBar/MissionBtn
-@onready var menu_btn: Button = $UILayer/BottomBar/MenuBtn
+@onready var buildings_btn: Button = $UILayer/BuildingsBtn
+@onready var survivors_btn: Button = $UILayer/SurvivorsBtn
+@onready var mission_btn: Button = $UILayer/MissionBtn
+@onready var menu_btn: Button = $UILayer/MenuBtn
 
 var building_panel: Control
 var building_list: VBoxContainer

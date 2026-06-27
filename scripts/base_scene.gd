@@ -58,29 +58,42 @@ func _ready() -> void:
 	_adjust_day_night_overlay()
 
 func _build_debug_buttons() -> void:
-	# Red debug bar at bottom to prove UI renders
+	# Red debug bar at bottom
 	var debug_bar = ColorRect.new()
 	debug_bar.set_position(Vector2(0, 1200))
 	debug_bar.set_size(Vector2(720, 80))
 	debug_bar.color = Color(0.8, 0.1, 0.1, 1.0)
 	ui_layer.add_child(debug_bar)
 
-	# Switch buttons to position mode and set absolute coordinates
-	for btn in [buildings_btn, survivors_btn, mission_btn, menu_btn]:
-		btn.layout_mode = 0  # Position mode — ignore anchors
-		btn.visible = true
+	# Create buttons FROM SCRATCH in code — no .tscn dependency
+	_build_one_button("BUILD", 30, 1210, 120, 64, _show_building_panel)
+	_build_one_button("CREW", 170, 1210, 110, 64, func(): _show_notification("Crew coming soon", "#FFAA00"))
+	_build_one_button("MISSION", 300, 1210, 120, 64, func(): _show_notification("Mission coming soon", "#FFAA00"))
+	_build_one_button("MENU", 440, 1210, 100, 64, func(): menu_panel.visible = true)
 
-	buildings_btn.set_position(Vector2(30, 1210))
-	buildings_btn.set_size(Vector2(120, 64))
+func _build_one_button(text: String, x: float, y: float, w: float, h: float, callback: Callable) -> void:
+	var btn = Button.new()
+	btn.text = text
+	btn.set_position(Vector2(x, y))
+	btn.set_size(Vector2(w, h))
 
-	survivors_btn.set_position(Vector2(170, 1210))
-	survivors_btn.set_size(Vector2(110, 64))
-
-	mission_btn.set_position(Vector2(300, 1210))
-	mission_btn.set_size(Vector2(120, 64))
-
-	menu_btn.set_position(Vector2(440, 1210))
-	menu_btn.set_size(Vector2(100, 64))
+	# Bright yellow-green background — impossible to miss
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.7, 0.2, 1.0)
+	style.border_width_left = 3
+	style.border_width_right = 3
+	style.border_width_top = 3
+	style.border_width_bottom = 3
+	style.border_color = Color(0.3, 1.0, 0.4, 1.0)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	btn.add_theme_stylebox_override("normal", style)
+	btn.add_theme_font_size_override("font_size", 18)
+	btn.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	btn.pressed.connect(callback)
+	ui_layer.add_child(btn)
 
 ## BUILDING PANEL
 

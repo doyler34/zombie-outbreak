@@ -10,7 +10,10 @@ script = ExtResource("1_script")
 position = Vector2(360, 640)
 enabled = true
 
-[node name="GrassBackground" type="TextureRect" parent="."]
+[node name="BgCanvasLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="GrassBackground" type="TextureRect" parent="BgCanvasLayer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,6 +22,14 @@ texture = ExtResource("2_grass")
 expand_mode = 1
 stretch_mode = 2
 mouse_filter = 2
+
+[node name="DayNightOverlay" type="ColorRect" parent="BgCanvasLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0.1, 0)
 
 [node name="BaseZone" type="Area2D" parent="."]
 
@@ -100,90 +111,86 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.7, 0.7, 0.5, 0.8)
 
-[node name="DayNightOverlay" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-color = Color(0, 0, 0.1, 0)
-
 [node name="UILayer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="TopBar" type="HBoxContainer" parent="UILayer"]
+[node name="TopBar" type="ScrollContainer" parent="UILayer"]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 0.0
-offset_bottom = 55
-theme_override_constants/separation = 8
+offset_bottom = 64
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
 
-[node name="TopBg" type="ColorRect" parent="UILayer/TopBar"]
-layout_mode = 0
-offset_right = 720
-offset_bottom = 55
+[node name="TopBarContent" type="HBoxContainer" parent="UILayer/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopBg" type="ColorRect" parent="UILayer/TopBar/TopBarContent"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 60)
 color = Color(0.02, 0.02, 0.06, 0.92)
 mouse_filter = 2
 
-[node name="DayLabel" type="Label" parent="UILayer/TopBar"]
+[node name="DayLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(120, 0)
+custom_minimum_size = Vector2(100, 0)
 text = "☀️ Day 1"
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
-[node name="PopLabel" type="Label" parent="UILayer/TopBar"]
+[node name="PopLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(85, 0)
+custom_minimum_size = Vector2(80, 0)
 text = "👥0/4"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.85, 0.85, 1, 1)
 
-[node name="FoodLabel" type="Label" parent="UILayer/TopBar"]
+[node name="FoodLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(60, 0)
 text = "🍗0"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.95, 0.55, 0.2, 1)
 
-[node name="WaterLabel" type="Label" parent="UILayer/TopBar"]
+[node name="WaterLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(60, 0)
 text = "💧0"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.35, 0.65, 1, 1)
 
-[node name="WoodLabel" type="Label" parent="UILayer/TopBar"]
+[node name="WoodLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(60, 0)
 text = "🪵0"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.65, 0.45, 0.25, 1)
 
-[node name="MetalLabel" type="Label" parent="UILayer/TopBar"]
+[node name="MetalLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(60, 0)
 text = "🔩0"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
 
-[node name="MedicineLabel" type="Label" parent="UILayer/TopBar"]
+[node name="MedicineLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(60, 0)
 text = "💊0"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
 
-[node name="AmmoLabel" type="Label" parent="UILayer/TopBar"]
+[node name="AmmoLabel" type="Label" parent="UILayer/TopBar/TopBarContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(60, 0)
 text = "🔫0"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.95, 0.85, 0.2, 1)
 
 [node name="BottomBar" type="HBoxContainer" parent="UILayer"]
@@ -195,41 +202,44 @@ anchor_bottom = 1.0
 offset_top = -90
 offset_bottom = 0
 alignment = 1
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="BottomBg" type="ColorRect" parent="UILayer/BottomBar"]
-layout_mode = 0
-offset_right = 720
-offset_bottom = 90
+layout_mode = 2
+custom_minimum_size = Vector2(0, 90)
 color = Color(0.08, 0.08, 0.15, 0.95)
 mouse_filter = 2
 
 [node name="BuildingsBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(135, 68)
-text = "🏗️ Build"
-theme_override_font_sizes/font_size = 17
+custom_minimum_size = Vector2(120, 72)
+text = "🏗️
+Build"
+theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="SurvivorsBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(135, 68)
-text = "👥 Crew"
-theme_override_font_sizes/font_size = 17
+custom_minimum_size = Vector2(100, 72)
+text = "👥
+Crew"
+theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="MissionBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(135, 68)
-text = "🎯 Mission"
-theme_override_font_sizes/font_size = 17
+custom_minimum_size = Vector2(115, 72)
+text = "🎯
+Mission"
+theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="MenuBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(110, 68)
-text = "⚙️ Menu"
-theme_override_font_sizes/font_size = 17
+custom_minimum_size = Vector2(95, 72)
+text = "⚙️
+Menu"
+theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="NotificationLabel" type="Label" parent="UILayer"]

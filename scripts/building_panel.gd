@@ -37,8 +37,8 @@ func _populate_list() -> void:
 
 	for bld in buildings_data:
 		var row = HBoxContainer.new()
-		row.custom_minimum_size = Vector2(0, 50)
-		row.add_theme_constant_override("separation", 10)
+		row.custom_minimum_size = Vector2(0, 60)
+		row.add_theme_constant_override("separation", 12)
 
 		# Building name + current level
 		var current_level = GameState.buildings.get(bld.id, 0)
@@ -46,13 +46,14 @@ func _populate_list() -> void:
 		var is_broken = is_placed and current_level == 0
 		var name_label = Label.new()
 		if is_broken:
-			name_label.text = "%s (Broken)" % bld.name
+			name_label.text = "🏚️ %s (Broken)" % bld.name
 		else:
 			name_label.text = "%s (Lv %d)" % [bld.name, current_level]
-		name_label.custom_minimum_size = Vector2(200, 0)
+		name_label.custom_minimum_size = Vector2(180, 0)
 		name_label.label_settings = LabelSettings.new()
-		name_label.label_settings.font_size = 16
+		name_label.label_settings.font_size = 17
 		name_label.label_settings.font_color = Color(1, 1, 1, 1)
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(name_label)
 
 		# Build/upgrade button
@@ -67,8 +68,8 @@ func _populate_list() -> void:
 			btn.text = "MAX"
 			btn.disabled = true
 
-		btn.custom_minimum_size = Vector2(150, 45)
-		btn.theme_override_font_sizes = {font_size = 14}
+		btn.custom_minimum_size = Vector2(165, 50)
+		btn.theme_override_font_sizes = {font_size = 16}
 		btn.pressed.connect(_on_build_pressed.bind(bld, current_level))
 		row.add_child(btn)
 
@@ -77,10 +78,11 @@ func _populate_list() -> void:
 		var costs = _get_cost_for_level(bld, current_level + 1)
 		var cost_text = _format_costs(costs)
 		cost_label.text = cost_text
-		cost_label.custom_minimum_size = Vector2(180, 0)
+		cost_label.custom_minimum_size = Vector2(160, 0)
 		cost_label.label_settings = LabelSettings.new()
-		cost_label.label_settings.font_size = 12
+		cost_label.label_settings.font_size = 14
 		cost_label.label_settings.font_color = Color(0.7, 0.7, 0.7, 1)
+		cost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(cost_label)
 
 		building_list.add_child(row)

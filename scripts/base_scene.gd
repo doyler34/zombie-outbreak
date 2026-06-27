@@ -1,18 +1,18 @@
 # base_scene.gd - Main game scene controller (updated with panels)
 extends Node2D
 
-@onready var day_night_overlay: ColorRect = $DayNightOverlay
+@onready var day_night_overlay: ColorRect = $BgCanvasLayer/DayNightOverlay
 @onready var ui_layer: Control = $UILayer
-@onready var top_bar: HBoxContainer = $UILayer/TopBar
+@onready var top_bar: ScrollContainer = $UILayer/TopBar
 @onready var bottom_bar: HBoxContainer = $UILayer/BottomBar
-@onready var day_label: Label = $UILayer/TopBar/DayLabel
-@onready var food_label: Label = $UILayer/TopBar/FoodLabel
-@onready var water_label: Label = $UILayer/TopBar/WaterLabel
-@onready var wood_label: Label = $UILayer/TopBar/WoodLabel
-@onready var metal_label: Label = $UILayer/TopBar/MetalLabel
-@onready var med_label: Label = $UILayer/TopBar/MedicineLabel
-@onready var ammo_label: Label = $UILayer/TopBar/AmmoLabel
-@onready var pop_label: Label = $UILayer/TopBar/PopLabel
+@onready var day_label: Label = $UILayer/TopBar/TopBarContent/DayLabel
+@onready var food_label: Label = $UILayer/TopBar/TopBarContent/FoodLabel
+@onready var water_label: Label = $UILayer/TopBar/TopBarContent/WaterLabel
+@onready var wood_label: Label = $UILayer/TopBar/TopBarContent/WoodLabel
+@onready var metal_label: Label = $UILayer/TopBar/TopBarContent/MetalLabel
+@onready var med_label: Label = $UILayer/TopBar/TopBarContent/MedicineLabel
+@onready var ammo_label: Label = $UILayer/TopBar/TopBarContent/AmmoLabel
+@onready var pop_label: Label = $UILayer/TopBar/TopBarContent/PopLabel
 @onready var notification_label: Label = $UILayer/NotificationLabel
 @onready var notification_timer: Timer = $NotificationTimer
 

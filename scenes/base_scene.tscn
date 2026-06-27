@@ -48,9 +48,8 @@ offset_bottom = 58
 theme_override_constants/separation = 6
 
 [node name="TopBg" type="ColorRect" parent="UILayer/TopBar"]
-layout_mode = 0
-offset_right = 720
-offset_bottom = 52
+layout_mode = 2
+custom_minimum_size = Vector2(0, 0)
 color = Color(0.02, 0.02, 0.06, 0.92)
 mouse_filter = 2
 
@@ -110,6 +109,17 @@ text = "🔫0"
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0.95, 0.85, 0.2, 1)
 
+[node name="BottomBg" type="ColorRect" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -80
+offset_bottom = 0
+color = Color(0.08, 0.08, 0.15, 0.95)
+mouse_filter = 2
+
 [node name="BottomBar" type="HBoxContainer" parent="UILayer"]
 layout_mode = 1
 anchors_preset = 12
@@ -121,39 +131,32 @@ offset_bottom = 0
 alignment = 1
 theme_override_constants/separation = 8
 
-[node name="BottomBg" type="ColorRect" parent="UILayer/BottomBar"]
-layout_mode = 0
-offset_right = 720
-offset_bottom = 80
-color = Color(0.08, 0.08, 0.15, 0.95)
-mouse_filter = 2
-
 [node name="BuildingsBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(115, 60)
-text = "🏗️ Build"
-theme_override_font_sizes/font_size = 15
+custom_minimum_size = Vector2(120, 64)
+text = "BUILD"
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="SurvivorsBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(100, 60)
-text = "👥 Crew"
-theme_override_font_sizes/font_size = 15
+custom_minimum_size = Vector2(110, 64)
+text = "CREW"
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="MissionBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(110, 60)
-text = "🎯 Mission"
-theme_override_font_sizes/font_size = 15
+custom_minimum_size = Vector2(120, 64)
+text = "MISSION"
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="MenuBtn" type="Button" parent="UILayer/BottomBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(90, 60)
-text = "⚙️ Menu"
-theme_override_font_sizes/font_size = 15
+custom_minimum_size = Vector2(100, 64)
+text = "MENU"
+theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="NotificationLabel" type="Label" parent="UILayer"]

@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://base_scene"]
+[gd_scene load_steps=8 format=3 uid="uid://base_scene"]
 
 [ext_resource type="Script" path="res://scripts/base_scene.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/terrain/ground_base.png" id="2_grass"]
+[ext_resource type="Shader" path="res://assets/shaders/tile_ground.gdshader" id="7_shader"]
 
 [sub_resource type="StyleBoxFlat" id="btn_normal"]
 bg_color = Color(0.15, 0.25, 0.45, 1)
@@ -39,6 +40,11 @@ corner_radius_top_right = 6
 corner_radius_bottom_left = 6
 corner_radius_bottom_right = 6
 
+[sub_resource type="ShaderMaterial" id="ground_shader"]
+shader = ExtResource("7_shader")
+shader_parameter/ground_tex = ExtResource("2_grass")
+shader_parameter/screen_size = Vector2(720, 1280)
+
 [node name="BaseScene" type="Node2D"]
 script = ExtResource("1_script")
 
@@ -49,15 +55,12 @@ enabled = true
 [node name="BgLayer" type="CanvasLayer" parent="."]
 layer = -10
 
-[node name="GrassBackground" type="TextureRect" parent="BgLayer"]
+[node name="GrassBackground" type="ColorRect" parent="BgLayer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-texture = ExtResource("2_grass")
-expand_mode = 1
-stretch_mode = 1
-texture_filter = 1
+material = SubResource("ground_shader")
 mouse_filter = 2
 
 [node name="DayNightOverlay" type="ColorRect" parent="."]

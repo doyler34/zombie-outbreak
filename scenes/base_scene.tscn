@@ -57,6 +57,7 @@ anchor_bottom = 1.0
 texture = ExtResource("2_grass")
 expand_mode = 1
 stretch_mode = 1
+texture_filter = 1
 mouse_filter = 2
 
 [node name="DayNightOverlay" type="ColorRect" parent="."]

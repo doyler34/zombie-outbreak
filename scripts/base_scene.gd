@@ -58,9 +58,6 @@ func _ready() -> void:
 	day_night_timer = GameState.day_timer
 	_adjust_day_night_overlay()
 	
-	# Update ground shader with actual viewport size for seamless tiling
-	_update_ground_shader()
-	get_tree().root.size_changed.connect(_update_ground_shader)
 
 func _build_debug_buttons() -> void:
 	# Red debug bar at bottom
@@ -437,6 +434,3 @@ func _load_json(path: String) -> Variant:
 	if json.parse(text) != OK: return null
 	return json.get_data()
 
-func _update_ground_shader() -> void:
-	var vp_size = get_viewport().get_visible_rect().size
-	ground_bg.material.set_shader_parameter("screen_size", vp_size)

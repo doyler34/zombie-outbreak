@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://base_scene"]
 
 [ext_resource type="Script" path="res://scripts/base_scene.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/grass_bg.png" id="2_grass"]
+[ext_resource type="Texture2D" path="res://assets/terrain/ground_base.png" id="2_grass"]
 
 [sub_resource type="StyleBoxFlat" id="btn_normal"]
 bg_color = Color(0.15, 0.25, 0.45, 1)

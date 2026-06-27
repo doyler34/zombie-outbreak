@@ -2,11 +2,12 @@
 [ext_resource type="Script" path="res://scripts/building_panel.gd" id="1"]
 
 [node name="BuildingPanel" type="Control"]
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
+visible = false
 mouse_filter = 1
 
 [node name="DimBg" type="ColorRect" parent="."]
@@ -28,7 +29,6 @@ offset_left = -320
 offset_top = -380
 offset_right = 320
 offset_bottom = 380
-mouse_filter = 1
 
 [node name="TitleLabel" type="Label" parent="Panel"]
 layout_mode = 1

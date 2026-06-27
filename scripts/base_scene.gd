@@ -407,78 +407,43 @@ func _on_repair_pressed() -> void:
 		glow_tween.kill()
 	outpost_sprite.modulate = Color(1, 1, 1, 1)
 
-	# Hide main content of panel, show countdown
-	for child in repair_panel.get_children():
-		child.visible = false
-	repair_panel.visible = true
+	# Close the detail panel — building stays visible on the ground
+	if repair_panel:
+		repair_panel.visible = false
 
-	# Full-screen repair overlay
-	var overlay = ColorRect.new()
-	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	overlay.color = Color(0, 0, 0, 0.80)
-	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	repair_panel.add_child(overlay)
-
-	var box2 = Panel.new()
-	var bw = 500
-	var bh = 220
-	box2.set_position(Vector2((720 - bw) / 2.0, (1280 - bh) / 2.0))
-	box2.set_size(Vector2(bw, bh))
-	var ps2 = StyleBoxFlat.new()
-	ps2.bg_color = Color(0.07, 0.06, 0.04, 0.98)
-	ps2.border_width_left = 3
-	ps2.border_width_right = 3
-	ps2.border_width_top = 3
-	ps2.border_width_bottom = 3
-	ps2.border_color = Color(0.72, 0.52, 0.18, 1)
-	ps2.corner_radius_top_left = 6
-	ps2.corner_radius_top_right = 6
-	ps2.corner_radius_bottom_left = 6
-	ps2.corner_radius_bottom_right = 6
-	box2.add_theme_stylebox_override("panel", ps2)
-	repair_panel.add_child(box2)
-
-	var hdr = ColorRect.new()
-	hdr.set_position(Vector2(0, 0))
-	hdr.set_size(Vector2(bw, 50))
-	hdr.color = Color(0.14, 0.10, 0.04, 1.0)
-	hdr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box2.add_child(hdr)
-
-	var hdr_line = ColorRect.new()
-	hdr_line.set_position(Vector2(0, 50))
-	hdr_line.set_size(Vector2(bw, 2))
-	hdr_line.color = Color(0.72, 0.52, 0.18, 1)
-	hdr_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box2.add_child(hdr_line)
-
-	var title2 = Label.new()
-	title2.text = "⚙  REPAIRING OUTPOST..."
-	title2.set_position(Vector2(18, 12))
-	title2.add_theme_font_size_override("font_size", 20)
-	title2.add_theme_color_override("font_color", Color(0.95, 0.75, 0.25, 1))
-	box2.add_child(title2)
+	# Small countdown badge centred on the building sprite
+	var badge = Panel.new()
+	badge.name = "RepairBadge"
+	var cx = outpost_sprite.position.x + outpost_sprite.size.x * 0.5
+	var cy = outpost_sprite.position.y + outpost_sprite.size.y * 0.5
+	badge.set_position(Vector2(cx - 90, cy - 28))
+	badge.set_size(Vector2(180, 56))
+	var bs2 = StyleBoxFlat.new()
+	bs2.bg_color = Color(0.07, 0.06, 0.04, 0.90)
+	bs2.border_width_left = 2
+	bs2.border_width_right = 2
+	bs2.border_width_top = 2
+	bs2.border_width_bottom = 2
+	bs2.border_color = Color(0.72, 0.52, 0.18, 1)
+	bs2.corner_radius_top_left = 6
+	bs2.corner_radius_top_right = 6
+	bs2.corner_radius_bottom_left = 6
+	bs2.corner_radius_bottom_right = 6
+	badge.add_theme_stylebox_override("panel", bs2)
+	ui_layer.add_child(badge)
 
 	build_timer_label = Label.new()
-	build_timer_label.set_position(Vector2(0, 68))
-	build_timer_label.set_size(Vector2(bw, 80))
-	build_timer_label.add_theme_font_size_override("font_size", 52)
+	build_timer_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	build_timer_label.add_theme_font_size_override("font_size", 18)
 	build_timer_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.25, 1))
 	build_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box2.add_child(build_timer_label)
-
-	var sub = Label.new()
-	sub.text = "The furnaces are being lit..."
-	sub.set_position(Vector2(0, 160))
-	sub.set_size(Vector2(bw, 40))
-	sub.add_theme_font_size_override("font_size", 14)
-	sub.add_theme_color_override("font_color", Color(0.65, 0.55, 0.35, 1))
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box2.add_child(sub)
+	build_timer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	build_timer_label.text = "⚙ REPAIRING  10s"
+	badge.add_child(build_timer_label)
 
 	build_countdown = 10.0
 
-	# Ambient pulse on building while repairing
+	# Pulse the building while repairing
 	var rep_tween = create_tween()
 	rep_tween.set_loops()
 	rep_tween.tween_property(outpost_sprite, "modulate", Color(1.2, 1.0, 0.6, 1.0), 0.5)
@@ -488,6 +453,10 @@ func _finish_repair() -> void:
 	if repair_panel:
 		repair_panel.queue_free()
 		repair_panel = null
+	var badge = ui_layer.find_child("RepairBadge", true, false)
+	if badge:
+		badge.queue_free()
+	build_timer_label = null
 
 	# Swap to repaired building
 	var cutout_shader = load("res://assets/shaders/building_cutout.gdshader")
@@ -783,7 +752,7 @@ func _process(delta: float) -> void:
 	if building_active and build_countdown > 0:
 		build_countdown -= delta
 		if build_timer_label and is_instance_valid(build_timer_label):
-			build_timer_label.text = str(ceili(build_countdown))
+			build_timer_label.text = "⚙ REPAIRING  %ds" % ceili(build_countdown)
 		if build_countdown <= 0:
 			building_active = false
 			_finish_repair()

@@ -6,8 +6,8 @@ void fragment() {
 	float hi = max(c.r, max(c.g, c.b));
 	float lo = min(c.r, min(c.g, c.b));
 	float saturation = hi - lo;
-	// Treat near-white/light-grey background pixels as transparent
-	if (brightness > 0.75 && saturation < 0.12) {
+	// Remove both checkerboard shades (#cccccc brightness~0.80 and #999999 brightness~0.60)
+	if (brightness > 0.55 && saturation < 0.06) {
 		c.a = 0.0;
 	}
 	COLOR = c;

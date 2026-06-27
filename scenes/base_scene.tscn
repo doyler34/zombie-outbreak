@@ -93,59 +93,38 @@ mouse_filter = 2
 
 [node name="DayLabel" type="Label" parent="UILayer/TopBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(95, 0)
-text = "☀️ Day 1"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-
-[node name="PopLabel" type="Label" parent="UILayer/TopBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(65, 0)
-text = "👥0/4"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.85, 0.85, 1, 1)
-
-[node name="FoodLabel" type="Label" parent="UILayer/TopBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(55, 0)
-text = "🍗0"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.95, 0.55, 0.2, 1)
-
-[node name="WaterLabel" type="Label" parent="UILayer/TopBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(55, 0)
-text = "💧0"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.35, 0.65, 1, 1)
+custom_minimum_size = Vector2(90, 0)
+text = "☀ Day 1"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.95, 0.80, 0.40, 1)
 
 [node name="WoodLabel" type="Label" parent="UILayer/TopBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(55, 0)
-text = "🪵0"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.65, 0.45, 0.25, 1)
+custom_minimum_size = Vector2(72, 0)
+text = "🪵 500"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.72, 0.50, 0.22, 1)
+
+[node name="StoneLabel" type="Label" parent="UILayer/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(72, 0)
+text = "🪨 500"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.75, 0.72, 0.68, 1)
 
 [node name="MetalLabel" type="Label" parent="UILayer/TopBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(55, 0)
-text = "🔩0"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
+custom_minimum_size = Vector2(72, 0)
+text = "⚙ 500"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.65, 0.72, 0.80, 1)
 
-[node name="MedicineLabel" type="Label" parent="UILayer/TopBar"]
+[node name="GoldLabel" type="Label" parent="UILayer/TopBar"]
 layout_mode = 2
-custom_minimum_size = Vector2(55, 0)
-text = "💊0"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
-
-[node name="AmmoLabel" type="Label" parent="UILayer/TopBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(55, 0)
-text = "🔫0"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.95, 0.85, 0.2, 1)
+custom_minimum_size = Vector2(72, 0)
+text = "🪙 500"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.95, 0.78, 0.18, 1)
 
 [node name="NotificationLabel" type="Label" parent="UILayer"]
 layout_mode = 1

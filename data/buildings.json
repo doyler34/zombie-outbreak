@@ -2,17 +2,15 @@
   "buildings": [
     {
       "id": "ruined_outpost",
-      "name": "Ruined Outpost",
-      "description": "A broken-down survivor camp. Repair it to establish your base.",
+      "name": "Survivor Outpost",
+      "description": "Eight years of dust and silence. The pipes still hold. Restore it and call this place home.",
       "max_level": 3,
-      "base_cost": {"wood": 15, "metal": 5},
-      "cost_per_level": {"wood": 10, "metal": 5},
+      "base_cost": {"wood": 20, "stone": 10, "gold": 50},
+      "cost_per_level": {"wood": 30, "stone": 20, "gold": 80},
       "effects": {
-        "population_cap": {"base": 3, "per_level": 2},
-        "defense": {"base": 3, "per_level": 2},
-        "happiness": {"base": 5, "per_level": 3}
+        "defense": {"base": 5, "per_level": 3}
       },
-      "build_time": 20,
+      "build_time": 10,
       "color": "8B7355"
     },
     {

@@ -128,21 +128,14 @@ func _build_bottom_bar() -> void:
 # ── TUTORIAL ────────────────────────────────────────────────────────────────────
 
 func _setup_tutorial() -> void:
-	var cutout_shader = load("res://assets/shaders/building_cutout.gdshader")
-
-	# Broken building sprite — centered on the map
+	# Broken building sprite — centred on the map, no shader so it is always visible
 	outpost_sprite = TextureRect.new()
-	var broken_tex = load("res://assets/buildings/outpost_broken.jpg")
-	outpost_sprite.texture = broken_tex
+	outpost_sprite.texture = load("res://assets/buildings/outpost_broken.jpg")
 	outpost_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	outpost_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	outpost_sprite.set_size(Vector2(340, 340))
-	outpost_sprite.set_position(Vector2(360 - 170, 560 - 170))
+	outpost_sprite.set_size(Vector2(360, 360))
+	outpost_sprite.set_position(Vector2(360 - 180, 560 - 180))
 	outpost_sprite.mouse_filter = Control.MOUSE_FILTER_STOP
-	if cutout_shader:
-		var mat = ShaderMaterial.new()
-		mat.shader = cutout_shader
-		outpost_sprite.material = mat
 	outpost_sprite.gui_input.connect(_on_outpost_clicked)
 	ui_layer.add_child(outpost_sprite)
 
@@ -459,12 +452,7 @@ func _finish_repair() -> void:
 	build_timer_label = null
 
 	# Swap to repaired building
-	var cutout_shader = load("res://assets/shaders/building_cutout.gdshader")
 	outpost_sprite.texture = outpost_repaired_tex
-	if cutout_shader:
-		var mat = ShaderMaterial.new()
-		mat.shader = cutout_shader
-		outpost_sprite.material = mat
 
 	# Flash bright on completion
 	outpost_sprite.modulate = Color(2.0, 1.8, 0.8, 1.0)

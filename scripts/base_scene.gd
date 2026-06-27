@@ -28,6 +28,9 @@ var day_night_timer: float = 0.0
 const FULL_CYCLE := 120.0
 
 func _ready() -> void:
+	# === DEBUG: Force button positions/sizes in code (bypass anchors) ===
+	_build_debug_buttons()
+
 	# Build building panel in code
 	_make_building_panel()
 
@@ -53,6 +56,31 @@ func _ready() -> void:
 	_refresh_day_display()
 	day_night_timer = GameState.day_timer
 	_adjust_day_night_overlay()
+
+func _build_debug_buttons() -> void:
+	# Red debug bar at bottom to prove UI renders
+	var debug_bar = ColorRect.new()
+	debug_bar.set_position(Vector2(0, 1200))
+	debug_bar.set_size(Vector2(720, 80))
+	debug_bar.color = Color(0.8, 0.1, 0.1, 1.0)
+	ui_layer.add_child(debug_bar)
+
+	# Switch buttons to position mode and set absolute coordinates
+	for btn in [buildings_btn, survivors_btn, mission_btn, menu_btn]:
+		btn.layout_mode = 0  # Position mode — ignore anchors
+		btn.visible = true
+
+	buildings_btn.set_position(Vector2(30, 1210))
+	buildings_btn.set_size(Vector2(120, 64))
+
+	survivors_btn.set_position(Vector2(170, 1210))
+	survivors_btn.set_size(Vector2(110, 64))
+
+	mission_btn.set_position(Vector2(300, 1210))
+	mission_btn.set_size(Vector2(120, 64))
+
+	menu_btn.set_position(Vector2(440, 1210))
+	menu_btn.set_size(Vector2(100, 64))
 
 ## BUILDING PANEL
 

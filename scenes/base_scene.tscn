@@ -1,7 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://base_scene"]
+[gd_scene load_steps=6 format=3 uid="uid://base_scene"]
 
 [ext_resource type="Script" path="res://scripts/base_scene.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/terrain/ground_base.png" id="2_grass"]
 [ext_resource type="Shader" path="res://assets/shaders/tile_ground.gdshader" id="7_shader"]
 
 [sub_resource type="StyleBoxFlat" id="btn_normal"]
@@ -42,7 +41,6 @@ corner_radius_bottom_right = 6
 
 [sub_resource type="ShaderMaterial" id="ground_shader"]
 shader = ExtResource("7_shader")
-shader_parameter/ground_tex = ExtResource("2_grass")
 
 [node name="BaseScene" type="Node2D"]
 script = ExtResource("1_script")

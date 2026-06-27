@@ -64,7 +64,7 @@ func _build_debug_buttons() -> void:
 	var debug_bar = ColorRect.new()
 	debug_bar.set_position(Vector2(0, 1200))
 	debug_bar.set_size(Vector2(720, 80))
-	debug_bar.color = Color(0.8, 0.1, 0.1, 1.0)
+	debug_bar.color = Color(0.12, 0.12, 0.16, 0.97)
 	ui_layer.add_child(debug_bar)
 
 	# Create buttons FROM SCRATCH in code — no .tscn dependency
@@ -79,21 +79,20 @@ func _build_one_button(text: String, x: float, y: float, w: float, h: float, cal
 	btn.set_position(Vector2(x, y))
 	btn.set_size(Vector2(w, h))
 
-	# Bright yellow-green background — impossible to miss
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.7, 0.2, 1.0)
-	style.border_width_left = 3
-	style.border_width_right = 3
-	style.border_width_top = 3
-	style.border_width_bottom = 3
-	style.border_color = Color(0.3, 1.0, 0.4, 1.0)
+	style.bg_color = Color(0.20, 0.20, 0.26, 1.0)
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.40, 0.40, 0.52, 1.0)
 	style.corner_radius_top_left = 8
 	style.corner_radius_top_right = 8
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_font_size_override("font_size", 18)
-	btn.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	btn.add_theme_color_override("font_color", Color(0.9, 0.9, 0.95, 1))
 	btn.pressed.connect(callback)
 	ui_layer.add_child(btn)
 

@@ -41,6 +41,14 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.4.stable
           cp templates/* ~/.local/share/godot/export_templates/4.4.stable/
 
+      - name: Generate Debug Keystore
+        run: |
+          mkdir -p ~/.local/share/godot/keystores
+          keytool -genkey -v -keystore ~/.local/share/godot/keystores/debug.keystore \
+            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US"
+
       - name: Pre-heat Godot Cache
         run: |
           ./Godot_v4.4-stable_linux.x86_64 --headless --editor --quit --path . || true

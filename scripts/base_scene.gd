@@ -63,53 +63,67 @@ func _ready() -> void:
 # ── BOTTOM BAR ─────────────────────────────────────────────────────────────────
 
 func _build_bottom_bar() -> void:
-	var vp = get_viewport().get_visible_rect().size
-	var bar_h = 80
-	var bar_y = vp.y - bar_h
-	var vp_w = vp.x
-
+	# Background — full viewport width, anchored to the bottom edge
 	var bar = ColorRect.new()
-	bar.set_position(Vector2(0, bar_y))
-	bar.set_size(Vector2(vp_w, bar_h))
+	bar.anchor_left = 0.0
+	bar.anchor_right = 1.0
+	bar.anchor_top = 1.0
+	bar.anchor_bottom = 1.0
+	bar.offset_top = -80
+	bar.offset_bottom = 0
 	bar.color = Color(0.10, 0.09, 0.07, 0.97)
 	ui_layer.add_child(bar)
 
-	# Brass top edge line
+	# Brass accent line at the top of the bar
 	var accent = ColorRect.new()
-	accent.set_position(Vector2(0, bar_y))
-	accent.set_size(Vector2(vp_w, 2))
+	accent.anchor_left = 0.0
+	accent.anchor_right = 1.0
+	accent.anchor_top = 1.0
+	accent.anchor_bottom = 1.0
+	accent.offset_top = -80
+	accent.offset_bottom = -78
 	accent.color = Color(0.72, 0.52, 0.18, 1.0)
 	ui_layer.add_child(accent)
 
-	# Center button group (widths 130+110+130+100 = 470, gaps 15x3 = 45, total 515)
-	var btn_y = bar_y + 9
-	var start_x = (vp_w - 515.0) / 2.0
-	_build_one_button("BUILD",   start_x,         btn_y, 130, 62, _show_building_panel)
-	_build_one_button("CREW",    start_x + 145.0, btn_y, 110, 62, func(): _show_notification("Crew panel coming soon", "#C8A84B"))
-	_build_one_button("MISSION", start_x + 270.0, btn_y, 130, 62, func(): _show_notification("Mission panel coming soon", "#C8A84B"))
-	_build_one_button("MENU",    start_x + 415.0, btn_y, 100, 62, func(): menu_panel.visible = true)
+	# Button row — fixed 515 px wide, horizontally centred, anchored to bottom
+	var hbox = HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 15)
+	hbox.anchor_left = 0.5
+	hbox.anchor_right = 0.5
+	hbox.anchor_top = 1.0
+	hbox.anchor_bottom = 1.0
+	hbox.offset_left = -257
+	hbox.offset_right = 258
+	hbox.offset_top = -71
+	hbox.offset_bottom = -9
+	ui_layer.add_child(hbox)
 
-func _build_one_button(text: String, x: float, y: float, w: float, h: float, callback: Callable) -> void:
-	var btn = Button.new()
-	btn.text = text
-	btn.set_position(Vector2(x, y))
-	btn.set_size(Vector2(w, h))
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.18, 0.14, 0.08, 1.0)
-	style.border_width_left = 2
-	style.border_width_right = 2
-	style.border_width_top = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(0.65, 0.47, 0.15, 1.0)
-	style.corner_radius_top_left = 5
-	style.corner_radius_top_right = 5
-	style.corner_radius_bottom_left = 5
-	style.corner_radius_bottom_right = 5
-	btn.add_theme_stylebox_override("normal", style)
-	btn.add_theme_font_size_override("font_size", 17)
-	btn.add_theme_color_override("font_color", Color(0.92, 0.78, 0.42, 1))
-	btn.pressed.connect(callback)
-	ui_layer.add_child(btn)
+	for item: Array in [
+		["BUILD",   _show_building_panel],
+		["CREW",    func(): _show_notification("Crew panel coming soon", "#C8A84B")],
+		["MISSION", func(): _show_notification("Mission panel coming soon", "#C8A84B")],
+		["MENU",    func(): menu_panel.visible = true],
+	]:
+		var btn := Button.new()
+		btn.text = item[0]
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.add_theme_font_size_override("font_size", 17)
+		btn.add_theme_color_override("font_color", Color(0.92, 0.78, 0.42, 1))
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.18, 0.14, 0.08, 1.0)
+		style.border_width_left = 2
+		style.border_width_right = 2
+		style.border_width_top = 2
+		style.border_width_bottom = 2
+		style.border_color = Color(0.65, 0.47, 0.15, 1.0)
+		style.corner_radius_top_left = 5
+		style.corner_radius_top_right = 5
+		style.corner_radius_bottom_left = 5
+		style.corner_radius_bottom_right = 5
+		btn.add_theme_stylebox_override("normal", style)
+		btn.pressed.connect(item[1])
+		hbox.add_child(btn)
+
 
 # ── TUTORIAL ────────────────────────────────────────────────────────────────────
 

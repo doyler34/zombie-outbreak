@@ -42,8 +42,13 @@ func _populate_list() -> void:
 
 		# Building name + current level
 		var current_level = GameState.buildings.get(bld.id, 0)
+		var is_placed = GameState.buildings.has(bld.id)
+		var is_broken = is_placed and current_level == 0
 		var name_label = Label.new()
-		name_label.text = "%s (Lv %d)" % [bld.name, current_level]
+		if is_broken:
+			name_label.text = "%s (Broken)" % bld.name
+		else:
+			name_label.text = "%s (Lv %d)" % [bld.name, current_level]
 		name_label.custom_minimum_size = Vector2(200, 0)
 		name_label.label_settings = LabelSettings.new()
 		name_label.label_settings.font_size = 16
@@ -52,7 +57,9 @@ func _populate_list() -> void:
 
 		# Build/upgrade button
 		var btn = Button.new()
-		if current_level == 0:
+		if is_broken:
+			btn.text = "Repair 🔧"
+		elif not is_placed:
 			btn.text = "Build"
 		elif current_level < bld.max_level:
 			btn.text = "Upgrade → Lv%d" % (current_level + 1)
@@ -103,7 +110,10 @@ func _on_build_pressed(bld: Dictionary, current_level: int) -> void:
 		GameState.buildings[bld.id] = target_level
 		GameState._recalculate_base_stats()
 		EventBus.building_built.emit(bld.id, target_level)
-		EventBus.notification.emit("%s built to level %d!" % [bld.name, target_level], "#00FF00")
+		if current_level == 0:
+			EventBus.notification.emit("%s repaired! Your base grows stronger." % bld.name, "#00FF00")
+		else:
+			EventBus.notification.emit("%s upgraded to level %d!" % [bld.name, target_level], "#00FF00")
 		_populate_list()
 	else:
 		EventBus.notification.emit("Not enough resources for %s!" % bld.name, "#FF4444")

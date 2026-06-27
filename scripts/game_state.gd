@@ -47,9 +47,11 @@ func new_game() -> void:
 
 	# Build initial barracks at level 1
 	buildings["barracks"] = 1
+	# Ruined outpost starts broken (level 0), needs repair
+	buildings["ruined_outpost"] = 0
 	_recalculate_base_stats()
 
-	EventBus.notification.emit("Day %d begins. Good luck, Overseer." % current_day, "#00FF00")
+	EventBus.notification.emit("Day %d begins. A ruined outpost nearby needs repair!" % current_day, "#FFAA00")
 	save_game()
 
 func _spawn_starting_survivors(count: int) -> void:
@@ -95,6 +97,8 @@ func _recalculate_base_stats() -> void:
 	for bld in buildings_data.buildings:
 		if buildings.has(bld.id):
 			var lvl = buildings[bld.id]
+			if lvl <= 0:
+				continue  # Skip broken/ruined buildings
 			for effect in bld.effects:
 				var cfg = bld.effects[effect]
 				# Use base + (level-1) * per_level

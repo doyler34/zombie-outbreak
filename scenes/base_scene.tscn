@@ -52,6 +52,54 @@ horizontal_alignment = 1
 theme_override_font_sizes/font_size = 28
 theme_override_colors/font_color = Color(0.3, 0.95, 0.3, 0.9)
 
+[node name="BrokenOutpost" type="Area2D" parent="."]
+
+[node name="OutpostGround" type="ColorRect" parent="BrokenOutpost"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200
+offset_top = 220
+offset_right = 200
+offset_bottom = 350
+color = Color(0.25, 0.18, 0.08, 0.85)
+mouse_filter = 2
+
+[node name="OutpostLabel" type="Label" parent="BrokenOutpost"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140
+offset_top = 225
+offset_right = 140
+offset_bottom = 255
+text = "🏚️ BROKEN OUTPOST"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.9, 0.6, 0.3, 0.9)
+
+[node name="OutpostHint" type="Label" parent="BrokenOutpost"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180
+offset_top = 260
+offset_right = 180
+offset_bottom = 290
+text = "Repair in 🏗️ Build menu"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.7, 0.7, 0.5, 0.8)
+
 [node name="DayNightOverlay" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15

@@ -128,13 +128,18 @@ func _build_bottom_bar() -> void:
 # ── TUTORIAL ────────────────────────────────────────────────────────────────────
 
 func _setup_tutorial() -> void:
-	# Broken building sprite — centred on the map, no shader so it is always visible
+	var vp := get_viewport().get_visible_rect().size
+	var spr_w := 360.0
+	var spr_h := 360.0
+	var spr_x := (vp.x - spr_w) / 2.0
+	var spr_y := (vp.y - spr_h) / 2.0 - 60.0  # slightly above centre
+
 	outpost_sprite = TextureRect.new()
 	outpost_sprite.texture = load("res://assets/buildings/outpost_broken.jpg")
 	outpost_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	outpost_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	outpost_sprite.set_size(Vector2(360, 360))
-	outpost_sprite.set_position(Vector2(360 - 180, 560 - 180))
+	outpost_sprite.set_size(Vector2(spr_w, spr_h))
+	outpost_sprite.set_position(Vector2(spr_x, spr_y))
 	outpost_sprite.mouse_filter = Control.MOUSE_FILTER_STOP
 	outpost_sprite.gui_input.connect(_on_outpost_clicked)
 	ui_layer.add_child(outpost_sprite)
@@ -159,14 +164,20 @@ func _start_glow_pulse() -> void:
 		.set_ease(Tween.EASE_IN_OUT)
 
 func _make_tutorial_hint() -> void:
+	var vp := get_viewport().get_visible_rect().size
+	var hint_w := 220.0
+	var spr_y := (vp.y - 360.0) / 2.0 - 60.0  # must match _setup_tutorial offset
+	var hint_x := (vp.x - hint_w) / 2.0
+	var hint_y := spr_y + 360.0 + 16.0  # just below the building sprite
+
 	var hint = Label.new()
 	hint.name = "TutorialHint"
 	hint.text = "⬆  TAP TO REPAIR"
 	hint.add_theme_font_size_override("font_size", 18)
 	hint.add_theme_color_override("font_color", Color(0.95, 0.78, 0.28, 1))
-	hint.set_position(Vector2(272, 910))
+	hint.set_position(Vector2(hint_x, hint_y))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.custom_minimum_size = Vector2(176, 0)
+	hint.custom_minimum_size = Vector2(hint_w, 0)
 	ui_layer.add_child(hint)
 
 	# Fade the hint in and out slowly
@@ -207,8 +218,9 @@ func _show_repair_panel() -> void:
 	# Panel box — 580×520, centered
 	var bw = 580
 	var bh = 520
+	var vp_rp := get_viewport().get_visible_rect().size
 	var box = Panel.new()
-	box.set_position(Vector2((720 - bw) / 2.0, (1280 - bh) / 2.0))
+	box.set_position(Vector2((vp_rp.x - bw) / 2.0, (vp_rp.y - bh) / 2.0))
 	box.set_size(Vector2(bw, bh))
 
 	var ps = StyleBoxFlat.new()
@@ -501,8 +513,9 @@ func _make_building_panel() -> void:
 
 	var bw = 600
 	var bh = 700
+	var vp_bp := get_viewport().get_visible_rect().size
 	var box = Panel.new()
-	box.set_position(Vector2((720 - bw) / 2, (1280 - bh) / 2))
+	box.set_position(Vector2((vp_bp.x - bw) / 2, (vp_bp.y - bh) / 2))
 	box.set_size(Vector2(bw, bh))
 	var panel_style = StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.07, 0.06, 0.04, 0.98)
@@ -687,7 +700,8 @@ func _make_menu_panel() -> void:
 	var box = Panel.new()
 	var bw = 300
 	var bh = 220
-	box.set_position(Vector2((720 - bw) / 2.0, (1280 - bh) / 2.0))
+	var vp_mp := get_viewport().get_visible_rect().size
+	box.set_position(Vector2((vp_mp.x - bw) / 2.0, (vp_mp.y - bh) / 2.0))
 	box.set_size(Vector2(bw, bh))
 	var ps = StyleBoxFlat.new()
 	ps.bg_color = Color(0.07, 0.06, 0.04, 0.98)

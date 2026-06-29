@@ -87,39 +87,29 @@ func _ready() -> void:
 # ── BOTTOM BAR ─────────────────────────────────────────────────────────────────
 
 func _build_bottom_bar() -> void:
-	# Background — full viewport width, anchored to the bottom edge
-	var bar = ColorRect.new()
-	bar.anchor_left = 0.0
-	bar.anchor_right = 1.0
-	bar.anchor_top = 1.0
-	bar.anchor_bottom = 1.0
-	bar.offset_top = -80
-	bar.offset_bottom = 0
+	# Use direct pixel positions — anchors on dynamically-added Controls
+	# don't work reliably when the parent Control is itself a child of Node2D.
+	var vp := get_viewport().get_visible_rect().size
+
+	var bar := ColorRect.new()
+	bar.set_position(Vector2(0, vp.y - 80))
+	bar.set_size(Vector2(vp.x, 80))
 	bar.color = Color(0.10, 0.09, 0.07, 0.97)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_layer.add_child(bar)
 
-	# Brass accent line at the top of the bar
-	var accent = ColorRect.new()
-	accent.anchor_left = 0.0
-	accent.anchor_right = 1.0
-	accent.anchor_top = 1.0
-	accent.anchor_bottom = 1.0
-	accent.offset_top = -80
-	accent.offset_bottom = -78
+	var accent := ColorRect.new()
+	accent.set_position(Vector2(0, vp.y - 80))
+	accent.set_size(Vector2(vp.x, 2))
 	accent.color = Color(0.72, 0.52, 0.18, 1.0)
+	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_layer.add_child(accent)
 
-	# Button row — fixed 515 px wide, horizontally centred, anchored to bottom
-	var hbox = HBoxContainer.new()
+	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 15)
-	hbox.anchor_left = 0.5
-	hbox.anchor_right = 0.5
-	hbox.anchor_top = 1.0
-	hbox.anchor_bottom = 1.0
-	hbox.offset_left = -257
-	hbox.offset_right = 258
-	hbox.offset_top = -71
-	hbox.offset_bottom = -9
+	var btn_row_w := 515.0
+	hbox.set_position(Vector2((vp.x - btn_row_w) / 2.0, vp.y - 71))
+	hbox.set_size(Vector2(btn_row_w, 62))
 	ui_layer.add_child(hbox)
 
 	for item: Array in [
@@ -236,13 +226,15 @@ func _show_repair_panel() -> void:
 	if repair_panel:
 		repair_panel.queue_free()
 
+	var vp_rp := get_viewport().get_visible_rect().size
 	repair_panel = Control.new()
-	repair_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	repair_panel.set_position(Vector2.ZERO)
+	repair_panel.set_size(vp_rp)
 	repair_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
-	# Dim overlay
 	var dim = ColorRect.new()
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.set_position(Vector2.ZERO)
+	dim.set_size(vp_rp)
 	dim.color = Color(0, 0, 0, 0.72)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	dim.gui_input.connect(func(e: InputEvent):
@@ -251,10 +243,8 @@ func _show_repair_panel() -> void:
 	)
 	repair_panel.add_child(dim)
 
-	# Panel box — 580×520, centered
 	var bw = 580
 	var bh = 520
-	var vp_rp := get_viewport().get_visible_rect().size
 	var box = Panel.new()
 	box.set_position(Vector2((vp_rp.x - bw) / 2.0, (vp_rp.y - bh) / 2.0))
 	box.set_size(Vector2(bw, bh))
@@ -532,13 +522,16 @@ func _make_building_panel() -> void:
 			buildings_data = json.get_data().buildings
 		file.close()
 
+	var vp_bp := get_viewport().get_visible_rect().size
 	building_panel = Control.new()
-	building_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	building_panel.set_position(Vector2.ZERO)
+	building_panel.set_size(vp_bp)
 	building_panel.visible = false
 	building_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var dim = ColorRect.new()
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.set_position(Vector2.ZERO)
+	dim.set_size(vp_bp)
 	dim.color = Color(0, 0, 0, 0.75)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	dim.gui_input.connect(func(event: InputEvent):
@@ -549,7 +542,6 @@ func _make_building_panel() -> void:
 
 	var bw = 600
 	var bh = 700
-	var vp_bp := get_viewport().get_visible_rect().size
 	var box = Panel.new()
 	box.set_position(Vector2((vp_bp.x - bw) / 2, (vp_bp.y - bh) / 2))
 	box.set_size(Vector2(bw, bh))
@@ -749,19 +741,21 @@ func _do_build(bld: Dictionary, current_level: int) -> void:
 var menu_panel: Control
 
 func _make_menu_panel() -> void:
+	var vp_mp := get_viewport().get_visible_rect().size
 	menu_panel = Control.new()
-	menu_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	menu_panel.set_position(Vector2.ZERO)
+	menu_panel.set_size(vp_mp)
 	menu_panel.visible = false
 
 	var bg = ColorRect.new()
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_position(Vector2.ZERO)
+	bg.set_size(vp_mp)
 	bg.color = Color(0, 0, 0, 0.78)
 	menu_panel.add_child(bg)
 
 	var box = Panel.new()
 	var bw = 300
 	var bh = 220
-	var vp_mp := get_viewport().get_visible_rect().size
 	box.set_position(Vector2((vp_mp.x - bw) / 2.0, (vp_mp.y - bh) / 2.0))
 	box.set_size(Vector2(bw, bh))
 	var ps = StyleBoxFlat.new()

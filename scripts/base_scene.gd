@@ -21,17 +21,10 @@ extends Node2D
 var building_panel: Control
 var building_list: VBoxContainer
 var buildings_data: Array = []
-var placed_building_sprites: Dictionary = {}  # bld_id -> TextureRect
+var placed_building_sprites: Dictionary = {}
 
-# Offsets from map centre (x, y) for each building's on-map sprite
-const BUILDING_OFFSETS: Dictionary = {
-    "shelter":     Vector2( 260, -80),
-    "barracks":    Vector2(-260, -80),
-    "farm":        Vector2( 260, 160),
-    "workshop":    Vector2(-260, 160),
-    "medical_bay": Vector2(   0, 220),
-    "watchtower":  Vector2(   0,-220),
-}
+# Offsets from map centre for each building's on-map sprite (set in _ready to avoid const/Dictionary parse issues)
+var BUILDING_OFFSETS: Dictionary
 
 var day_night_timer: float = 0.0
 const FULL_CYCLE := 120.0
@@ -46,7 +39,29 @@ var building_active: bool = false
 var glow_tween: Tween
 
 func _ready() -> void:
-	# Hide tscn bottom bar; _build_bottom_bar() creates the correctly-positioned one
+	BUILDING_OFFSETS = {
+		"shelter":     Vector2( 260, -80),
+		"barracks":    Vector2(-260, -80),
+		"farm":        Vector2( 260, 160),
+		"workshop":    Vector2(-260, 160),
+		"medical_bay": Vector2(   0, 220),
+		"watchtower":  Vector2(   0,-220),
+	}
+
+	# Connect signals first — no size dependency
+	EventBus.resource_changed.connect(_on_resource_changed)
+	EventBus.day_passed.connect(_on_day_passed)
+	EventBus.notification.connect(_show_notification)
+	EventBus.game_over.connect(_on_game_over)
+	notification_timer.timeout.connect(_on_notification_timeout)
+
+	day_night_timer = GameState.day_timer
+
+	# Wait one frame so Android has reported its real viewport size before
+	# we anchor or position any UI elements
+	await get_tree().process_frame
+
+	# Hide the .tscn bottom bar; we build a new correctly-anchored one below
 	$UILayer/BottomBg.visible = false
 	buildings_btn.visible = false
 	survivors_btn.visible = false
@@ -56,21 +71,18 @@ func _ready() -> void:
 	_build_bottom_bar()
 	_make_building_panel()
 	_make_menu_panel()
-	_restore_placed_buildings()
-
-	EventBus.resource_changed.connect(_on_resource_changed)
-	EventBus.day_passed.connect(_on_day_passed)
-	EventBus.notification.connect(_show_notification)
-	EventBus.game_over.connect(_on_game_over)
-	notification_timer.timeout.connect(_on_notification_timeout)
 
 	_refresh_resource_display()
 	_refresh_day_display()
-	day_night_timer = GameState.day_timer
 	_adjust_day_night_overlay()
 
 	if GameState.tutorial_active and GameState.tutorial_step == 0:
 		_setup_tutorial()
+	elif GameState.tutorial_step >= 2:
+		# Tutorial already complete — restore the outpost sprite from save
+		_restore_outpost_sprite()
+
+	_restore_placed_buildings()
 
 # ── BOTTOM BAR ─────────────────────────────────────────────────────────────────
 
@@ -138,6 +150,18 @@ func _build_bottom_bar() -> void:
 
 
 # ── TUTORIAL ────────────────────────────────────────────────────────────────────
+
+func _restore_outpost_sprite() -> void:
+	var vp := get_viewport().get_visible_rect().size
+	var spr_w := 360.0; var spr_h := 360.0
+	outpost_sprite = TextureRect.new()
+	outpost_sprite.texture = load("res://assets/buildings/outpost_repaired.jpg")
+	outpost_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	outpost_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	outpost_sprite.set_size(Vector2(spr_w, spr_h))
+	outpost_sprite.set_position(Vector2((vp.x - spr_w) / 2.0, (vp.y - spr_h) / 2.0 - 60.0))
+	outpost_sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ui_layer.add_child(outpost_sprite)
 
 func _setup_tutorial() -> void:
 	var vp := get_viewport().get_visible_rect().size

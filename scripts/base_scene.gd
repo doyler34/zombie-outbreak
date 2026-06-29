@@ -3,20 +3,20 @@ extends Node2D
 
 @onready var day_night_overlay: ColorRect = $DayNightOverlay
 @onready var ground_bg: ColorRect = $BgLayer/GrassBackground
-@onready var ui_layer: Control = $UILayer
-@onready var top_bar: HBoxContainer = $UILayer/TopBar
-@onready var day_label: Label = $UILayer/TopBar/DayLabel
-@onready var wood_label: Label = $UILayer/TopBar/WoodLabel
-@onready var stone_label: Label = $UILayer/TopBar/StoneLabel
-@onready var metal_label: Label = $UILayer/TopBar/MetalLabel
-@onready var gold_label: Label = $UILayer/TopBar/GoldLabel
-@onready var notification_label: Label = $UILayer/NotificationLabel
+@onready var ui_layer: Control = $UICanvas/UILayer
+@onready var top_bar: HBoxContainer = $UICanvas/UILayer/TopBar
+@onready var day_label: Label = $UICanvas/UILayer/TopBar/DayLabel
+@onready var wood_label: Label = $UICanvas/UILayer/TopBar/WoodLabel
+@onready var stone_label: Label = $UICanvas/UILayer/TopBar/StoneLabel
+@onready var metal_label: Label = $UICanvas/UILayer/TopBar/MetalLabel
+@onready var gold_label: Label = $UICanvas/UILayer/TopBar/GoldLabel
+@onready var notification_label: Label = $UICanvas/UILayer/NotificationLabel
 @onready var notification_timer: Timer = $NotificationTimer
 
-@onready var buildings_btn: Button = $UILayer/BuildingsBtn
-@onready var survivors_btn: Button = $UILayer/SurvivorsBtn
-@onready var mission_btn: Button = $UILayer/MissionBtn
-@onready var menu_btn: Button = $UILayer/MenuBtn
+@onready var buildings_btn: Button = $UICanvas/UILayer/BuildingsBtn
+@onready var survivors_btn: Button = $UICanvas/UILayer/SurvivorsBtn
+@onready var mission_btn: Button = $UICanvas/UILayer/MissionBtn
+@onready var menu_btn: Button = $UICanvas/UILayer/MenuBtn
 
 var building_panel: Control
 var building_list: VBoxContainer
@@ -55,7 +55,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 
 	# Hide the .tscn bottom bar; we build a new one in code below
-	$UILayer/BottomBg.visible = false
+	$UICanvas/UILayer/BottomBg.visible = false
 	buildings_btn.visible = false
 	survivors_btn.visible = false
 	mission_btn.visible = false

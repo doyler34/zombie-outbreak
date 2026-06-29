@@ -48,20 +48,13 @@ func _ready() -> void:
 		"watchtower":  Vector2(   0,-220),
 	}
 
-	# Connect signals first — no size dependency
-	EventBus.resource_changed.connect(_on_resource_changed)
-	EventBus.day_passed.connect(_on_day_passed)
-	EventBus.notification.connect(_show_notification)
-	EventBus.game_over.connect(_on_game_over)
-	notification_timer.timeout.connect(_on_notification_timeout)
-
 	day_night_timer = GameState.day_timer
 
-	# Wait one frame so Android has reported its real viewport size before
-	# we anchor or position any UI elements
+	# Wait one frame so Android has reported its real viewport size and UILayer
+	# has been laid out before we position any dynamic UI elements.
 	await get_tree().process_frame
 
-	# Hide the .tscn bottom bar; we build a new correctly-anchored one below
+	# Hide the .tscn bottom bar; we build a new one in code below
 	$UILayer/BottomBg.visible = false
 	buildings_btn.visible = false
 	survivors_btn.visible = false
@@ -72,14 +65,23 @@ func _ready() -> void:
 	_make_building_panel()
 	_make_menu_panel()
 
+	# Connect signals AFTER panels exist so no signal handler can touch a null panel
+	EventBus.resource_changed.connect(_on_resource_changed)
+	EventBus.day_passed.connect(_on_day_passed)
+	EventBus.notification.connect(_show_notification)
+	EventBus.game_over.connect(_on_game_over)
+	notification_timer.timeout.connect(_on_notification_timeout)
+
 	_refresh_resource_display()
 	_refresh_day_display()
 	_adjust_day_night_overlay()
 
 	if GameState.tutorial_active and GameState.tutorial_step == 0:
 		_setup_tutorial()
+	elif GameState.tutorial_step == 1:
+		# Mid-repair save/reload — restore broken outpost so player can re-tap
+		_setup_tutorial()
 	elif GameState.tutorial_step >= 2:
-		# Tutorial already complete — restore the outpost sprite from save
 		_restore_outpost_sprite()
 
 	_restore_placed_buildings()
@@ -87,30 +89,33 @@ func _ready() -> void:
 # ── BOTTOM BAR ─────────────────────────────────────────────────────────────────
 
 func _build_bottom_bar() -> void:
-	# Use direct pixel positions — anchors on dynamically-added Controls
-	# don't work reliably when the parent Control is itself a child of Node2D.
-	var vp := get_viewport().get_visible_rect().size
+	# ui_layer.size gives the logical canvas size (e.g. 720×1560) — correct for
+	# positioning children of UILayer. get_visible_rect().size returns physical
+	# pixels on Android and would place everything far off-screen.
+	var vp := ui_layer.size
 
 	var bar := ColorRect.new()
-	bar.set_position(Vector2(0, vp.y - 80))
-	bar.set_size(Vector2(vp.x, 80))
 	bar.color = Color(0.10, 0.09, 0.07, 0.97)
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.mouse_filter = Control.MOUSE_FILTER_STOP  # block taps from falling through to game world
 	ui_layer.add_child(bar)
+	bar.position = Vector2(0, vp.y - 80)
+	bar.size = Vector2(vp.x, 80)
 
 	var accent := ColorRect.new()
-	accent.set_position(Vector2(0, vp.y - 80))
-	accent.set_size(Vector2(vp.x, 2))
 	accent.color = Color(0.72, 0.52, 0.18, 1.0)
 	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_layer.add_child(accent)
+	accent.position = Vector2(0, vp.y - 80)
+	accent.size = Vector2(vp.x, 2)
 
+	# Add hbox to tree FIRST, then set position/size so the layout pass has a
+	# valid parent rect before the HBoxContainer sizes its children.
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 15)
-	var btn_row_w := 515.0
-	hbox.set_position(Vector2((vp.x - btn_row_w) / 2.0, vp.y - 71))
-	hbox.set_size(Vector2(btn_row_w, 62))
 	ui_layer.add_child(hbox)
+	var btn_row_w := 515.0
+	hbox.position = Vector2((vp.x - btn_row_w) / 2.0, vp.y - 71)
+	hbox.size = Vector2(btn_row_w, 62)
 
 	for item: Array in [
 		["BUILD",   _show_building_panel],
@@ -142,19 +147,19 @@ func _build_bottom_bar() -> void:
 # ── TUTORIAL ────────────────────────────────────────────────────────────────────
 
 func _restore_outpost_sprite() -> void:
-	var vp := get_viewport().get_visible_rect().size
+	var vp := ui_layer.size
 	var spr_w := 360.0; var spr_h := 360.0
 	outpost_sprite = TextureRect.new()
 	outpost_sprite.texture = load("res://assets/buildings/outpost_repaired.jpg")
 	outpost_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	outpost_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	outpost_sprite.set_size(Vector2(spr_w, spr_h))
-	outpost_sprite.set_position(Vector2((vp.x - spr_w) / 2.0, (vp.y - spr_h) / 2.0 - 60.0))
 	outpost_sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_layer.add_child(outpost_sprite)
+	outpost_sprite.size = Vector2(spr_w, spr_h)
+	outpost_sprite.position = Vector2((vp.x - spr_w) / 2.0, (vp.y - spr_h) / 2.0 - 60.0)
 
 func _setup_tutorial() -> void:
-	var vp := get_viewport().get_visible_rect().size
+	var vp := ui_layer.size
 	var spr_w := 360.0
 	var spr_h := 360.0
 	var spr_x := (vp.x - spr_w) / 2.0
@@ -164,11 +169,11 @@ func _setup_tutorial() -> void:
 	outpost_sprite.texture = load("res://assets/buildings/outpost_broken.jpg")
 	outpost_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	outpost_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	outpost_sprite.set_size(Vector2(spr_w, spr_h))
-	outpost_sprite.set_position(Vector2(spr_x, spr_y))
 	outpost_sprite.mouse_filter = Control.MOUSE_FILTER_STOP
 	outpost_sprite.gui_input.connect(_on_outpost_clicked)
 	ui_layer.add_child(outpost_sprite)
+	outpost_sprite.size = Vector2(spr_w, spr_h)
+	outpost_sprite.position = Vector2(spr_x, spr_y)
 
 	# Load repaired texture for later
 	outpost_repaired_tex = load("res://assets/buildings/outpost_repaired.jpg")
@@ -190,7 +195,7 @@ func _start_glow_pulse() -> void:
 		.set_ease(Tween.EASE_IN_OUT)
 
 func _make_tutorial_hint() -> void:
-	var vp := get_viewport().get_visible_rect().size
+	var vp := ui_layer.size
 	var hint_w := 220.0
 	var spr_y := (vp.y - 360.0) / 2.0 - 60.0  # must match _setup_tutorial offset
 	var hint_x := (vp.x - hint_w) / 2.0
@@ -226,15 +231,14 @@ func _show_repair_panel() -> void:
 	if repair_panel:
 		repair_panel.queue_free()
 
-	var vp_rp := get_viewport().get_visible_rect().size
+	var vp_rp := ui_layer.size
 	repair_panel = Control.new()
-	repair_panel.set_position(Vector2.ZERO)
-	repair_panel.set_size(vp_rp)
 	repair_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	ui_layer.add_child(repair_panel)
+	repair_panel.position = Vector2.ZERO
+	repair_panel.size = vp_rp
 
 	var dim = ColorRect.new()
-	dim.set_position(Vector2.ZERO)
-	dim.set_size(vp_rp)
 	dim.color = Color(0, 0, 0, 0.72)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	dim.gui_input.connect(func(e: InputEvent):
@@ -242,6 +246,8 @@ func _show_repair_panel() -> void:
 			repair_panel.visible = false
 	)
 	repair_panel.add_child(dim)
+	dim.position = Vector2.ZERO
+	dim.size = vp_rp
 
 	var bw = 580
 	var bh = 520
@@ -425,8 +431,6 @@ func _show_repair_panel() -> void:
 	repair_btn.pressed.connect(_on_repair_pressed)
 	box.add_child(repair_btn)
 
-	ui_layer.add_child(repair_panel)
-
 func _on_repair_pressed() -> void:
 	var costs = {"wood": 20, "stone": 10, "gold": 50}
 	if not ResourceManager.pay(costs):
@@ -464,13 +468,14 @@ func _on_repair_pressed() -> void:
 	ui_layer.add_child(badge)
 
 	build_timer_label = Label.new()
-	build_timer_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	build_timer_label.add_theme_font_size_override("font_size", 18)
 	build_timer_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.25, 1))
 	build_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	build_timer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	build_timer_label.text = "⚙ REPAIRING  10s"
 	badge.add_child(build_timer_label)
+	build_timer_label.position = Vector2.ZERO
+	build_timer_label.size = badge.size
 
 	build_countdown = 10.0
 
@@ -522,16 +527,15 @@ func _make_building_panel() -> void:
 			buildings_data = json.get_data().buildings
 		file.close()
 
-	var vp_bp := get_viewport().get_visible_rect().size
+	var vp_bp := ui_layer.size
 	building_panel = Control.new()
-	building_panel.set_position(Vector2.ZERO)
-	building_panel.set_size(vp_bp)
 	building_panel.visible = false
 	building_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	ui_layer.add_child(building_panel)
+	building_panel.position = Vector2.ZERO
+	building_panel.size = vp_bp
 
 	var dim = ColorRect.new()
-	dim.set_position(Vector2.ZERO)
-	dim.set_size(vp_bp)
 	dim.color = Color(0, 0, 0, 0.75)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	dim.gui_input.connect(func(event: InputEvent):
@@ -539,6 +543,8 @@ func _make_building_panel() -> void:
 			building_panel.visible = false
 	)
 	building_panel.add_child(dim)
+	dim.position = Vector2.ZERO
+	dim.size = vp_bp
 
 	var bw = 600
 	var bh = 700
@@ -612,12 +618,10 @@ func _make_building_panel() -> void:
 	building_list.add_theme_constant_override("separation", 10)
 	scroll.add_child(building_list)
 
-	ui_layer.add_child(building_panel)
-
 func _place_building_on_map(bld: Dictionary) -> void:
 	if not bld.has("sprite"): return
 	if placed_building_sprites.has(bld.id): return  # already placed
-	var vp := get_viewport().get_visible_rect().size
+	var vp := ui_layer.size
 	var cx := vp.x / 2.0
 	var cy := (vp.y - 80.0) / 2.0  # centre of playfield above the bottom bar
 	var offset: Vector2 = BUILDING_OFFSETS.get(bld.id, Vector2.ZERO)
@@ -741,17 +745,18 @@ func _do_build(bld: Dictionary, current_level: int) -> void:
 var menu_panel: Control
 
 func _make_menu_panel() -> void:
-	var vp_mp := get_viewport().get_visible_rect().size
+	var vp_mp := ui_layer.size
 	menu_panel = Control.new()
-	menu_panel.set_position(Vector2.ZERO)
-	menu_panel.set_size(vp_mp)
 	menu_panel.visible = false
+	ui_layer.add_child(menu_panel)
+	menu_panel.position = Vector2.ZERO
+	menu_panel.size = vp_mp
 
 	var bg = ColorRect.new()
-	bg.set_position(Vector2.ZERO)
-	bg.set_size(vp_mp)
 	bg.color = Color(0, 0, 0, 0.78)
 	menu_panel.add_child(bg)
+	bg.position = Vector2.ZERO
+	bg.size = vp_mp
 
 	var box = Panel.new()
 	var bw = 300
@@ -800,8 +805,6 @@ func _make_menu_panel() -> void:
 		b.add_theme_color_override("font_color", Color(0.92, 0.78, 0.42, 1))
 		b.pressed.connect(item[1])
 		vbox.add_child(b)
-
-	ui_layer.add_child(menu_panel)
 
 # ── GAME LOOP ────────────────────────────────────────────────────────────────────
 

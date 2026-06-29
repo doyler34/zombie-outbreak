@@ -14,6 +14,22 @@
       "color": "8B7355"
     },
     {
+      "id": "shelter",
+      "name": "Safe House",
+      "description": "A fortified manor converted into survivor quarters. The pipes still hiss and the lights still burn.",
+      "max_level": 4,
+      "base_cost": {"wood": 60, "stone": 40, "metal": 20},
+      "cost_per_level": {"wood": 40, "stone": 30, "metal": 15},
+      "effects": {
+        "population_cap": {"base": 6, "per_level": 4},
+        "defense": {"base": 3, "per_level": 2},
+        "happiness": {"base": 5, "per_level": 2}
+      },
+      "build_time": 45,
+      "color": "4A3728",
+      "sprite": "res://assets/buildings/shelter.png"
+    },
+    {
       "id": "barracks",
       "name": "Barracks",
       "description": "Houses survivors and provides beds.",

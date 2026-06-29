@@ -21,6 +21,17 @@ extends Node2D
 var building_panel: Control
 var building_list: VBoxContainer
 var buildings_data: Array = []
+var placed_building_sprites: Dictionary = {}  # bld_id -> TextureRect
+
+# Offsets from map centre (x, y) for each building's on-map sprite
+const BUILDING_OFFSETS: Dictionary = {
+    "shelter":     Vector2( 260, -80),
+    "barracks":    Vector2(-260, -80),
+    "farm":        Vector2( 260, 160),
+    "workshop":    Vector2(-260, 160),
+    "medical_bay": Vector2(   0, 220),
+    "watchtower":  Vector2(   0,-220),
+}
 
 var day_night_timer: float = 0.0
 const FULL_CYCLE := 120.0
@@ -45,6 +56,7 @@ func _ready() -> void:
 	_build_bottom_bar()
 	_make_building_panel()
 	_make_menu_panel()
+	_restore_placed_buildings()
 
 	EventBus.resource_changed.connect(_on_resource_changed)
 	EventBus.day_passed.connect(_on_day_passed)
@@ -586,6 +598,30 @@ func _make_building_panel() -> void:
 
 	ui_layer.add_child(building_panel)
 
+func _place_building_on_map(bld: Dictionary) -> void:
+	if not bld.has("sprite"): return
+	if placed_building_sprites.has(bld.id): return  # already placed
+	var vp := get_viewport().get_visible_rect().size
+	var cx := vp.x / 2.0
+	var cy := (vp.y - 80.0) / 2.0  # centre of playfield above the bottom bar
+	var offset: Vector2 = BUILDING_OFFSETS.get(bld.id, Vector2.ZERO)
+	var tex: Texture2D = load(bld.sprite)
+	if tex == null: return
+	var sprite := TextureRect.new()
+	sprite.texture = tex
+	sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	sprite.set_size(Vector2(220, 220))
+	sprite.set_position(Vector2(cx + offset.x - 110, cy + offset.y - 110))
+	sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ui_layer.add_child(sprite)
+	placed_building_sprites[bld.id] = sprite
+
+func _restore_placed_buildings() -> void:
+	for bld in buildings_data:
+		if GameState.buildings.get(bld.id, 0) > 0:
+			_place_building_on_map(bld)
+
 func _show_building_panel() -> void:
 	_populate_building_list()
 	building_panel.visible = true
@@ -676,7 +712,8 @@ func _do_build(bld: Dictionary, current_level: int) -> void:
 		GameState._recalculate_base_stats()
 		EventBus.building_built.emit(bld.id, target_level)
 		if current_level == 0:
-			_show_notification("%s repaired!" % bld.name, "#C8A84B")
+			_place_building_on_map(bld)
+			_show_notification("%s built!" % bld.name, "#C8A84B")
 		else:
 			_show_notification("%s upgraded to Lv%d!" % [bld.name, target_level], "#C8A84B")
 		_populate_building_list()

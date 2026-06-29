@@ -17,12 +17,12 @@ GameState="*res://scripts/game_state.gd"
 EventBus="*res://scripts/event_bus.gd"
 
 [display]
-window/size/viewport_width=720
-window/size/viewport_height=1280
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/size/mode=2
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/handheld/orientation=1
+window/handheld/orientation=0
 
 [input_devices]
 pointing/emulate_touch_from_mouse=true

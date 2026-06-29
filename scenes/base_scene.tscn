@@ -48,7 +48,7 @@ shader_parameter/ground_texture = ExtResource("8_soil")
 script = ExtResource("1_script")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(360, 640)
+position = Vector2(640, 360)
 enabled = true
 
 [node name="BgLayer" type="CanvasLayer" parent="."]

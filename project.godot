@@ -1,22 +1,38 @@
 ; Zombie Outbreak: Colony Survival
-; Godot 4.4 Android Game
+; Godot 4.4 — mobile-first top-down strategy framework
+;
+; Autoload order matters: EventBus and DataManager first (everything reads
+; them), SaveManager before any manager that registers a save section,
+; GameManager last (it drives all the others).
 
 config_version=5
 
 [application]
+
 config/name="ZombieOutbreak"
 config/description="Top-down zombie strategy game. Build, scavenge, survive."
-config/version="0.1.0"
-run/main_scene="res://scenes/main_menu.tscn"
+config/version="0.2.0"
+run/main_scene="res://scenes/main/main_menu.tscn"
 config/features=PackedStringArray("4.4")
 config/icon="res://assets/icon.svg"
 
 [autoload]
-ResourceManager="*res://scripts/resource_manager.gd"
-GameState="*res://scripts/game_state.gd"
-EventBus="*res://scripts/event_bus.gd"
+
+EventBus="*res://scripts/managers/event_bus.gd"
+DataManager="*res://scripts/managers/data_manager.gd"
+SaveManager="*res://scripts/managers/save_manager.gd"
+TimeManager="*res://scripts/managers/time_manager.gd"
+ResourceManager="*res://scripts/managers/resource_manager.gd"
+WorldManager="*res://scripts/managers/world_manager.gd"
+SurvivorManager="*res://scripts/managers/survivor_manager.gd"
+BuildingManager="*res://scripts/managers/building_manager.gd"
+AudioManager="*res://scripts/managers/audio_manager.gd"
+InputManager="*res://scripts/managers/input_manager.gd"
+UIManager="*res://scripts/managers/ui_manager.gd"
+GameManager="*res://scripts/managers/game_manager.gd"
 
 [display]
+
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/size/mode=2
@@ -25,9 +41,11 @@ window/stretch/aspect="expand"
 window/handheld/orientation=0
 
 [input_devices]
+
 pointing/emulate_touch_from_mouse=true
 
 [rendering]
+
 renderer/rendering_method="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.05, 0.05, 0.08, 1)

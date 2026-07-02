@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/buildings/workshop.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "workshop"
+display_name = "Workshop"
+description = "Salvage in, tools out. The heartbeat of the settlement."
+texture = ExtResource("2")
+grid_size = Vector2i(2, 2)
+max_level = 5
+build_time = 40.0
+sort_order = 40
+base_cost = {
+"metal": 15,
+"wood": 25
+}
+cost_per_level = {
+"metal": 8,
+"wood": 12
+}
+production = {
+"metal": 3
+}
+production_per_level = {
+"metal": 2
+}

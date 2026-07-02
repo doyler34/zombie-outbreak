@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ResourceDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/resource_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "gold"
+display_name = "Gold"
+icon = "🪙"
+icon_color = Color(0.95, 0.78, 0.18, 1)
+starting_amount = 500
+sort_order = 50

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/buildings/medical_bay.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "medical_bay"
+display_name = "Medical Bay"
+description = "Heals the injured and keeps disease at bay."
+texture = ExtResource("2")
+grid_size = Vector2i(2, 2)
+max_level = 5
+build_time = 50.0
+sort_order = 50
+base_cost = {
+"stone": 10,
+"wood": 25
+}
+cost_per_level = {
+"stone": 5,
+"wood": 12
+}
+effects = {
+"happiness": 3,
+"heal_rate": 10
+}
+effects_per_level = {
+"happiness": 2,
+"heal_rate": 5
+}

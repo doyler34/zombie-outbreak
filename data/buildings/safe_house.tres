@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/buildings/shelter.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "safe_house"
+display_name = "Safe House"
+description = "A fortified manor converted into survivor quarters. The pipes still hiss and the lights still burn."
+texture = ExtResource("2")
+grid_size = Vector2i(3, 3)
+max_level = 4
+build_time = 45.0
+sort_order = 10
+base_cost = {
+"metal": 20,
+"stone": 40,
+"wood": 60
+}
+cost_per_level = {
+"metal": 15,
+"stone": 30,
+"wood": 40
+}
+effects = {
+"defense": 3,
+"population_cap": 6
+}
+effects_per_level = {
+"defense": 2,
+"population_cap": 4
+}

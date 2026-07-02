@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/buildings/farm.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "farm"
+display_name = "Farm"
+description = "Reclaimed soil under grow lamps. Keeps the colony fed."
+texture = ExtResource("2")
+grid_size = Vector2i(2, 2)
+max_level = 5
+build_time = 45.0
+sort_order = 30
+base_cost = {
+"wood": 20
+}
+cost_per_level = {
+"wood": 10
+}
+production = {
+"food": 6
+}
+production_per_level = {
+"food": 4
+}

@@ -18,6 +18,8 @@ var _definition: BuildingDefinition
 var _ghost_cell: Vector2i
 var _ghost_sprite: Sprite2D
 var _active: bool = false
+## Ghost orientation in 90° steps (0-3).
+var _rotation: int = 0
 
 
 func _ready() -> void:
@@ -32,7 +34,7 @@ func is_active() -> bool:
 func confirm() -> void:
 	if not _active:
 		return
-	var entity := BuildingManager.place(_definition, _ghost_cell)
+	var entity := BuildingManager.place(_definition, _ghost_cell, _rotation)
 	if entity != null:
 		_end(true)
 	# On failure keep placement active so the player can pick another spot.
@@ -43,11 +45,22 @@ func cancel() -> void:
 		_end(false)
 
 
+## Rotate the ghost 90° clockwise (wired to the HUD's rotate button).
+func rotate_ghost() -> void:
+	if not _active:
+		return
+	_rotation = (_rotation + 1) % 4
+	_ghost_sprite.rotation = _rotation * PI / 2.0
+	# Re-snap: a swapped footprint changes the center and validity.
+	_move_ghost(_ghost_cell)
+
+
 # ── Internal ─────────────────────────────────────────────────────────────
 
 func _on_placement_started(def: BuildingDefinition) -> void:
 	_definition = def
 	_active = true
+	_rotation = 0
 	BuildingManager.deselect()
 
 	_ghost_sprite = Sprite2D.new()
@@ -70,14 +83,21 @@ func _on_tapped(_screen_pos: Vector2, world_pos: Vector2) -> void:
 	if not _active:
 		return
 	# Snap the footprint so the tapped point is its center.
-	var half := Vector2(_definition.grid_size) * WorldManager.cell_size() / 2.0
+	var half := Vector2(_footprint()) * WorldManager.cell_size() / 2.0
 	_move_ghost(WorldManager.world_to_cell(world_pos - half + Vector2.ONE * WorldManager.cell_size() / 2.0))
+
+
+## Grid footprint with the current rotation applied.
+func _footprint() -> Vector2i:
+	if _rotation % 2 == 1:
+		return Vector2i(_definition.grid_size.y, _definition.grid_size.x)
+	return _definition.grid_size
 
 
 func _move_ghost(cell: Vector2i) -> void:
 	_ghost_cell = cell
-	_ghost_sprite.position = WorldManager.area_center(cell, _definition.grid_size)
-	var valid := WorldManager.is_area_free(cell, _definition.grid_size)
+	_ghost_sprite.position = WorldManager.area_center(cell, _footprint())
+	var valid := WorldManager.is_area_free(cell, _footprint())
 	_ghost_sprite.modulate = VALID_TINT if valid else INVALID_TINT
 	queue_redraw()
 
@@ -107,6 +127,6 @@ func _draw() -> void:
 		y += cs
 	# Footprint outline under the ghost.
 	var footprint := Rect2(WorldManager.cell_to_world(_ghost_cell),
-		Vector2(_definition.grid_size) * cs)
-	var valid := WorldManager.is_area_free(_ghost_cell, _definition.grid_size)
+		Vector2(_footprint()) * cs)
+	var valid := WorldManager.is_area_free(_ghost_cell, _footprint())
 	draw_rect(footprint, Color(0.4, 1.0, 0.4, 0.9) if valid else Color(1.0, 0.3, 0.3, 0.9), false, 2.0)

@@ -13,6 +13,8 @@ var definition: BuildingDefinition
 var cell: Vector2i
 var level: int = 1
 var state: BuildingState = BuildingState.CONSTRUCTING
+## Orientation in 90° steps (0-3). Only the sprite rotates; labels stay upright.
+var rotation_index: int = 0
 
 var _remaining_build_time: float = 0.0
 var _selected: bool = false
@@ -26,20 +28,30 @@ func _ready() -> void:
 
 
 ## Called by BuildingManager right after instancing.
-func setup(def: BuildingDefinition, grid_cell: Vector2i) -> void:
+func setup(def: BuildingDefinition, grid_cell: Vector2i, rot: int = 0) -> void:
 	definition = def
 	cell = grid_cell
-	position = WorldManager.area_center(cell, def.grid_size)
+	rotation_index = posmod(rot, 4)
+	position = WorldManager.area_center(cell, footprint())
 
 	_sprite.texture = def.texture
+	_sprite.rotation = rotation_index * PI / 2.0
 	if def.texture:
-		# Scale the art to the grid footprint, whatever its native size.
-		var footprint := Vector2(def.grid_size * WorldManager.cell_size())
+		# Scale the art to the unrotated footprint; the sprite rotation
+		# then maps it onto the (possibly swapped) world footprint.
+		var fp := Vector2(def.grid_size * WorldManager.cell_size())
 		var tex_size := def.texture.get_size()
-		var s := minf(footprint.x / tex_size.x, footprint.y / tex_size.y)
+		var s := minf(fp.x / tex_size.x, fp.y / tex_size.y)
 		_sprite.scale = Vector2(s, s)
 
 	_begin_construction(def.build_time)
+
+
+## Grid footprint with rotation applied (90°/270° swap the axes).
+func footprint() -> Vector2i:
+	if rotation_index % 2 == 1:
+		return Vector2i(definition.grid_size.y, definition.grid_size.x)
+	return definition.grid_size
 
 
 func is_operational() -> bool:
@@ -78,8 +90,8 @@ func _draw() -> void:
 	if not _selected:
 		return
 	# Brass selection frame around the footprint.
-	var footprint := Vector2(definition.grid_size * WorldManager.cell_size())
-	draw_rect(Rect2(-footprint / 2.0, footprint), Color(0.9, 0.7, 0.25, 0.9), false, 3.0)
+	var fp := Vector2(footprint() * WorldManager.cell_size())
+	draw_rect(Rect2(-fp / 2.0, fp), Color(0.9, 0.7, 0.25, 0.9), false, 3.0)
 
 
 # ── Construction ticking ─────────────────────────────────────────────────
@@ -114,6 +126,7 @@ func get_save_data() -> Dictionary:
 		"id": definition.id,
 		"cx": cell.x,
 		"cy": cell.y,
+		"rot": rotation_index,
 		"level": level,
 		"state": state,
 		"remaining": _remaining_build_time,

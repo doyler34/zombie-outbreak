@@ -117,6 +117,10 @@ func _build_placement_bar() -> void:
 	confirm.pressed.connect(func(): _placer().confirm())
 	_placement_bar.add_child(confirm)
 
+	var rotate := UIStyle.make_button("⟳  ROTATE", 20)
+	rotate.pressed.connect(func(): _placer().rotate_ghost())
+	_placement_bar.add_child(rotate)
+
 	var cancel := UIStyle.make_button("✕  CANCEL", 20)
 	cancel.pressed.connect(func(): _placer().cancel())
 	_placement_bar.add_child(cancel)

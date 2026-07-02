@@ -40,25 +40,32 @@ func reset() -> void:
 
 # ── Placement / removal ──────────────────────────────────────────────────
 
-func can_place(def: BuildingDefinition, cell: Vector2i) -> bool:
-	return WorldManager.is_area_free(cell, def.grid_size) \
+func can_place(def: BuildingDefinition, cell: Vector2i, rotation: int = 0) -> bool:
+	return WorldManager.is_area_free(cell, _rotated_footprint(def, rotation)) \
 		and ResourceManager.can_afford(def.cost_for_level(1))
 
 
 ## Validates, pays, spawns and registers a building.
+## [param rotation] is in 90° steps (0-3); odd steps swap the footprint.
 ## Returns the new entity, or null if placement failed.
-func place(def: BuildingDefinition, cell: Vector2i, instant: bool = false) -> BuildingEntity:
-	if not WorldManager.is_area_free(cell, def.grid_size):
+func place(def: BuildingDefinition, cell: Vector2i, rotation: int = 0, instant: bool = false) -> BuildingEntity:
+	if not WorldManager.is_area_free(cell, _rotated_footprint(def, rotation)):
 		EventBus.notify("Blocked — that spot is occupied.", 1)
 		return null
 	if not ResourceManager.spend(def.cost_for_level(1)):
 		EventBus.notify("Not enough materials!", 1)
 		return null
-	var entity := _spawn(def, cell)
+	var entity := _spawn(def, cell, rotation)
 	if instant:
 		entity.finish_construction()
 	EventBus.building_placed.emit(entity)
 	return entity
+
+
+static func _rotated_footprint(def: BuildingDefinition, rotation: int) -> Vector2i:
+	if posmod(rotation, 2) == 1:
+		return Vector2i(def.grid_size.y, def.grid_size.x)
+	return def.grid_size
 
 
 ## Pay for and start an upgrade on an operational building.
@@ -78,7 +85,7 @@ func upgrade(entity: BuildingEntity) -> bool:
 func remove(entity: BuildingEntity) -> void:
 	if selected == entity:
 		deselect()
-	WorldManager.vacate_area(entity.cell, entity.definition.grid_size)
+	WorldManager.vacate_area(entity.cell, entity.footprint())
 	_entities.erase(entity)
 	EventBus.building_removed.emit(entity)
 	entity.queue_free()
@@ -129,12 +136,12 @@ func total_effect(effect_id: String) -> int:
 
 # ── Internal ─────────────────────────────────────────────────────────────
 
-func _spawn(def: BuildingDefinition, cell: Vector2i) -> BuildingEntity:
+func _spawn(def: BuildingDefinition, cell: Vector2i, rotation: int = 0) -> BuildingEntity:
 	assert(_container != null, "No world registered — call register_container() first")
 	var entity: BuildingEntity = BUILDING_ENTITY_SCENE.instantiate()
 	_container.add_child(entity)
-	entity.setup(def, cell)
-	WorldManager.occupy_area(cell, def.grid_size, entity)
+	entity.setup(def, cell, rotation)
+	WorldManager.occupy_area(cell, entity.footprint(), entity)
 	_entities.append(entity)
 	return entity
 
@@ -162,5 +169,5 @@ func apply_save_data(data: Array) -> void:
 			push_warning("[BuildingManager] Save references unknown building: %s" % entry)
 			continue
 		var cell := Vector2i(int(entry.get("cx", 0)), int(entry.get("cy", 0)))
-		var entity := _spawn(def, cell)
+		var entity := _spawn(def, cell, int(entry.get("rot", 0)))
 		entity.apply_save_data(entry)

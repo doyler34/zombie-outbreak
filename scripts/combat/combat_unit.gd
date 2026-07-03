@@ -52,6 +52,8 @@ func is_alive() -> bool:
 func _process(delta: float) -> void:
 	if not is_alive() or not _battle.is_running():
 		return
+	# combat_speed is the battle's watch-speed toggle (1x/2x/3x).
+	delta *= _battle.combat_speed
 	_cooldown = maxf(_cooldown - delta, 0.0)
 
 	# Medic behaviour: while an ally is hurt, heal instead of fighting.
@@ -80,17 +82,29 @@ func _pursue(other: CombatUnit, delta: float, action: Callable) -> void:
 
 func _attack(target: CombatUnit) -> void:
 	var dmg := stats.damage
-	if _rng.randf() < stats.crit_chance:
+	var crit := _rng.randf() < stats.crit_chance
+	if crit:
 		dmg *= 2
-	target.take_damage(dmg)
+	# Quick lunge toward the target so attacks read on screen.
+	var punch := position.direction_to(target.position) * 12.0
+	var tween := create_tween()
+	tween.tween_property(self, "position", punch, 0.07).as_relative()
+	tween.tween_property(self, "position", -punch, 0.09).as_relative()
+	target.take_damage(dmg, crit)
 
 
-func take_damage(amount: int) -> void:
+func take_damage(amount: int, crit: bool = false) -> void:
 	if not is_alive():
 		return
 	if _rng.randf() < stats.dodge_chance:
-		return  # dodged
-	hp -= maxi(amount - stats.armor, 1)
+		_battle.spawn_popup(position, "MISS", Color(0.7, 0.7, 0.7))
+		return
+	var dealt := maxi(amount - stats.armor, 1)
+	hp -= dealt
+	if crit:
+		_battle.spawn_popup(position, "CRIT %d" % dealt, Color(1.0, 0.85, 0.2))
+	else:
+		_battle.spawn_popup(position, str(dealt), Color(1.0, 0.45, 0.35))
 	queue_redraw()
 	if hp <= 0:
 		hp = 0
@@ -101,7 +115,10 @@ func take_damage(amount: int) -> void:
 func heal(amount: int) -> void:
 	if not is_alive():
 		return
+	var before := hp
 	hp = mini(hp + amount, stats.max_health)
+	if hp > before:
+		_battle.spawn_popup(position, "+%d" % (hp - before), Color(0.45, 0.9, 0.4))
 	queue_redraw()
 
 

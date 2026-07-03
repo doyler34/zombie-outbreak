@@ -20,6 +20,13 @@ const ABILITIES: Array = [HealAbility, RetreatAbility]
 ## Set by CombatManager before this node enters the tree.
 var auto_mode: bool = false
 
+## Watch-speed multiplier (viewing control, not a combat control) —
+## cycled by the ⏩ button through these steps.
+const SPEED_STEPS: Array[float] = [1.0, 2.0, 3.0]
+var combat_speed: float = 1.0
+
+var _speed_button: Button
+
 var _arena: Rect2
 var _units: Array[CombatUnit] = []
 var _dead_survivors: Array = []      # roster Survivors killed in this fight
@@ -67,13 +74,18 @@ func start(spec: Dictionary, squad: Array) -> void:
 	_running = true
 	_update_status()
 
+	# Degenerate roll (all ranges hit zero): nothing to fight — instant
+	# victory instead of an arena that can never end.
+	if team_units(CombatUnit.Team.ZOMBIES).is_empty():
+		end_battle("victory")
+
 
 func _process(delta: float) -> void:
 	if not _running:
 		return
 	for entry: Dictionary in _abilities:
 		if entry.cooldown_left > 0.0:
-			entry.cooldown_left = maxf(entry.cooldown_left - delta, 0.0)
+			entry.cooldown_left = maxf(entry.cooldown_left - delta * combat_speed, 0.0)
 		_refresh_ability_button(entry)
 
 
@@ -122,6 +134,25 @@ func clamp_to_arena(pos: Vector2) -> Vector2:
 	return pos.clamp(_arena.position + Vector2.ONE * 30, _arena.end - Vector2.ONE * 30)
 
 
+## Floating combat text (damage, MISS, CRIT, heals, deaths) so the
+## real-time fight is readable at a glance.
+func spawn_popup(at: Vector2, text: String, color: Color) -> void:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	label.add_theme_constant_override("outline_size", 5)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(label)
+	label.position = at + Vector2(randf_range(-14, 14), -34)
+	var tween := label.create_tween()
+	tween.set_parallel()
+	tween.tween_property(label, "position:y", label.position.y - 34, 0.7)
+	tween.tween_property(label, "modulate:a", 0.0, 0.7).set_ease(Tween.EASE_IN)
+	tween.chain().tween_callback(label.queue_free)
+
+
 # ── Battle end ───────────────────────────────────────────────────────────
 
 func end_battle(result: String) -> void:
@@ -146,6 +177,7 @@ func end_battle(result: String) -> void:
 ## Called by CombatManager with the resolved mission result.
 func show_result(result: Dictionary) -> void:
 	_ability_bar.visible = false
+	_speed_button.visible = false
 
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", UIStyle.panel_style())
@@ -202,6 +234,7 @@ func _spawn_unit(team: CombatUnit.Team, def: CombatantDefinition, survivor = nul
 
 func _on_unit_died(unit: CombatUnit) -> void:
 	_units.erase(unit)
+	spawn_popup(unit.position, "💀", Color(0.9, 0.9, 0.9))
 	if unit.team == CombatUnit.Team.ZOMBIES:
 		_zombies_killed += 1
 		_xp_earned += (unit.stats as ZombieDefinition).xp_value
@@ -256,6 +289,15 @@ func _build_layout() -> void:
 	_status_label.add_theme_color_override("font_color", UIStyle.BRASS_BRIGHT)
 	_root.add_child(_status_label)
 
+	# Watch-speed toggle — a viewing control, available in both modes.
+	_speed_button = UIStyle.make_button("⏩ 1x", 15)
+	_speed_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_speed_button.offset_top = 18
+	_speed_button.offset_right = -24
+	_speed_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_speed_button.pressed.connect(_cycle_speed)
+	_root.add_child(_speed_button)
+
 	_ability_bar = HBoxContainer.new()
 	_ability_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_ability_bar.offset_bottom = -24
@@ -279,6 +321,12 @@ func _build_layout() -> void:
 		button.pressed.connect(func(): _use_ability(entry))
 		_ability_bar.add_child(button)
 		_abilities.append(entry)
+
+
+func _cycle_speed() -> void:
+	var index := (SPEED_STEPS.find(combat_speed) + 1) % SPEED_STEPS.size()
+	combat_speed = SPEED_STEPS[index]
+	_speed_button.text = "⏩ %dx" % int(combat_speed)
 
 
 func _use_ability(entry: Dictionary) -> void:

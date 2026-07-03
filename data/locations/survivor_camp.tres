@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "survivor_camp"
+display_name = "Survivor Camp"
+description = "An abandoned camp. Someone might still be holding out in there."
+icon = "⛺"
+difficulty = 2
+map_position = Vector2(300, 400)
+travel_time = 20.0
+zombies = {
+"walker": [3, 6]
+}
+rewards = {
+"food": [15, 30],
+"wood": [10, 20]
+}
+bonus_xp = 15
+rescue_chance = 0.8
+requires = Array[String](["farm"])
+unlocks_territory = false

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "military_base"
+display_name = "Military Base"
+description = "The last stand of the old world. The best loot. The worst odds."
+icon = "🎖"
+difficulty = 5
+map_position = Vector2(850, 460)
+travel_time = 45.0
+zombies = {
+"brute": [2, 4],
+"runner": [4, 6],
+"walker": [8, 14]
+}
+rewards = {
+"gold": [50, 90],
+"metal": [60, 100],
+"stone": [30, 60]
+}
+bonus_xp = 90
+rescue_chance = 0.2
+requires = Array[String](["military_checkpoint"])
+unlocks_territory = false

@@ -54,8 +54,12 @@ func _ready() -> void:
 # ── Screen stack ─────────────────────────────────────────────────────────
 
 ## Instance a UIScreen scene and show it on top of the stack.
-func push_screen(scene: PackedScene) -> Control:
+## [param setup] runs on the instance BEFORE it enters the tree — use it
+## to inject data the screen's _ready/_build_content needs.
+func push_screen(scene: PackedScene, setup: Callable = Callable()) -> Control:
 	var screen: Control = scene.instantiate()
+	if setup.is_valid():
+		setup.call(screen)
 	_screen_layer.add_child(screen)
 	_stack.append(screen)
 	if screen.has_method("open"):

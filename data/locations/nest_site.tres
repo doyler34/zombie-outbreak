@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "nest_site"
+display_name = "Zombie Nest"
+description = "The source of the local infestation. Burn it out."
+icon = "🧟"
+difficulty = 4
+map_position = Vector2(1030, 390)
+travel_time = 35.0
+zombies = {
+"brute": [1, 2],
+"runner": [3, 5],
+"walker": [8, 12]
+}
+rewards = {
+"gold": [40, 70],
+"metal": [20, 40]
+}
+bonus_xp = 55
+rescue_chance = 0.1
+requires = Array[String](["factory"])
+unlocks_territory = false

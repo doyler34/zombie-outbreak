@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "hospital"
+display_name = "Hospital"
+description = "Medicine behind every door — and infected in every ward."
+icon = "🏥"
+difficulty = 3
+map_position = Vector2(950, 310)
+travel_time = 30.0
+zombies = {
+"infected": [6, 12],
+"runner": [2, 4]
+}
+rewards = {
+"food": [15, 30],
+"gold": [25, 50]
+}
+bonus_xp = 32
+rescue_chance = 0.25
+requires = Array[String](["police_station"])
+unlocks_territory = false

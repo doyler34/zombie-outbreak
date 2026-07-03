@@ -16,6 +16,10 @@ signal continue_pressed()
 ## The player's ability loadout. Future abilities: append here.
 const ABILITIES: Array = [HealAbility, RetreatAbility]
 
+## World-map expeditions run hands-off: no ability bar, pure auto-battle.
+## Set by CombatManager before this node enters the tree.
+var auto_mode: bool = false
+
 var _arena: Rect2
 var _units: Array[CombatUnit] = []
 var _dead_survivors: Array = []      # roster Survivors killed in this fight
@@ -259,6 +263,14 @@ func _build_layout() -> void:
 	_ability_bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_ability_bar.add_theme_constant_override("separation", 16)
 	_root.add_child(_ability_bar)
+
+	if auto_mode:
+		var auto_label := Label.new()
+		auto_label.text = "⚙ AUTO COMBAT"
+		auto_label.add_theme_font_size_override("font_size", 15)
+		auto_label.add_theme_color_override("font_color", UIStyle.TEXT_DIM)
+		_ability_bar.add_child(auto_label)
+		return
 
 	for ability_class in ABILITIES:
 		var ability: CombatAbility = ability_class.new()

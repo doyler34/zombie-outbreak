@@ -11,6 +11,7 @@ extends Control
 const BUILD_MENU_SCENE := preload("res://scenes/ui/build_menu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
 const SQUAD_SELECT_SCENE := preload("res://scenes/ui/squad_select.tscn")
+const WORLD_MAP_SCENE := preload("res://scenes/ui/world_map.tscn")
 
 var _resource_labels: Dictionary = {}  # id -> Label
 var _day_label: Label
@@ -102,6 +103,10 @@ func _build_action_bar() -> void:
 	var build_btn := UIStyle.make_button("⚙  BUILD")
 	build_btn.pressed.connect(func(): UIManager.push_screen(BUILD_MENU_SCENE))
 	_action_bar.add_child(build_btn)
+
+	var map_btn := UIStyle.make_button("🗺  MAP")
+	map_btn.pressed.connect(func(): UIManager.push_screen(WORLD_MAP_SCENE))
+	_action_bar.add_child(map_btn)
 
 	var menu_btn := UIStyle.make_button("☰  MENU")
 	menu_btn.pressed.connect(func(): UIManager.push_screen(PAUSE_MENU_SCENE))
@@ -252,10 +257,19 @@ func _populate_obstacle_panel(entity: ObstacleEntity) -> void:
 		_info_content.add_child(_detail_label("⚠ Risk: %s" % info.risk))
 		_info_content.add_child(_detail_label("🧟 %d–%d zombies" % [info.enemies_min, info.enemies_max]))
 		var fight_btn := UIStyle.make_button("⚔  FIGHT", 15)
-		fight_btn.disabled = SurvivorManager.count() == 0
+		fight_btn.disabled = SurvivorManager.available_for_combat().is_empty()
 		fight_btn.pressed.connect(func():
 			CombatManager.prepare_mission(entity)
-			UIManager.push_screen(SQUAD_SELECT_SCENE)
+			UIManager.push_screen(SQUAD_SELECT_SCENE, func(screen):
+				screen.briefing = {
+					"title": def.display_name.to_upper(),
+					"risk": info.risk,
+					"enemies_min": info.enemies_min,
+					"enemies_max": info.enemies_max,
+					"rewards": info.rewards,
+				}
+				screen.on_start = CombatManager.start_mission
+			)
 		)
 		_info_content.add_child(fight_btn)
 		_info_panel.visible = true

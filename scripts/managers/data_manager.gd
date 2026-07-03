@@ -16,6 +16,7 @@ const RESOURCES_DIR := "res://data/resources"
 const OBSTACLES_DIR := "res://data/obstacles"
 const ROLES_DIR := "res://data/roles"
 const ZOMBIES_DIR := "res://data/zombies"
+const LOCATIONS_DIR := "res://data/locations"
 const TABLES_DIR := "res://data/tables"
 
 var settings: GameSettings
@@ -25,6 +26,7 @@ var _resources: Dictionary = {}  # id -> ResourceDefinition
 var _obstacles: Dictionary = {}  # id -> ObstacleDefinition
 var _roles: Dictionary = {}      # id -> SurvivorRoleDefinition
 var _zombies: Dictionary = {}    # id -> ZombieDefinition
+var _locations: Dictionary = {}  # id -> LocationDefinition
 var _tables: Dictionary = {}     # name -> Dictionary/Array
 
 
@@ -36,10 +38,11 @@ func _ready() -> void:
 	_load_definitions(OBSTACLES_DIR, _obstacles)
 	_load_definitions(ROLES_DIR, _roles)
 	_load_definitions(ZOMBIES_DIR, _zombies)
+	_load_definitions(LOCATIONS_DIR, _locations)
 	_load_tables()
-	print("[DataManager] %d buildings, %d resources, %d obstacles, %d roles, %d zombies, %d tables" % [
+	print("[DataManager] %d buildings, %d resources, %d obstacles, %d roles, %d zombies, %d locations, %d tables" % [
 		_buildings.size(), _resources.size(), _obstacles.size(),
-		_roles.size(), _zombies.size(), _tables.size()])
+		_roles.size(), _zombies.size(), _locations.size(), _tables.size()])
 
 
 # ── Buildings ────────────────────────────────────────────────────────────
@@ -99,6 +102,18 @@ func all_roles() -> Array[SurvivorRoleDefinition]:
 
 func get_zombie(id: String) -> ZombieDefinition:
 	return _zombies.get(id)
+
+
+func get_location(id: String) -> LocationDefinition:
+	return _locations.get(id)
+
+
+func all_locations() -> Array[LocationDefinition]:
+	var list: Array[LocationDefinition] = []
+	for def: LocationDefinition in _locations.values():
+		list.append(def)
+	list.sort_custom(func(a, b): return a.difficulty < b.difficulty)
+	return list
 
 
 func all_zombies() -> Array[ZombieDefinition]:

@@ -106,6 +106,7 @@ func _enter_world() -> void:
 ## Wipe all per-session state before starting or loading a game.
 func _reset_session() -> void:
 	CombatManager.reset()
+	WorldMapManager.reset()
 	ObstacleManager.reset()
 	BuildingManager.reset()
 	WorldManager.reset()

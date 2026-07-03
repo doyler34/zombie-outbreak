@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "police_station"
+display_name = "Police Station"
+description = "The armoury may be intact. Clearing it opens up the town."
+icon = "🚓"
+difficulty = 3
+map_position = Vector2(760, 250)
+travel_time = 25.0
+zombies = {
+"runner": [2, 4],
+"walker": [6, 9]
+}
+rewards = {
+"gold": [15, 30],
+"metal": [25, 45]
+}
+bonus_xp = 30
+rescue_chance = 0.15
+requires = Array[String](["small_town"])
+unlocks_territory = true

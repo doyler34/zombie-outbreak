@@ -42,6 +42,12 @@ signal mission_started(zone: ObstacleEntity)
 ## "xp_each", "rescued"} — see CombatManager.
 signal mission_completed(result: Dictionary)
 
+# ── World map / territory ────────────────────────────────────────────────
+## phase: "travel_out" / "combat" / "return" / "" (expedition over).
+signal expedition_updated(location_id: String, phase: String)
+signal expedition_finished(location_id: String, result: Dictionary)
+signal location_state_changed(location_id: String, state: int)
+
 # ── Survivors ────────────────────────────────────────────────────────────
 signal workers_changed(available: int, total: int)
 signal survivor_added(survivor)

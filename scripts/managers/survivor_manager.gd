@@ -12,6 +12,8 @@ extends Node
 ## future system gives them presence in the world.
 class Survivor:
 	extends RefCounted
+	## Stable identity for save references (expeditions, future jobs).
+	var uid: String = ""
 	var survivor_name: String = ""
 	var skill: String = ""
 	## Combat role id (SurvivorRoleDefinition in data/roles/).
@@ -23,6 +25,11 @@ class Survivor:
 	var mood: String = "Neutral"
 	## Building id this survivor works at ("" = unassigned).
 	var assigned_building: String = ""
+	## True while travelling/fighting on a world-map expedition.
+	var on_mission: bool = false
+
+	func _init() -> void:
+		uid = "%d-%06d" % [Time.get_ticks_usec(), randi() % 1000000]
 
 	## Level derived from XP — 100 XP per level for the prototype.
 	func level() -> int:
@@ -30,13 +37,15 @@ class Survivor:
 
 	func to_dict() -> Dictionary:
 		return {
-			"name": survivor_name, "skill": skill, "role": role, "xp": xp,
-			"health": health, "hunger": hunger, "mood": mood,
-			"assigned": assigned_building,
+			"uid": uid, "name": survivor_name, "skill": skill, "role": role,
+			"xp": xp, "health": health, "hunger": hunger, "mood": mood,
+			"assigned": assigned_building, "on_mission": on_mission,
 		}
 
 	static func from_dict(d: Dictionary) -> Survivor:
 		var s := Survivor.new()
+		if d.has("uid"):
+			s.uid = str(d.uid)
 		s.survivor_name = str(d.get("name", "Unknown"))
 		s.skill = str(d.get("skill", ""))
 		s.role = str(d.get("role", "fighter"))
@@ -45,6 +54,8 @@ class Survivor:
 		s.hunger = int(d.get("hunger", 100))
 		s.mood = str(d.get("mood", "Neutral"))
 		s.assigned_building = str(d.get("assigned", ""))
+		# on_mission is restored by WorldMapManager when it re-links the
+		# expedition squad, so a stale flag can't strand anyone.
 		return s
 
 
@@ -98,11 +109,31 @@ func remove(survivor: Survivor) -> void:
 	EventBus.population_changed.emit(count(), population_cap())
 
 
+func get_by_uid(uid: String) -> Survivor:
+	for s in _roster:
+		if s.uid == uid:
+			return s
+	return null
+
+
+## Survivors free to join a combat squad (not away on an expedition).
+func available_for_combat() -> Array[Survivor]:
+	var out: Array[Survivor] = []
+	for s in _roster:
+		if not s.on_mission:
+			out.append(s)
+	return out
+
+
 # ── Worker pool (clearing, future expeditions/jobs) ──────────────────────
 
 ## Survivors not currently committed to a task.
 func available_workers() -> int:
-	return count() - _reserved_workers
+	var away := 0
+	for s in _roster:
+		if s.on_mission:
+			away += 1
+	return count() - _reserved_workers - away
 
 
 ## Commit workers to a task. Returns false if not enough are free.

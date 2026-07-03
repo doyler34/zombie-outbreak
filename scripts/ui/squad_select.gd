@@ -1,10 +1,16 @@
 extends UIScreen
-## Mission briefing + squad picker. Shows the danger zone's risk, enemy
-## estimate and loot preview (CombatManager.mission_info), then lets the
-## player toggle survivors into the squad and launch the battle.
+## Mission briefing + squad picker, shared by every mission source (nest
+## fights, world-map expeditions, future story missions).
 ##
-## Reads the staged zone from CombatManager.pending_zone (set by the HUD
-## before pushing this screen).
+## Callers inject a briefing and a launch callback via
+## UIManager.push_screen(scene, setup):
+##   briefing = {"title", "risk", "enemies_min", "enemies_max",
+##               "rewards" (ranges), "travel_time" (optional),
+##               "note" (optional)}
+##   on_start = func(squad: Array) — fired after the screen closes.
+
+var briefing: Dictionary = {}
+var on_start: Callable = Callable()
 
 var _selected: Array = []  # roster Survivors
 var _count_label: Label
@@ -16,21 +22,23 @@ func _init() -> void:
 
 
 func _build_content() -> void:
-	var zone: ObstacleEntity = CombatManager.pending_zone
-	var content := build_frame("⚔  MISSION: %s" % (zone.definition.display_name if zone else "?"))
-	if zone == null:
-		return
+	var content := build_frame("⚔  %s" % briefing.get("title", "MISSION"))
 
-	var info := CombatManager.mission_info(zone)
-	content.add_child(_line("Risk:  %s" % info.risk, UIStyle.DANGER))
-	content.add_child(_line("Enemies:  %d – %d zombies" % [info.enemies_min, info.enemies_max], UIStyle.TEXT_DIM))
-	if not info.rewards.is_empty():
+	content.add_child(_line("Risk:  %s" % briefing.get("risk", "?"), UIStyle.DANGER))
+	content.add_child(_line("Enemies:  %d – %d zombies" % [
+		briefing.get("enemies_min", 0), briefing.get("enemies_max", 0)], UIStyle.TEXT_DIM))
+	if briefing.has("travel_time"):
+		content.add_child(_line("Travel:  %ds each way" % int(briefing.travel_time), UIStyle.TEXT_DIM))
+	var reward_ranges: Dictionary = briefing.get("rewards", {})
+	if not reward_ranges.is_empty():
 		var parts: Array[String] = []
-		for id in info.rewards:
+		for id in reward_ranges:
 			var def := DataManager.get_resource_def(id)
-			var reward_range: Array = info.rewards[id]
+			var reward_range: Array = reward_ranges[id]
 			parts.append("%s %d–%d" % [def.icon if def else id, reward_range[0], reward_range[1]])
 		content.add_child(_line("Possible salvage:  " + "  ".join(parts), UIStyle.TEXT_DIM))
+	if briefing.has("note"):
+		content.add_child(_line(str(briefing.note), UIStyle.TEXT_DIM))
 
 	var rule := ColorRect.new()
 	rule.color = UIStyle.BRASS.darkened(0.4)
@@ -49,7 +57,10 @@ func _build_content() -> void:
 	list.add_theme_constant_override("separation", 6)
 	scroll.add_child(list)
 
-	for survivor in SurvivorManager.all():
+	var candidates := SurvivorManager.available_for_combat()
+	if candidates.is_empty():
+		list.add_child(_line("Nobody is available — everyone is out on missions.", UIStyle.DANGER))
+	for survivor in candidates:
 		list.add_child(_make_row(survivor))
 
 	var footer := HBoxContainer.new()
@@ -63,7 +74,7 @@ func _build_content() -> void:
 
 	_start_btn = UIStyle.make_button("⚔  START MISSION", 17)
 	_start_btn.disabled = true
-	_start_btn.pressed.connect(_on_start)
+	_start_btn.pressed.connect(_on_start_pressed)
 	footer.add_child(_start_btn)
 
 
@@ -96,10 +107,12 @@ func _on_toggled(survivor, on: bool, toggle: Button) -> void:
 	_start_btn.disabled = _selected.size() < CombatManager.SQUAD_MIN
 
 
-func _on_start() -> void:
+func _on_start_pressed() -> void:
 	var squad := _selected.duplicate()
+	var launch := on_start
 	UIManager.pop_screen()
-	CombatManager.start_mission(squad)
+	if launch.is_valid():
+		launch.call(squad)
 
 
 func _line(text: String, color: Color) -> Label:

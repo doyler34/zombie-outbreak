@@ -21,6 +21,10 @@ var pending_zone: ObstacleEntity = null
 
 var _battle: BattleScene = null
 var _squad: Array = []
+## Mission spec of the running battle (zombies/rewards/xp/rescue ranges).
+var _spec: Dictionary = {}
+## Callback invoked with the resolved result (world map, nest clearing).
+var _on_resolved: Callable = Callable()
 var _rng := RandomNumberGenerator.new()
 
 
@@ -31,6 +35,8 @@ func _ready() -> void:
 func reset() -> void:
 	pending_zone = null
 	_squad.clear()
+	_spec = {}
+	_on_resolved = Callable()
 	if _battle != null and is_instance_valid(_battle):
 		_battle.queue_free()
 	_battle = null
@@ -59,19 +65,37 @@ func prepare_mission(zone: ObstacleEntity) -> void:
 	pending_zone = zone
 
 
-## Launch the battle. Freezes base time via the BATTLE state.
+## Nest flow: fight the staged danger zone with the player watching and
+## abilities enabled. On victory the zone is removed from the map.
 func start_mission(squad: Array) -> void:
-	if pending_zone == null or squad.is_empty() or _battle != null:
+	if pending_zone == null:
+		return
+	var zone := pending_zone
+	launch_battle(_spec_for(zone), squad, false, func(result: Dictionary):
+		if result.outcome == "victory" and is_instance_valid(zone):
+			ObstacleManager.clear_zone(zone)
+	)
+	EventBus.mission_started.emit(zone)
+
+
+## Generic entry point: run any mission spec against a squad.
+## [param auto] disables the ability bar (world-map auto combat).
+## [param on_resolved] receives the resolved result dictionary.
+## Freezes base time via the BATTLE state while the fight runs.
+func launch_battle(spec: Dictionary, squad: Array, auto: bool, on_resolved: Callable = Callable()) -> void:
+	if squad.is_empty() or _battle != null:
 		return
 	_squad = squad
+	_spec = spec
+	_on_resolved = on_resolved
 	GameManager.enter_battle()
 
 	_battle = BATTLE_SCENE.instantiate()
+	_battle.auto_mode = auto
 	add_child(_battle)
 	_battle.finished.connect(_on_battle_finished)
 	_battle.continue_pressed.connect(_on_battle_dismissed)
-	_battle.start({"zombies": _roll_horde(_spec_for(pending_zone))}, squad)
-	EventBus.mission_started.emit(pending_zone)
+	_battle.start({"zombies": _roll_horde(spec)}, squad)
 
 
 # ── Resolution ───────────────────────────────────────────────────────────
@@ -82,7 +106,6 @@ func _on_battle_finished(outcome: Dictionary) -> void:
 		"zombies_killed": int(outcome.zombies_killed),
 		"dead": [], "injured": [], "rewards": {}, "xp_each": 0, "rescued": [],
 	}
-	var spec := _spec_for(pending_zone)
 
 	# Injuries and deaths map back onto the roster (health is 0-100).
 	for state: Dictionary in outcome.survivors:
@@ -96,25 +119,24 @@ func _on_battle_finished(outcome: Dictionary) -> void:
 			result.injured.append(survivor.survivor_name)
 
 	if outcome.result == "victory":
-		result.rewards = _roll_rewards(spec)
+		result.rewards = _roll_rewards(_spec)
 		ResourceManager.grant(result.rewards)
 
 		# XP split across the whole squad, survivors and fallen alike.
-		var xp_total := int(outcome.xp_earned) + int(spec.get("bonus_xp", 0))
+		var xp_total := int(outcome.xp_earned) + int(_spec.get("bonus_xp", 0))
 		result.xp_each = xp_total / maxi(_squad.size(), 1)
 		for survivor in _squad:
 			if not result.dead.has(survivor.survivor_name):
 				survivor.xp += result.xp_each
 
-		# Sometimes someone is holed up inside the zone.
-		if _rng.randf() < float(spec.get("rescue_chance", 0.0)):
+		# Sometimes someone is holed up in there.
+		if _rng.randf() < float(_spec.get("rescue_chance", 0.0)):
 			var rescued = SurvivorManager.generate_random()
 			if SurvivorManager.add(rescued):
 				result.rescued.append(rescued.survivor_name)
 
-		# The zone is cleansed — build space freed permanently.
-		if pending_zone != null and is_instance_valid(pending_zone):
-			ObstacleManager.clear_zone(pending_zone)
+	if _on_resolved.is_valid():
+		_on_resolved.call(result)
 
 	_battle.show_result(result)
 	EventBus.mission_completed.emit(result)
@@ -125,6 +147,8 @@ func _on_battle_dismissed() -> void:
 	_battle = null
 	pending_zone = null
 	_squad = []
+	_spec = {}
+	_on_resolved = Callable()
 	GameManager.exit_battle()
 
 

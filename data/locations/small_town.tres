@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "small_town"
+display_name = "Small Town"
+description = "Boarded-up streets. Something still moves behind the windows."
+icon = "🏘"
+difficulty = 2
+map_position = Vector2(690, 90)
+travel_time = 20.0
+zombies = {
+"infected": [0, 4],
+"walker": [5, 8]
+}
+rewards = {
+"gold": [5, 15],
+"stone": [15, 35],
+"wood": [20, 40]
+}
+bonus_xp = 18
+rescue_chance = 0.15
+requires = Array[String](["forest"])
+unlocks_territory = false

@@ -42,7 +42,10 @@ data/              ALL game content and tuning (no code)
   buildings/       one BuildingDefinition .tres per building
   obstacles/       one ObstacleDefinition .tres per obstacle type
   resources/       one ResourceDefinition .tres per resource
-  tables/          loose JSON data (name pools, zombies, world generation)
+  roles/           one SurvivorRoleDefinition .tres per combat role
+  zombies/         one ZombieDefinition .tres per enemy type
+  locations/       one LocationDefinition .tres per world-map location
+  tables/          loose JSON data (name pools, missions, world generation)
 docs/              this file
 scenes/
   main/            main_menu.tscn (entry scene)
@@ -61,7 +64,7 @@ project), and user preferences to `user://settings.cfg`.
 
 ---
 
-## The 14 Managers (autoload order matters)
+## The 15 Managers (autoload order matters)
 
 Registration order in `project.godot` is dependency order: EventBus and
 DataManager first because everything reads them; SaveManager before any
@@ -150,12 +153,25 @@ in `data/roles/` and `data/zombies/` (both extend CombatantDefinition,
 so units share one code path). The ability bar is a list of
 CombatAbility subclasses — new abilities are one small class each.
 
-### 11. AudioManager (`audio_manager.gd`)
+### 11. WorldMapManager (`world_map_manager.gd`)
+The Last-Day-on-Earth-style world layer. Fixed LocationDefinitions form
+a territory graph via their `requires` lists; states are LOCKED →
+AVAILABLE → CLEARED (or CONTROLLED for locations with
+`unlocks_territory`, which expand player territory and unlock their
+dependents). Expeditions run on game ticks: send squad (members flagged
+on_mission and excluded from other squads/worker pools) → travel out →
+CombatManager auto-battle (no abilities) → rewards + territory update →
+travel home. One expedition at a time for the prototype; the state is
+already shaped as data so multiple simultaneous squads is a small
+change. Locations carry future hooks: `resource_bonus` for controlled
+income, and the state enum supports event/story locations.
+
+### 12. AudioManager (`audio_manager.gd`)
 Creates Music/SFX buses at runtime, a round-robin SFX player pool (safe
 to spam on mobile), music crossfade, and volume persistence separate
 from game saves.
 
-### 12. InputManager (`input_manager.gd`)
+### 13. InputManager (`input_manager.gd`)
 Translates raw touch/mouse events into gestures: `tapped`,
 `long_pressed`, `drag_updated`, `zoom_requested`. Uses
 `_unhandled_input`, so any UI Control that accepts an event
@@ -164,13 +180,13 @@ anywhere. **Why:** gameplay code written against gestures works
 identically on Android touch and desktop mouse, and a replay/AI system
 can emit the same signals.
 
-### 13. UIManager (`ui_manager.gd`)
+### 14. UIManager (`ui_manager.gd`)
 Persistent CanvasLayers that survive scene changes: a modal screen stack
 (`push_screen`/`pop_screen`), toast notifications, and the fade
 transition overlay. Screens extend `UIScreen` for consistent open/close
 behaviour.
 
-### 14. GameManager (`game_manager.gd`)
+### 15. GameManager (`game_manager.gd`)
 Top-level state machine (MENU/LOADING/PLAYING/PAUSED) and the only
 system that changes scenes. New-game/continue flow: reset all session
 managers → load world scene → world calls `notify_world_ready()` →

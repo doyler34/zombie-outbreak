@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "forest"
+display_name = "Forest"
+description = "Old pines pressing at the settlement fence. Clearing it expands your territory."
+icon = "🌲"
+difficulty = 1
+map_position = Vector2(330, 110)
+travel_time = 12.0
+zombies = {
+"walker": [3, 5]
+}
+rewards = {
+"food": [5, 15],
+"wood": [30, 60]
+}
+bonus_xp = 10
+rescue_chance = 0.05
+requires = Array[String]([])
+unlocks_territory = true

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "fuel_depot"
+display_name = "Fuel Depot"
+description = "Rusted tanks and generator parts worth their weight in gold."
+icon = "⛽"
+difficulty = 2
+map_position = Vector2(90, 150)
+travel_time = 18.0
+zombies = {
+"runner": [0, 2],
+"walker": [4, 7]
+}
+rewards = {
+"gold": [20, 45],
+"metal": [10, 25]
+}
+bonus_xp = 18
+rescue_chance = 0.0
+requires = Array[String](["farm"])
+unlocks_territory = false

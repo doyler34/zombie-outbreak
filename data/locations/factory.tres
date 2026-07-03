@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="LocationDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "factory"
+display_name = "Factory"
+description = "Heavy machinery, heavier footsteps on the catwalks."
+icon = "🏭"
+difficulty = 3
+map_position = Vector2(1000, 150)
+travel_time = 30.0
+zombies = {
+"brute": [1, 2],
+"walker": [6, 10]
+}
+rewards = {
+"metal": [35, 60],
+"stone": [20, 40]
+}
+bonus_xp = 35
+rescue_chance = 0.05
+requires = Array[String](["warehouse"])
+unlocks_territory = false

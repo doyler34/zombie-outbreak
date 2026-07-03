@@ -14,7 +14,13 @@ signal finished(outcome: Dictionary)
 signal continue_pressed()
 
 ## The player's ability loadout. Future abilities: append here.
-const ABILITIES: Array = [HealAbility, RetreatAbility]
+## Must use preload — class_name references aren't constant expressions,
+## and a non-constant const kills this script and everything that
+## depends on it (this exact line broke all combat).
+const ABILITIES: Array = [
+	preload("res://scripts/combat/abilities/heal_ability.gd"),
+	preload("res://scripts/combat/abilities/retreat_ability.gd"),
+]
 
 ## World-map expeditions run hands-off: no ability bar, pure auto-battle.
 ## Set by CombatManager before this node enters the tree.

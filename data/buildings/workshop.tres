@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+color = Color(0.52, 0.56, 0.65, 1)
 id = "workshop"
 display_name = "Workshop"
 description = "Salvage in, tools out. The heartbeat of the settlement."

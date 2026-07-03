@@ -8,8 +8,8 @@ extends Resource
 ## DataManager.settings.
 
 @export_group("World Grid")
-## Size of one grid cell, in world pixels.
-@export var cell_size: int = 96
+## Size of one grid cell, in world meters (3D units on the XZ plane).
+@export var cell_size: float = 4.0
 ## World dimensions, in cells.
 @export var world_size: Vector2i = Vector2i(48, 48)
 
@@ -22,8 +22,13 @@ extends Resource
 @export var autosave_interval_days: int = 1
 
 @export_group("Camera")
-@export var camera_min_zoom: float = 0.5
-@export var camera_max_zoom: float = 2.5
+## Orthographic size (vertical world extent). Smaller = closer/chunkier.
+@export var camera_default_size: float = 35.0
+@export var camera_min_size: float = 18.0
+@export var camera_max_size: float = 60.0
+## Clash-style angle: pitch down, 45° diagonal yaw.
+@export var camera_pitch_degrees: float = -55.0
+@export var camera_yaw_degrees: float = 45.0
 ## Smoothing factor for camera movement (higher = snappier).
 @export var camera_smoothing: float = 8.0
 ## Mouse wheel zoom step multiplier.

@@ -1,26 +1,30 @@
 class_name BuildingEntity
-extends Node2D
-## One placed building in the world.
+extends Node3D
+## One placed building in the 3D world.
 ##
 ## Pure presentation + per-instance state (level, construction progress).
 ## Rules about placement, cost and production live in BuildingManager;
-## shared stats live in the BuildingDefinition. This node never mutates
-## global state directly.
+## shared stats live in the BuildingDefinition. The visual comes from
+## ModelFactory — a real .glb when the definition has one, a chunky
+## placeholder otherwise.
 
 enum BuildingState { CONSTRUCTING, OPERATIONAL, UPGRADING }
+
+## Construction sites show the model shrunken until work completes.
+const CONSTRUCTION_SCALE := 0.55
 
 var definition: BuildingDefinition
 var cell: Vector2i
 var level: int = 1
 var state: BuildingState = BuildingState.CONSTRUCTING
-## Orientation in 90° steps (0-3). Only the sprite rotates; labels stay upright.
+## Orientation in 90° steps (0-3).
 var rotation_index: int = 0
 
 var _remaining_build_time: float = 0.0
-var _selected: bool = false
+var _model_root: Node3D
+var _select_ring: MeshInstance3D
 
-@onready var _sprite: Sprite2D = $Sprite
-@onready var _timer_label: Label = $TimerLabel
+@onready var _timer_label: Label3D = $TimerLabel
 
 
 func _ready() -> void:
@@ -33,16 +37,17 @@ func setup(def: BuildingDefinition, grid_cell: Vector2i, rot: int = 0) -> void:
 	cell = grid_cell
 	rotation_index = posmod(rot, 4)
 	position = WorldManager.area_center(cell, footprint())
+	rotation.y = -rotation_index * PI / 2.0
 
-	_sprite.texture = def.texture
-	_sprite.rotation = rotation_index * PI / 2.0
-	if def.texture:
-		# Scale the art to the unrotated footprint; the sprite rotation
-		# then maps it onto the (possibly swapped) world footprint.
-		var fp := Vector2(def.grid_size * WorldManager.cell_size())
-		var tex_size := def.texture.get_size()
-		var s := minf(fp.x / tex_size.x, fp.y / tex_size.y)
-		_sprite.scale = Vector2(s, s)
+	# Footprint in meters, pre-rotation (the whole entity rotates).
+	var fp := Vector2(def.grid_size) * WorldManager.cell_size()
+	_model_root = ModelFactory.building_model(def, fp)
+	add_child(_model_root)
+
+	_select_ring = _make_ring(fp, Color(0.9, 0.7, 0.25, 0.45))
+	add_child(_select_ring)
+
+	_timer_label.position.y = WorldManager.cell_size() * 1.6
 
 	_begin_construction(def.build_time)
 
@@ -63,9 +68,14 @@ func finish_construction(silent: bool = false) -> void:
 	state = BuildingState.OPERATIONAL
 	_remaining_build_time = 0.0
 	_timer_label.visible = false
-	_sprite.modulate = Color.WHITE
 	if silent:
+		_model_root.scale = Vector3.ONE
 		return
+	# Pop up to full size.
+	var tween := create_tween()
+	tween.tween_property(_model_root, "scale", Vector3.ONE * 1.08, 0.18) \
+		.set_ease(Tween.EASE_OUT)
+	tween.tween_property(_model_root, "scale", Vector3.ONE, 0.12)
 	if was_upgrading:
 		level += 1
 		EventBus.building_upgraded.emit(self, level)
@@ -82,16 +92,7 @@ func begin_upgrade() -> void:
 
 
 func set_selected(selected: bool) -> void:
-	_selected = selected
-	queue_redraw()
-
-
-func _draw() -> void:
-	if not _selected:
-		return
-	# Brass selection frame around the footprint.
-	var fp := Vector2(footprint() * WorldManager.cell_size())
-	draw_rect(Rect2(-fp / 2.0, fp), Color(0.9, 0.7, 0.25, 0.9), false, 3.0)
+	_select_ring.visible = selected
 
 
 # ── Construction ticking ─────────────────────────────────────────────────
@@ -100,7 +101,7 @@ func _begin_construction(duration: float) -> void:
 	if state == BuildingState.OPERATIONAL:
 		state = BuildingState.CONSTRUCTING
 	_remaining_build_time = duration
-	_sprite.modulate = Color(1, 1, 1, 0.55)
+	_model_root.scale = Vector3.ONE * CONSTRUCTION_SCALE
 	_timer_label.visible = true
 	_update_timer_text()
 
@@ -117,6 +118,22 @@ func _on_game_tick() -> void:
 
 func _update_timer_text() -> void:
 	_timer_label.text = "⚙ %ds" % ceili(_remaining_build_time)
+
+
+## Flat translucent quad marking the footprint (selection indicator).
+func _make_ring(fp: Vector2, color: Color) -> MeshInstance3D:
+	var plane := PlaneMesh.new()
+	plane.size = fp * 1.04
+	var mi := MeshInstance3D.new()
+	mi.mesh = plane
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mi.material_override = mat
+	mi.position.y = 0.05
+	mi.visible = false
+	return mi
 
 
 # ── Save contract (via BuildingManager) ──────────────────────────────────

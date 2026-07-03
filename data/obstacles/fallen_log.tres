@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+model_kind = "log"
 id = "fallen_log"
 display_name = "Fallen Log"
 description = "Came down years ago. Easy timber."

@@ -1,10 +1,12 @@
-[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/building_definition.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/textures/buildings/gate.png" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/gate.glb" id="3"]
 
 [resource]
 script = ExtResource("1")
+model = ExtResource("3")
 id = "gate"
 display_name = "Gate"
 description = "A reinforced gate for the perimeter. Lets your people through and keeps everything else out. (Passage mechanics arrive with the movement system.)"

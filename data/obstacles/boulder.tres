@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+model_kind = "boulder"
 id = "boulder"
 display_name = "Boulder"
 description = "A monolith of granite. Needs demolitions research and a full crew."

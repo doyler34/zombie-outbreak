@@ -1,19 +1,35 @@
 class_name CameraController
-extends Camera2D
-## RTS-style camera: one-finger / mouse drag to pan, pinch or wheel to
-## zoom toward the gesture point, clamped to the world bounds.
+extends Node3D
+## Clash-style orthographic camera rig.
 ##
-## All gestures arrive pre-digested from InputManager, so this script
-## contains zero platform-specific input code. Tuning lives in
-## GameSettings (zoom range, smoothing, wheel step).
+## This node is the look-at target on the ground plane; the child
+## Camera3D is pitched down and yawed 45° for the diagonal isometric
+## look, pulled back along its view axis. Drag pans the rig across the
+## XZ plane in camera-relative directions; pinch/wheel changes the
+## orthographic size (chunky zoom). All tuning lives in GameSettings.
 
-var _target_position: Vector2
-var _target_zoom: float = 1.0
+## Distance the camera sits back along its view direction. With an
+## orthographic projection this only needs to clear the tallest object.
+const CAMERA_DISTANCE := 90.0
+
+var _target_position: Vector3
+var _target_size: float
+
+@onready var camera: Camera3D = $Camera
 
 
 func _ready() -> void:
+	var settings := DataManager.settings
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.rotation_degrees = Vector3(settings.camera_pitch_degrees, settings.camera_yaw_degrees, 0)
+	camera.size = settings.camera_default_size
+	camera.near = 1.0
+	camera.far = 400.0
+	# Pull back along the view direction so the rig origin is the focus.
+	camera.position = camera.transform.basis.z * CAMERA_DISTANCE
+
 	_target_position = position
-	_target_zoom = zoom.x
+	_target_size = camera.size
 	InputManager.drag_updated.connect(_on_drag)
 	InputManager.zoom_requested.connect(_on_zoom)
 
@@ -21,12 +37,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var weight := clampf(DataManager.settings.camera_smoothing * delta, 0.0, 1.0)
 	position = position.lerp(_target_position, weight)
-	var z := lerpf(zoom.x, _target_zoom, weight)
-	zoom = Vector2(z, z)
+	camera.size = lerpf(camera.size, _target_size, weight)
 
 
 ## Snap instantly (e.g. when the world loads centered on the base).
-func jump_to(world_pos: Vector2) -> void:
+func jump_to(world_pos: Vector3) -> void:
 	_target_position = _clamped(world_pos)
 	position = _target_position
 
@@ -34,39 +49,30 @@ func jump_to(world_pos: Vector2) -> void:
 # ── Gestures ─────────────────────────────────────────────────────────────
 
 func _on_drag(delta_screen: Vector2) -> void:
-	# Screen-space drag → world-space pan (inverted; scaled by zoom).
-	_target_position = _clamped(_target_position - delta_screen / zoom.x)
+	# World units per screen pixel at the current zoom (ortho size is
+	# the vertical extent of the view).
+	var units_per_px := camera.size / get_viewport().get_visible_rect().size.y
+	# Camera-relative axes flattened onto the ground plane.
+	var basis := camera.global_transform.basis
+	var right := Vector3(basis.x.x, 0, basis.x.z).normalized()
+	var forward := Vector3(-basis.z.x, 0, -basis.z.z).normalized()
+	var motion := (-right * delta_screen.x + forward * delta_screen.y) * units_per_px
+	_target_position = _clamped(_target_position + motion)
 
 
-func _on_zoom(factor: float, screen_pos: Vector2) -> void:
+func _on_zoom(factor: float, _screen_pos: Vector2) -> void:
 	var settings := DataManager.settings
-	var old_zoom := _target_zoom
-	_target_zoom = clampf(_target_zoom * factor, settings.camera_min_zoom, settings.camera_max_zoom)
-	if is_equal_approx(old_zoom, _target_zoom):
-		return
-	# Keep the point under the finger/cursor stationary while zooming.
-	var viewport_center := get_viewport_rect().size / 2.0
-	var offset_from_center := (screen_pos - viewport_center) / old_zoom
-	var world_focus := _target_position + offset_from_center
-	_target_position = _clamped(world_focus - offset_from_center * old_zoom / _target_zoom)
+	_target_size = clampf(_target_size / factor, settings.camera_min_size, settings.camera_max_size)
+	# Zooming changes how much world fits on screen — re-clamp the pan.
+	_target_position = _clamped(_target_position)
 
 
 # ── Internal ─────────────────────────────────────────────────────────────
 
-## Keep the camera center inside the world rect (with a half-view margin
-## so the view never shows past the edge more than necessary).
-func _clamped(pos: Vector2) -> Vector2:
+## Keep the focus point inside the world rect (XZ plane).
+func _clamped(pos: Vector3) -> Vector3:
 	var world := WorldManager.world_rect()
-	var half_view := get_viewport_rect().size / (2.0 * _target_zoom)
-	var min_pos := world.position + half_view
-	var max_pos := world.end - half_view
-	# If the world is smaller than the view on an axis, just center it.
-	if min_pos.x > max_pos.x:
-		pos.x = world.get_center().x
-	else:
-		pos.x = clampf(pos.x, min_pos.x, max_pos.x)
-	if min_pos.y > max_pos.y:
-		pos.y = world.get_center().y
-	else:
-		pos.y = clampf(pos.y, min_pos.y, max_pos.y)
+	pos.x = clampf(pos.x, world.position.x, world.end.x)
+	pos.z = clampf(pos.z, world.position.y, world.end.y)
+	pos.y = 0.0
 	return pos

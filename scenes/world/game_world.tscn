@@ -1,31 +1,40 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/textures/terrain/soil.png" id="2"]
-[ext_resource type="Script" path="res://scripts/world/building_placer.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/world/camera_controller.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/world/building_placer.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/world/camera_controller.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="4"]
 
-[node name="GameWorld" type="Node2D"]
+[sub_resource type="Environment" id="env"]
+background_mode = 1
+background_color = Color(0.32, 0.42, 0.36, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.75, 0.8, 0.75, 1)
+ambient_light_energy = 0.7
+
+[node name="GameWorld" type="Node3D"]
 script = ExtResource("1")
 
-[node name="Ground" type="Sprite2D" parent="."]
-z_index = -100
-texture = ExtResource("2")
-texture_repeat = 2
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
 
-[node name="Obstacles" type="Node2D" parent="."]
-y_sort_enabled = true
+[node name="Sun" type="DirectionalLight3D" parent="."]
+light_energy = 1.2
+shadow_enabled = true
 
-[node name="Buildings" type="Node2D" parent="."]
-y_sort_enabled = true
+[node name="Ground" type="MeshInstance3D" parent="."]
 
-[node name="BuildingPlacer" type="Node2D" parent="." groups=["building_placer"]]
-z_index = 50
+[node name="Obstacles" type="Node3D" parent="."]
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="BuildingPlacer" type="Node3D" parent="." groups=["building_placer"]]
+script = ExtResource("2")
+
+[node name="CameraRig" type="Node3D" parent="."]
 script = ExtResource("3")
 
-[node name="Camera" type="Camera2D" parent="."]
-script = ExtResource("4")
+[node name="Camera" type="Camera3D" parent="CameraRig"]
 
 [node name="DayNightLayer" type="CanvasLayer" parent="."]
 layer = 50
@@ -45,4 +54,4 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("5")
+script = ExtResource("4")

@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+model_kind = "bush"
 id = "bush"
 display_name = "Berry Bush"
 description = "Wild berries. Quick to clear — and it grows back."

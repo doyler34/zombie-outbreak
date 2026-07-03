@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+model_kind = "rock"
 id = "rock"
 display_name = "Rock"
 description = "Solid stone. Slow work, honest pay."

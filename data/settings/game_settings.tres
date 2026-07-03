@@ -4,13 +4,16 @@
 
 [resource]
 script = ExtResource("1")
-cell_size = 96
+cell_size = 4.0
 world_size = Vector2i(48, 48)
 seconds_per_day = 120.0
 night_start_fraction = 0.65
 autosave_interval_days = 1
-camera_min_zoom = 0.5
-camera_max_zoom = 2.5
+camera_default_size = 35.0
+camera_min_size = 18.0
+camera_max_size = 60.0
+camera_pitch_degrees = -55.0
+camera_yaw_degrees = 45.0
 camera_smoothing = 8.0
 camera_zoom_step = 1.1
 tap_max_distance = 24.0

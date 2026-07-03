@@ -14,8 +14,8 @@ extends Node
 ## panels) automatically blocks world input — no manual "is pointer over
 ## UI" checks anywhere.
 
-signal tapped(screen_pos: Vector2, world_pos: Vector2)
-signal long_pressed(screen_pos: Vector2, world_pos: Vector2)
+signal tapped(screen_pos: Vector2, world_pos: Vector3)
+signal long_pressed(screen_pos: Vector2, world_pos: Vector3)
 signal drag_started(screen_pos: Vector2)
 signal drag_updated(delta: Vector2)
 signal drag_ended()
@@ -120,6 +120,16 @@ func _touch_center() -> Vector2:
 	return (positions[0] + positions[1]) / 2.0 if positions.size() >= 2 else Vector2.ZERO
 
 
-## Screen → world using the active camera's canvas transform.
-func _to_world(screen_pos: Vector2) -> Vector2:
-	return get_viewport().get_canvas_transform().affine_inverse() * screen_pos
+## Screen → world by casting the active 3D camera's ray onto the ground
+## plane (Y = 0). Returns Vector3.ZERO when no 3D camera is active
+## (menus) or the ray is parallel to the ground.
+func _to_world(screen_pos: Vector2) -> Vector3:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return Vector3.ZERO
+	var origin := camera.project_ray_origin(screen_pos)
+	var direction := camera.project_ray_normal(screen_pos)
+	if absf(direction.y) < 0.0001:
+		return Vector3.ZERO
+	var t := -origin.y / direction.y
+	return origin + direction * t

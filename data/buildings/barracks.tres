@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+color = Color(0.62, 0.42, 0.25, 1)
 id = "barracks"
 display_name = "Barracks"
 description = "Bunk space for survivors. Crowded, but safe."

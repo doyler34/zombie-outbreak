@@ -11,8 +11,12 @@ full system guide.
 ## Tech
 
 - Godot 4.4, GL Compatibility renderer (Android-first)
+- Clash-style orthographic 3D: angled camera (pitch −55°, yaw 45°),
+  real .glb building models, chunky primitive placeholders, tile-grid
+  ground shader, directional sun shadows
 - Landscape 1280×720 base, `canvas_items` + `expand` stretch
-- Touch + mouse input, one unified gesture layer
+- Touch + mouse input, one unified gesture layer (taps raycast onto the
+  ground plane)
 
 ## Quick start
 

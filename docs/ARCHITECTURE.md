@@ -194,26 +194,33 @@ pending save is applied → state becomes PLAYING. Also owns autosave.
 
 ---
 
-## World Scene (`scenes/world/game_world.tscn`)
+## World Scene (`scenes/world/game_world.tscn`) — orthographic 3D
 
+Clash-style presentation: a Node3D world under an orthogonal Camera3D
+pitched −55° with a 45° diagonal yaw, and a shadow-casting sun.
 Disposable view over manager state:
 
-- **Ground** — a repeated-texture `Sprite2D` sized to the world rect in
-  world space (pans correctly with the camera, unlike a screen-space
-  shader).
-- **Buildings** — y-sorted container; BuildingManager spawns entities here.
-- **BuildingPlacer** — ghost preview: tap to position, green/red validity
-  tint, grid overlay while placing, confirm/cancel via HUD. Position
-  first, commit second — no accidental purchases on mobile.
-- **CameraController** — RTS camera: drag pan, pinch/wheel zoom toward
-  the gesture point, clamped to world bounds, smoothed. Consumes
-  InputManager gestures only; zero platform-specific code.
-- **DayNightLayer / HUDLayer** — CanvasLayers; ambience tint sits above
-  the world (layer 50) but below the HUD (80) and UIManager (90+).
+- **Ground** — one plane sized to the world rect with a world-space
+  two-tone tile shader aligned to the gameplay grid (bright and
+  readable, no photo textures).
+- **ModelFactory** — builds every entity visual: definitions with a
+  `model` (.glb PackedScene) get the real asset auto-fitted to their
+  footprint and grounded; everything else gets a chunky primitive
+  placeholder (house, tree, rock, pile, nest...) so content is playable
+  before art exists.
+- **BuildingPlacer** — translucent ghost model + green/red footprint
+  quad, tap to position, rotate/confirm/cancel via HUD.
+- **CameraController** — a rig on the ground plane: drag pans along
+  camera-relative XZ axes, pinch/wheel changes orthographic size,
+  clamped to world bounds, smoothed. Gesture-driven only.
+- **InputManager taps** raycast through the 3D camera onto the ground
+  plane, so all grid logic stays in cell space.
+- **DayNightLayer / HUDLayer** — CanvasLayers render above the 3D
+  viewport unchanged; night also dims the sun.
 
-`BuildingEntity` is presentation + per-instance state (level,
-construction countdown). Rules live in managers/definitions, so entities
-stay small as building types multiply.
+`BuildingEntity` / `ObstacleEntity` are presentation + per-instance
+state (level, timers). Rules live in managers/definitions, so entities
+stay small as content multiplies.
 
 ## UI Framework
 

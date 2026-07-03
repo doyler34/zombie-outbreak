@@ -10,8 +10,13 @@ extends Resource
 @export var id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
-## Texture drawn on the map (scaled to fit the footprint).
+## Icon shown in the build menu.
 @export var texture: Texture2D
+## 3D model placed in the world (imported .glb). When empty, a chunky
+## primitive placeholder in [member color] is generated instead.
+@export var model: PackedScene
+## Placeholder color used when no model is assigned.
+@export var color: Color = Color(0.55, 0.45, 0.35)
 ## Footprint on the grid, in cells.
 @export var grid_size: Vector2i = Vector2i(2, 2)
 ## Highest level this building can be upgraded to.

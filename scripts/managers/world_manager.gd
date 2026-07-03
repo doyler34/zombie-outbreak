@@ -18,29 +18,34 @@ func reset() -> void:
 
 
 # ── Grid math ────────────────────────────────────────────────────────────
+# Cells are 2D indices; world positions are Vector3 on the XZ ground
+# plane (cell.x → world X, cell.y → world Z, ground at Y = 0).
 
-func cell_size() -> int:
+func cell_size() -> float:
 	return DataManager.settings.cell_size
 
 
-## World bounds in pixels, centered on the origin.
+## World bounds on the XZ plane in meters, centered on the origin.
 func world_rect() -> Rect2:
-	var size := Vector2(DataManager.settings.world_size * cell_size())
+	var size := Vector2(DataManager.settings.world_size) * cell_size()
 	return Rect2(-size / 2.0, size)
 
 
-func world_to_cell(world_pos: Vector2) -> Vector2i:
-	return Vector2i((world_pos / float(cell_size())).floor())
+func world_to_cell(world_pos: Vector3) -> Vector2i:
+	return Vector2i(
+		floori(world_pos.x / cell_size()),
+		floori(world_pos.z / cell_size()))
 
 
-## Top-left corner of a cell, in world pixels.
-func cell_to_world(cell: Vector2i) -> Vector2:
-	return Vector2(cell) * float(cell_size())
+## Corner of a cell (minimum X/Z), on the ground plane.
+func cell_to_world(cell: Vector2i) -> Vector3:
+	return Vector3(cell.x * cell_size(), 0.0, cell.y * cell_size())
 
 
-## Center of a footprint whose top-left cell is [param cell].
-func area_center(cell: Vector2i, size_in_cells: Vector2i) -> Vector2:
-	return cell_to_world(cell) + Vector2(size_in_cells) * cell_size() / 2.0
+## Center of a footprint whose corner cell is [param cell].
+func area_center(cell: Vector2i, size_in_cells: Vector2i) -> Vector3:
+	return cell_to_world(cell) + Vector3(
+		size_in_cells.x * cell_size() / 2.0, 0.0, size_in_cells.y * cell_size() / 2.0)
 
 
 func is_cell_inside_world(cell: Vector2i) -> bool:

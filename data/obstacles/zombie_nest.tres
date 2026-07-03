@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+model_kind = "nest"
 id = "zombie_nest"
 display_name = "Zombie Nest"
 description = "Something moves in the wreckage. Clearing this means a fight."

@@ -12,6 +12,12 @@ extends Resource
 @export var display_name: String = ""
 @export_multiline var description: String = ""
 @export var texture: Texture2D
+## 3D model placed in the world (imported .glb). When empty, a stylized
+## primitive is generated from [member model_kind].
+@export var model: PackedScene
+## Placeholder shape when no model is assigned:
+## "tree", "bush", "rock", "boulder", "log", "pile", "nest" or "box".
+@export var model_kind: String = "box"
 ## Footprint on the grid, in cells.
 @export var grid_size: Vector2i = Vector2i(1, 1)
 

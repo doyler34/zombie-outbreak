@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+model_kind = "pile"
 id = "debris"
 display_name = "Ruined Debris"
 description = "Twisted metal and wreckage. Rich salvage for patient hands."

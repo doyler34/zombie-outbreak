@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+model_kind = "pile"
 id = "rubble"
 display_name = "Rubble"
 description = "Collapsed masonry from the old world."

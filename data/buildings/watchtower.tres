@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+color = Color(0.72, 0.6, 0.35, 1)
 id = "watchtower"
 display_name = "Watchtower"
 description = "Eyes on the wasteland. Spots hordes before they reach the walls."

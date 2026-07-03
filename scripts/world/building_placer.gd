@@ -1,22 +1,22 @@
 class_name BuildingPlacer
-extends Node2D
-## Ghost-preview building placement (city-builder style).
+extends Node3D
+## Ghost-preview building placement in the 3D world.
 ##
 ## Flow: the build menu emits EventBus.building_placement_started(def) →
-## this node shows a translucent ghost that snaps to the grid and tints
-## green/red for validity. Tapping moves the ghost; the HUD's confirm /
-## cancel buttons call confirm() / cancel().
-##
-## Placement is mobile-friendly: position first, commit second — no
-## accidental purchases from a single mis-tap.
+## a translucent ghost model snaps to the grid with a green/red
+## footprint quad for validity. Tapping moves the ghost; the HUD's
+## confirm / rotate / cancel buttons drive the rest. Position first,
+## commit second — no accidental purchases from a single mis-tap.
 
-const VALID_TINT := Color(0.5, 1.0, 0.5, 0.6)
-const INVALID_TINT := Color(1.0, 0.35, 0.35, 0.6)
-const GRID_COLOR := Color(1.0, 1.0, 1.0, 0.07)
+const VALID_COLOR := Color(0.35, 0.9, 0.4, 0.4)
+const INVALID_COLOR := Color(0.95, 0.3, 0.25, 0.45)
+const GHOST_TRANSPARENCY := 0.45
 
 var _definition: BuildingDefinition
 var _ghost_cell: Vector2i
-var _ghost_sprite: Sprite2D
+var _ghost: Node3D
+var _footprint_quad: MeshInstance3D
+var _quad_material: StandardMaterial3D
 var _active: bool = false
 ## Ghost orientation in 90° steps (0-3).
 var _rotation: int = 0
@@ -50,7 +50,8 @@ func rotate_ghost() -> void:
 	if not _active:
 		return
 	_rotation = (_rotation + 1) % 4
-	_ghost_sprite.rotation = _rotation * PI / 2.0
+	_ghost.rotation.y = -_rotation * PI / 2.0
+	_footprint_quad.rotation.y = _ghost.rotation.y
 	# Re-snap: a swapped footprint changes the center and validity.
 	_move_ghost(_ghost_cell)
 
@@ -62,29 +63,43 @@ func _on_placement_started(def: BuildingDefinition) -> void:
 	_active = true
 	_rotation = 0
 	BuildingManager.deselect()
+	ObstacleManager.deselect()
 
-	_ghost_sprite = Sprite2D.new()
-	_ghost_sprite.texture = def.texture
-	if def.texture:
-		var footprint := Vector2(def.grid_size * WorldManager.cell_size())
-		var tex_size := def.texture.get_size()
-		var s := minf(footprint.x / tex_size.x, footprint.y / tex_size.y)
-		_ghost_sprite.scale = Vector2(s, s)
-	add_child(_ghost_sprite)
+	var fp := Vector2(def.grid_size) * WorldManager.cell_size()
+	_ghost = ModelFactory.building_model(def, fp)
+	ModelFactory.set_transparency(_ghost, GHOST_TRANSPARENCY)
+	add_child(_ghost)
+
+	var plane := PlaneMesh.new()
+	plane.size = fp * 1.02
+	_footprint_quad = MeshInstance3D.new()
+	_footprint_quad.mesh = plane
+	_quad_material = StandardMaterial3D.new()
+	_quad_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_quad_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_footprint_quad.material_override = _quad_material
+	add_child(_footprint_quad)
 
 	# Start centered on the current camera view.
-	var camera := get_viewport().get_camera_2d()
-	var start := camera.position if camera else Vector2.ZERO
+	var camera := get_viewport().get_camera_3d()
+	var start := Vector3.ZERO
+	if camera != null:
+		var viewport_center := get_viewport().get_visible_rect().size / 2.0
+		var origin := camera.project_ray_origin(viewport_center)
+		var direction := camera.project_ray_normal(viewport_center)
+		if absf(direction.y) > 0.0001:
+			start = origin + direction * (-origin.y / direction.y)
 	_move_ghost(WorldManager.world_to_cell(start))
-	queue_redraw()
 
 
-func _on_tapped(_screen_pos: Vector2, world_pos: Vector2) -> void:
+func _on_tapped(_screen_pos: Vector2, world_pos: Vector3) -> void:
 	if not _active:
 		return
 	# Snap the footprint so the tapped point is its center.
-	var half := Vector2(_footprint()) * WorldManager.cell_size() / 2.0
-	_move_ghost(WorldManager.world_to_cell(world_pos - half + Vector2.ONE * WorldManager.cell_size() / 2.0))
+	var fp := _footprint()
+	var corner := world_pos - Vector3(fp.x, 0, fp.y) * WorldManager.cell_size() / 2.0 \
+		+ Vector3.ONE * WorldManager.cell_size() / 2.0
+	_move_ghost(WorldManager.world_to_cell(corner))
 
 
 ## Grid footprint with the current rotation applied.
@@ -96,37 +111,19 @@ func _footprint() -> Vector2i:
 
 func _move_ghost(cell: Vector2i) -> void:
 	_ghost_cell = cell
-	_ghost_sprite.position = WorldManager.area_center(cell, _footprint())
+	var center := WorldManager.area_center(cell, _footprint())
+	_ghost.position = center
+	_footprint_quad.position = center + Vector3(0, 0.06, 0)
 	var valid := WorldManager.is_area_buildable(cell, _footprint())
-	_ghost_sprite.modulate = VALID_TINT if valid else INVALID_TINT
-	queue_redraw()
+	_quad_material.albedo_color = VALID_COLOR if valid else INVALID_COLOR
 
 
 func _end(confirmed: bool) -> void:
 	_active = false
-	if _ghost_sprite:
-		_ghost_sprite.queue_free()
-		_ghost_sprite = null
-	queue_redraw()
+	if _ghost:
+		_ghost.queue_free()
+		_ghost = null
+	if _footprint_quad:
+		_footprint_quad.queue_free()
+		_footprint_quad = null
 	EventBus.building_placement_ended.emit(confirmed)
-
-
-func _draw() -> void:
-	if not _active:
-		return
-	# Subtle grid over the whole world while placing.
-	var world := WorldManager.world_rect()
-	var cs := float(WorldManager.cell_size())
-	var x := world.position.x
-	while x <= world.end.x:
-		draw_line(Vector2(x, world.position.y), Vector2(x, world.end.y), GRID_COLOR, 1.0)
-		x += cs
-	var y := world.position.y
-	while y <= world.end.y:
-		draw_line(Vector2(world.position.x, y), Vector2(world.end.x, y), GRID_COLOR, 1.0)
-		y += cs
-	# Footprint outline under the ghost.
-	var footprint := Rect2(WorldManager.cell_to_world(_ghost_cell),
-		Vector2(_footprint()) * cs)
-	var valid := WorldManager.is_area_buildable(_ghost_cell, _footprint())
-	draw_rect(footprint, Color(0.4, 1.0, 0.4, 0.9) if valid else Color(1.0, 0.3, 0.3, 0.9), false, 2.0)

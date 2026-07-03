@@ -15,6 +15,9 @@ extends Resource
 ## 3D model placed in the world (imported .glb). When empty, a stylized
 ## primitive is generated from [member model_kind].
 @export var model: PackedScene
+## Uniform scale applied to the model. 0 = auto-fit to the footprint;
+## set explicitly when an asset should ignore footprint fitting.
+@export var model_scale: float = 0.0
 ## Placeholder shape when no model is assigned:
 ## "tree", "bush", "rock", "boulder", "log", "pile", "nest" or "box".
 @export var model_kind: String = "box"

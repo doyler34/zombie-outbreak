@@ -14,13 +14,13 @@ const FOOTPRINT_FILL := 0.92
 ## [param footprint] is the building's world-space footprint in meters.
 static func building_model(def: BuildingDefinition, footprint: Vector2) -> Node3D:
 	if def.model != null:
-		return _fitted(def.model, footprint * FOOTPRINT_FILL)
+		return _fitted(def.model, footprint * FOOTPRINT_FILL, def.model_scale)
 	return _chunky_house(def.color, footprint)
 
 
 static func obstacle_model(def: ObstacleDefinition, footprint: Vector2) -> Node3D:
 	if def.model != null:
-		return _fitted(def.model, footprint * FOOTPRINT_FILL)
+		return _fitted(def.model, footprint * FOOTPRINT_FILL, def.model_scale)
 	match def.model_kind:
 		"tree": return _tree(footprint)
 		"bush": return _bush(footprint)
@@ -44,7 +44,10 @@ static func set_transparency(node: Node, value: float) -> void:
 
 ## Instance a scene, rotate its long axis to match the footprint's,
 ## uniformly scale to fit, and rest its base on the ground plane.
-static func _fitted(scene: PackedScene, footprint: Vector2) -> Node3D:
+## [param scale_override] > 0 skips auto-fitting entirely and trusts the
+## authored orientation — the tuning knob for assets that should be
+## bigger or smaller than their plot (model_scale in the definitions).
+static func _fitted(scene: PackedScene, footprint: Vector2, scale_override: float = 0.0) -> Node3D:
 	var root := Node3D.new()
 	var model: Node3D = scene.instantiate()
 	root.add_child(model)
@@ -53,15 +56,16 @@ static func _fitted(scene: PackedScene, footprint: Vector2) -> Node3D:
 	if bounds.size.length() < 0.001:
 		return root
 
-	var extent_x := bounds.size.x
-	var extent_z := bounds.size.z
-	if (extent_x >= extent_z) != (footprint.x >= footprint.y):
-		model.rotation.y = PI / 2.0
-		var swap := extent_x
-		extent_x = extent_z
-		extent_z = swap
-
-	var s := minf(footprint.x / maxf(extent_x, 0.001), footprint.y / maxf(extent_z, 0.001))
+	var s := scale_override
+	if s <= 0.0:
+		var extent_x := bounds.size.x
+		var extent_z := bounds.size.z
+		if (extent_x >= extent_z) != (footprint.x >= footprint.y):
+			model.rotation.y = PI / 2.0
+			var swap := extent_x
+			extent_x = extent_z
+			extent_z = swap
+		s = minf(footprint.x / maxf(extent_x, 0.001), footprint.y / maxf(extent_z, 0.001))
 	model.scale = Vector3.ONE * s
 	# Recenter horizontally and sit the base on Y = 0. The AABB was
 	# measured pre-rotation; a 90° yaw about the center keeps the same

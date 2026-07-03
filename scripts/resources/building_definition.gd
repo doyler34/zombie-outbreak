@@ -15,6 +15,10 @@ extends Resource
 ## 3D model placed in the world (imported .glb). When empty, a chunky
 ## primitive placeholder in [member color] is generated instead.
 @export var model: PackedScene
+## Uniform scale applied to the model. 0 = auto-fit to the grid
+## footprint (the default for normalized AI exports); set an explicit
+## value when an asset should be larger or smaller than its plot.
+@export var model_scale: float = 0.0
 ## Placeholder color used when no model is assigned.
 @export var color: Color = Color(0.55, 0.45, 0.35)
 ## Footprint on the grid, in cells.

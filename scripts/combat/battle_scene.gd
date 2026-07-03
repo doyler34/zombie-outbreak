@@ -22,7 +22,9 @@ var auto_mode: bool = false
 
 ## Watch-speed multiplier (viewing control, not a combat control) —
 ## cycled by the ⏩ button through these steps.
-const SPEED_STEPS: Array[float] = [1.0, 2.0, 3.0]
+## NOTE: deliberately untyped — typed const collections have broken
+## script compilation in this project before (see BUILDING_OFFSETS bug).
+const SPEED_STEPS := [1.0, 2.0, 3.0]
 var combat_speed: float = 1.0
 
 var _speed_button: Button

@@ -11,7 +11,9 @@ extends Node2D
 ## label — no textures needed for the prototype; swapping in animated
 ## sprites later only touches this file.
 
-signal died(unit: CombatUnit)
+# Param untyped on purpose: a signal typing a parameter with the class
+# it is declared in is a self-reference some Godot versions reject.
+signal died(unit)
 
 enum Team { SURVIVORS, ZOMBIES }
 

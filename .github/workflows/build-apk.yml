@@ -1,8 +1,11 @@
 name: Build Android APK
 
+# Builds on main AND on working branches (claude/**) so every push
+# produces a testable APK — testing an old artifact looks exactly like
+# "the new feature doesn't load".
 on:
   push:
-    branches: [main]
+    branches: [main, 'claude/**']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -51,7 +54,15 @@ jobs:
 
       - name: Pre-heat Godot Cache
         run: |
-          ./Godot_v4.4-stable_linux.x86_64 --headless --editor --quit --path . || true
+          ./Godot_v4.4-stable_linux.x86_64 --headless --import --path . || true
+
+      - name: Validate scripts and scenes
+        run: |
+          ./Godot_v4.4-stable_linux.x86_64 --headless --path . -s tools/validate_scripts.gd 2>&1 | tee validate.log
+          if grep -E "SCRIPT ERROR|Parse Error|FAILED to load|FAILED to instantiate" validate.log; then
+            echo "::error::Script/scene errors detected — see validate.log above"
+            exit 1
+          fi
 
       - name: Build APK (Debug)
         run: |

@@ -36,6 +36,12 @@ signal obstacle_cleared(entity: ObstacleEntity, rewards: Dictionary)
 ## the future combat system.
 signal obstacle_infestation_triggered(entity: ObstacleEntity)
 
+# ── Combat / missions ────────────────────────────────────────────────────
+signal mission_started(zone: ObstacleEntity)
+## result: {"outcome", "zombies_killed", "dead", "injured", "rewards",
+## "xp_each", "rescued"} — see CombatManager.
+signal mission_completed(result: Dictionary)
+
 # ── Survivors ────────────────────────────────────────────────────────────
 signal workers_changed(available: int, total: int)
 signal survivor_added(survivor)

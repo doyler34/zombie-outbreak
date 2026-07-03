@@ -11,7 +11,7 @@ extends Node
 ##   continue_game()   → reset, then SaveManager.load_game() once the
 ##                       world has called notify_world_ready()
 
-enum State { BOOT, MENU, LOADING, PLAYING, PAUSED }
+enum State { BOOT, MENU, LOADING, PLAYING, PAUSED, BATTLE }
 
 const MAIN_MENU_SCENE := "res://scenes/main/main_menu.tscn"
 const GAME_WORLD_SCENE := "res://scenes/world/game_world.tscn"
@@ -70,6 +70,18 @@ func toggle_pause() -> void:
 		_set_state(State.PLAYING)
 
 
+## Battle overlay is up: base time freezes (TimeManager only runs in
+## PLAYING) while the fight plays out in real time.
+func enter_battle() -> void:
+	if state == State.PLAYING:
+		_set_state(State.BATTLE)
+
+
+func exit_battle() -> void:
+	if state == State.BATTLE:
+		_set_state(State.PLAYING)
+
+
 # ── Scene transitions ────────────────────────────────────────────────────
 
 ## Fade out, switch scene, fade back in.
@@ -93,6 +105,8 @@ func _enter_world() -> void:
 
 ## Wipe all per-session state before starting or loading a game.
 func _reset_session() -> void:
+	CombatManager.reset()
+	ObstacleManager.reset()
 	BuildingManager.reset()
 	WorldManager.reset()
 	SurvivorManager.reset()

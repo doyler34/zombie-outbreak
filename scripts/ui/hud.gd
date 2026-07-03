@@ -10,6 +10,7 @@ extends Control
 
 const BUILD_MENU_SCENE := preload("res://scenes/ui/build_menu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
+const SQUAD_SELECT_SCENE := preload("res://scenes/ui/squad_select.tscn")
 
 var _resource_labels: Dictionary = {}  # id -> Label
 var _day_label: Label
@@ -244,6 +245,21 @@ func _populate_obstacle_panel(entity: ObstacleEntity) -> void:
 	title.add_theme_font_size_override("font_size", 18)
 	title.add_theme_color_override("font_color", UIStyle.BRASS_BRIGHT)
 	_info_content.add_child(title)
+
+	# Danger zones are cleared by force, not by workers.
+	if def.has_tag("infested"):
+		var info := CombatManager.mission_info(entity)
+		_info_content.add_child(_detail_label("⚠ Risk: %s" % info.risk))
+		_info_content.add_child(_detail_label("🧟 %d–%d zombies" % [info.enemies_min, info.enemies_max]))
+		var fight_btn := UIStyle.make_button("⚔  FIGHT", 15)
+		fight_btn.disabled = SurvivorManager.count() == 0
+		fight_btn.pressed.connect(func():
+			CombatManager.prepare_mission(entity)
+			UIManager.push_screen(SQUAD_SELECT_SCENE)
+		)
+		_info_content.add_child(fight_btn)
+		_info_panel.visible = true
+		return
 
 	if entity.is_clearing():
 		var status := Label.new()

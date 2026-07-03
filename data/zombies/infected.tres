@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ZombieDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/zombie_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "infected"
+display_name = "Infected"
+icon = "🧟"
+color = Color(0.55, 0.6, 0.25, 1)
+max_health = 12
+damage = 4
+attack_interval = 1.0
+attack_range = 36.0
+move_speed = 60.0
+armor = 0
+crit_chance = 0.02
+dodge_chance = 0.03
+xp_value = 6

@@ -61,7 +61,7 @@ project), and user preferences to `user://settings.cfg`.
 
 ---
 
-## The 13 Managers (autoload order matters)
+## The 14 Managers (autoload order matters)
 
 Registration order in `project.godot` is dependency order: EventBus and
 DataManager first because everything reads them; SaveManager before any
@@ -137,12 +137,25 @@ WorldManager's `is_area_buildable` / `is_cell_walkable` through a
 duck-typed occupant contract — so decorative, walkable and solid
 obstacles all use the same code path.
 
-### 10. AudioManager (`audio_manager.gd`)
+### 10. CombatManager (`combat_manager.gd`)
+Squad missions against "infested" danger zones. Flow: tap a zone → the
+HUD shows risk/enemy estimate → squad select screen → BattleScene
+overlay (a CanvasLayer above the frozen world — no scene change) where
+survivors and zombies fight automatically while the player uses
+abilities → the outcome is resolved back into the settlement: injuries
+(roster health), deaths, XP, rolled rewards with role bonuses
+(Scavenger loot, Engineer rewards), rescue chances, and zone removal.
+Mission composition lives in `data/tables/missions.json`; combat stats
+in `data/roles/` and `data/zombies/` (both extend CombatantDefinition,
+so units share one code path). The ability bar is a list of
+CombatAbility subclasses — new abilities are one small class each.
+
+### 11. AudioManager (`audio_manager.gd`)
 Creates Music/SFX buses at runtime, a round-robin SFX player pool (safe
 to spam on mobile), music crossfade, and volume persistence separate
 from game saves.
 
-### 11. InputManager (`input_manager.gd`)
+### 12. InputManager (`input_manager.gd`)
 Translates raw touch/mouse events into gestures: `tapped`,
 `long_pressed`, `drag_updated`, `zoom_requested`. Uses
 `_unhandled_input`, so any UI Control that accepts an event
@@ -151,13 +164,13 @@ anywhere. **Why:** gameplay code written against gestures works
 identically on Android touch and desktop mouse, and a replay/AI system
 can emit the same signals.
 
-### 12. UIManager (`ui_manager.gd`)
+### 13. UIManager (`ui_manager.gd`)
 Persistent CanvasLayers that survive scene changes: a modal screen stack
 (`push_screen`/`pop_screen`), toast notifications, and the fade
 transition overlay. Screens extend `UIScreen` for consistent open/close
 behaviour.
 
-### 13. GameManager (`game_manager.gd`)
+### 14. GameManager (`game_manager.gd`)
 Top-level state machine (MENU/LOADING/PLAYING/PAUSED) and the only
 system that changes scenes. New-game/continue flow: reset all session
 managers → load world scene → world calls `notify_world_ready()` →

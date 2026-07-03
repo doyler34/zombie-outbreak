@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SurvivorRoleDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/survivor_role_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "engineer"
+display_name = "Engineer"
+icon = "🔧"
+color = Color(0.6, 0.65, 0.75, 1)
+max_health = 85
+damage = 7
+attack_interval = 1.0
+attack_range = 42.0
+move_speed = 95.0
+armor = 1
+crit_chance = 0.05
+dodge_chance = 0.08
+reward_bonus = 0.2

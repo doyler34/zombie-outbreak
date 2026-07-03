@@ -14,6 +14,8 @@ const SETTINGS_PATH := "res://data/settings/game_settings.tres"
 const BUILDINGS_DIR := "res://data/buildings"
 const RESOURCES_DIR := "res://data/resources"
 const OBSTACLES_DIR := "res://data/obstacles"
+const ROLES_DIR := "res://data/roles"
+const ZOMBIES_DIR := "res://data/zombies"
 const TABLES_DIR := "res://data/tables"
 
 var settings: GameSettings
@@ -21,6 +23,8 @@ var settings: GameSettings
 var _buildings: Dictionary = {}  # id -> BuildingDefinition
 var _resources: Dictionary = {}  # id -> ResourceDefinition
 var _obstacles: Dictionary = {}  # id -> ObstacleDefinition
+var _roles: Dictionary = {}      # id -> SurvivorRoleDefinition
+var _zombies: Dictionary = {}    # id -> ZombieDefinition
 var _tables: Dictionary = {}     # name -> Dictionary/Array
 
 
@@ -30,9 +34,12 @@ func _ready() -> void:
 	_load_definitions(BUILDINGS_DIR, _buildings)
 	_load_definitions(RESOURCES_DIR, _resources)
 	_load_definitions(OBSTACLES_DIR, _obstacles)
+	_load_definitions(ROLES_DIR, _roles)
+	_load_definitions(ZOMBIES_DIR, _zombies)
 	_load_tables()
-	print("[DataManager] %d buildings, %d resources, %d obstacles, %d tables" % [
-		_buildings.size(), _resources.size(), _obstacles.size(), _tables.size()])
+	print("[DataManager] %d buildings, %d resources, %d obstacles, %d roles, %d zombies, %d tables" % [
+		_buildings.size(), _resources.size(), _obstacles.size(),
+		_roles.size(), _zombies.size(), _tables.size()])
 
 
 # ── Buildings ────────────────────────────────────────────────────────────
@@ -73,6 +80,30 @@ func get_obstacle(id: String) -> ObstacleDefinition:
 func all_obstacles() -> Array[ObstacleDefinition]:
 	var list: Array[ObstacleDefinition] = []
 	for def: ObstacleDefinition in _obstacles.values():
+		list.append(def)
+	return list
+
+
+# ── Combat: roles & zombies ──────────────────────────────────────────────
+
+func get_role(id: String) -> SurvivorRoleDefinition:
+	return _roles.get(id)
+
+
+func all_roles() -> Array[SurvivorRoleDefinition]:
+	var list: Array[SurvivorRoleDefinition] = []
+	for def: SurvivorRoleDefinition in _roles.values():
+		list.append(def)
+	return list
+
+
+func get_zombie(id: String) -> ZombieDefinition:
+	return _zombies.get(id)
+
+
+func all_zombies() -> Array[ZombieDefinition]:
+	var list: Array[ZombieDefinition] = []
+	for def: ZombieDefinition in _zombies.values():
 		list.append(def)
 	return list
 

@@ -91,6 +91,10 @@ func start_clearing(entity: ObstacleEntity, workers: int = 0) -> bool:
 		return false
 	if entity.is_clearing():
 		return false
+	if def.has_tag("infested"):
+		# Zombies inside — this goes through CombatManager, not workers.
+		EventBus.notify("It's crawling with zombies. Send a squad!", 1)
+		return false
 	if not is_tech_unlocked(def.required_tech):
 		EventBus.notify("Requires research: %s" % def.required_tech.capitalize(), 1)
 		return false
@@ -141,6 +145,13 @@ func finish_clearing(entity: ObstacleEntity) -> void:
 ## to call this — the game logic is already here.
 func finish_clearing_now(entity: ObstacleEntity) -> void:
 	finish_clearing(entity)
+
+
+## Remove a zone that was cleansed by combat (CombatManager pays no
+## clearing cost and grants mission rewards instead of clear_rewards).
+func clear_zone(entity: ObstacleEntity) -> void:
+	EventBus.obstacle_cleared.emit(entity, {})
+	_remove(entity)
 
 
 ## Research gate. Returns true until a research/tech system exists —

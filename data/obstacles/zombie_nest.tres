@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/obstacles/zombie_nest.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "zombie_nest"
+display_name = "Zombie Nest"
+description = "Something moves in the wreckage. Clearing this means a fight."
+texture = ExtResource("2")
+grid_size = Vector2i(2, 2)
+clear_time = 1.0
+health = 200
+tags = Array[String](["infested"])

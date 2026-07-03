@@ -1,0 +1,16 @@
+{
+  "zombie_nest": {
+    "risk": "Medium",
+    "zombies": {
+      "walker": [5, 10],
+      "runner": [0, 3]
+    },
+    "rewards": {
+      "wood": [15, 35],
+      "metal": [10, 30],
+      "gold": [5, 20]
+    },
+    "bonus_xp": 20,
+    "rescue_chance": 0.35
+  }
+}

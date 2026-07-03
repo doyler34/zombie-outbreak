@@ -7,6 +7,7 @@
     {"id": "fallen_log", "count": 12},
     {"id": "rubble", "count": 14},
     {"id": "debris", "count": 10},
-    {"id": "boulder", "count": 6}
+    {"id": "boulder", "count": 6},
+    {"id": "zombie_nest", "count": 8}
   ]
 }

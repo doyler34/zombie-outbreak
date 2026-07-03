@@ -14,22 +14,33 @@ class Survivor:
 	extends RefCounted
 	var survivor_name: String = ""
 	var skill: String = ""
+	## Combat role id (SurvivorRoleDefinition in data/roles/).
+	var role: String = "fighter"
+	## Mission experience; levels derive from it (future progression).
+	var xp: int = 0
 	var health: int = 100
 	var hunger: int = 100
 	var mood: String = "Neutral"
 	## Building id this survivor works at ("" = unassigned).
 	var assigned_building: String = ""
 
+	## Level derived from XP — 100 XP per level for the prototype.
+	func level() -> int:
+		return 1 + xp / 100
+
 	func to_dict() -> Dictionary:
 		return {
-			"name": survivor_name, "skill": skill, "health": health,
-			"hunger": hunger, "mood": mood, "assigned": assigned_building,
+			"name": survivor_name, "skill": skill, "role": role, "xp": xp,
+			"health": health, "hunger": hunger, "mood": mood,
+			"assigned": assigned_building,
 		}
 
 	static func from_dict(d: Dictionary) -> Survivor:
 		var s := Survivor.new()
 		s.survivor_name = str(d.get("name", "Unknown"))
 		s.skill = str(d.get("skill", ""))
+		s.role = str(d.get("role", "fighter"))
+		s.xp = int(d.get("xp", 0))
 		s.health = int(d.get("health", 100))
 		s.hunger = int(d.get("hunger", 100))
 		s.mood = str(d.get("mood", "Neutral"))
@@ -124,6 +135,9 @@ func generate_random() -> Survivor:
 			s.skill = str(skills.pick_random().get("id", ""))
 	else:
 		s.survivor_name = "Survivor %d" % (count() + 1)
+	var roles := DataManager.all_roles()
+	if not roles.is_empty():
+		s.role = roles.pick_random().id
 	return s
 
 

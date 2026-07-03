@@ -33,9 +33,10 @@ structures, tap a building to select/upgrade it. Saves autosave daily to
 
 ## Layout
 
-- `scripts/managers/` — the 13 autoload systems (EventBus, Data, Save,
-  Time, Resource, World, Survivor, Building, Obstacle, Audio, Input,
-  UI, Game)
+- `scripts/managers/` — the 14 autoload systems (EventBus, Data, Save,
+  Time, Resource, World, Survivor, Building, Obstacle, Combat, Audio,
+  Input, UI, Game)
+- `scripts/combat/` — battle scene, units, ability framework
 - `scripts/world/` — camera, building entities, ghost placement
 - `scripts/ui/` — UI framework (UIStyle, UIScreen) + screens
 - `data/` — all content and tuning

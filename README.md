@@ -26,14 +26,16 @@ structures, tap a building to select/upgrade it. Saves autosave daily to
 | Content   | How                                                        |
 |-----------|------------------------------------------------------------|
 | Building  | Add a `BuildingDefinition` .tres in `data/buildings/`      |
+| Obstacle  | Add an `ObstacleDefinition` .tres in `data/obstacles/` and list it in `data/tables/world_generation.json` |
 | Resource  | Add a `ResourceDefinition` .tres in `data/resources/`      |
 | Tuning    | Edit `data/settings/game_settings.tres`                    |
 | Data table| Drop a .json in `data/tables/`, read via `DataManager.get_table()` |
 
 ## Layout
 
-- `scripts/managers/` — the 12 autoload systems (EventBus, Data, Save,
-  Time, Resource, World, Survivor, Building, Audio, Input, UI, Game)
+- `scripts/managers/` — the 13 autoload systems (EventBus, Data, Save,
+  Time, Resource, World, Survivor, Building, Obstacle, Audio, Input,
+  UI, Game)
 - `scripts/world/` — camera, building entities, ghost placement
 - `scripts/ui/` — UI framework (UIStyle, UIScreen) + screens
 - `data/` — all content and tuning

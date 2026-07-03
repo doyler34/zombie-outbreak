@@ -1,0 +1,12 @@
+{
+  "spawn_clear_radius_cells": 6,
+  "obstacles": [
+    {"id": "tree", "count": 46},
+    {"id": "bush", "count": 24},
+    {"id": "rock", "count": 20},
+    {"id": "fallen_log", "count": 12},
+    {"id": "rubble", "count": 14},
+    {"id": "debris", "count": 10},
+    {"id": "boulder", "count": 6}
+  ]
+}

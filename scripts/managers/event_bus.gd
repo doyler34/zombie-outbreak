@@ -27,7 +27,17 @@ signal building_deselected()
 signal building_construction_finished(entity: BuildingEntity)
 signal building_upgraded(entity: BuildingEntity, new_level: int)
 
+# ── Obstacles / clearing ─────────────────────────────────────────────────
+signal obstacle_selected(entity: ObstacleEntity)
+signal obstacle_deselected()
+signal obstacle_clear_started(entity: ObstacleEntity, workers: int)
+signal obstacle_cleared(entity: ObstacleEntity, rewards: Dictionary)
+## Fired when clearing starts on an "infested" obstacle — the hook for
+## the future combat system.
+signal obstacle_infestation_triggered(entity: ObstacleEntity)
+
 # ── Survivors ────────────────────────────────────────────────────────────
+signal workers_changed(available: int, total: int)
 signal survivor_added(survivor)
 signal survivor_removed(survivor)
 signal population_changed(count: int, cap: int)

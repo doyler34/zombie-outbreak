@@ -14,6 +14,9 @@ z_index = -100
 texture = ExtResource("2")
 texture_repeat = 2
 
+[node name="Obstacles" type="Node2D" parent="."]
+y_sort_enabled = true
+
 [node name="Buildings" type="Node2D" parent="."]
 y_sort_enabled = true
 

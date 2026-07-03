@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/obstacles/debris.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "debris"
+display_name = "Ruined Debris"
+description = "Twisted metal and wreckage. Rich salvage for patient hands."
+texture = ExtResource("2")
+grid_size = Vector2i(1, 1)
+clear_cost = {
+"food": 10
+}
+clear_rewards = {
+"metal": 30,
+"stone": 10
+}
+clear_time = 40.0
+health = 120
+max_workers = 3
+worker_time_bonus = 0.5

@@ -41,7 +41,7 @@ func reset() -> void:
 # ── Placement / removal ──────────────────────────────────────────────────
 
 func can_place(def: BuildingDefinition, cell: Vector2i, rotation: int = 0) -> bool:
-	return WorldManager.is_area_free(cell, _rotated_footprint(def, rotation)) \
+	return WorldManager.is_area_buildable(cell, _rotated_footprint(def, rotation)) \
 		and ResourceManager.can_afford(def.cost_for_level(1))
 
 
@@ -49,8 +49,8 @@ func can_place(def: BuildingDefinition, cell: Vector2i, rotation: int = 0) -> bo
 ## [param rotation] is in 90° steps (0-3); odd steps swap the footprint.
 ## Returns the new entity, or null if placement failed.
 func place(def: BuildingDefinition, cell: Vector2i, rotation: int = 0, instant: bool = false) -> BuildingEntity:
-	if not WorldManager.is_area_free(cell, _rotated_footprint(def, rotation)):
-		EventBus.notify("Blocked — that spot is occupied.", 1)
+	if not WorldManager.is_area_buildable(cell, _rotated_footprint(def, rotation)):
+		EventBus.notify("Blocked — clear the area first.", 1)
 		return null
 	if not ResourceManager.spend(def.cost_for_level(1)):
 		EventBus.notify("Not enough materials!", 1)

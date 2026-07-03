@@ -38,6 +38,9 @@ class Survivor:
 
 
 var _roster: Array[Survivor] = []
+## Workers tied up in tasks (clearing, future expeditions). Not saved —
+## each task re-reserves its crew when its own save section loads.
+var _reserved_workers: int = 0
 
 
 func _ready() -> void:
@@ -46,6 +49,11 @@ func _ready() -> void:
 
 func reset() -> void:
 	_roster.clear()
+	_reserved_workers = 0
+	# The founding crew — they arrive with the player, so the population
+	# cap (which comes from housing) doesn't apply to them.
+	for i in DataManager.settings.starting_survivors:
+		_roster.append(generate_random())
 
 
 # ── Roster ───────────────────────────────────────────────────────────────
@@ -79,6 +87,30 @@ func remove(survivor: Survivor) -> void:
 	EventBus.population_changed.emit(count(), population_cap())
 
 
+# ── Worker pool (clearing, future expeditions/jobs) ──────────────────────
+
+## Survivors not currently committed to a task.
+func available_workers() -> int:
+	return count() - _reserved_workers
+
+
+## Commit workers to a task. Returns false if not enough are free.
+func reserve_workers(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if amount > available_workers():
+		return false
+	_reserved_workers += amount
+	EventBus.workers_changed.emit(available_workers(), count())
+	return true
+
+
+## Return workers to the available pool when their task ends.
+func release_workers(amount: int) -> void:
+	_reserved_workers = maxi(0, _reserved_workers - amount)
+	EventBus.workers_changed.emit(available_workers(), count())
+
+
 ## Create a random survivor from the data tables (does not add them).
 func generate_random() -> Survivor:
 	var table: Dictionary = DataManager.get_table("survivor_names")
@@ -106,6 +138,7 @@ func get_save_data() -> Array:
 
 func apply_save_data(data: Array) -> void:
 	_roster.clear()
+	_reserved_workers = 0  # running tasks re-reserve their own crews
 	for entry: Dictionary in data:
 		_roster.append(Survivor.from_dict(entry))
 	EventBus.population_changed.emit(count(), population_cap())

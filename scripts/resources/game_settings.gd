@@ -37,6 +37,11 @@ extends Resource
 ## Press duration (seconds) after which a long-press fires.
 @export var long_press_duration: float = 0.6
 
+@export_group("Population")
+## Survivors the player starts a new game with (the founding crew —
+## exempt from the housing cap).
+@export var starting_survivors: int = 3
+
 @export_group("Saves")
 ## Save format version — bump when the save layout changes and add a
 ## migration step in SaveManager._migrate().

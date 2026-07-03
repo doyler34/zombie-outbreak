@@ -9,6 +9,7 @@ extends Node2D
 
 @onready var ground: Sprite2D = $Ground
 @onready var buildings: Node2D = $Buildings
+@onready var obstacles: Node2D = $Obstacles
 @onready var placer: BuildingPlacer = $BuildingPlacer
 @onready var camera: CameraController = $Camera
 @onready var day_night_overlay: ColorRect = $DayNightLayer/DayNightOverlay
@@ -16,6 +17,7 @@ extends Node2D
 
 func _ready() -> void:
 	BuildingManager.register_container(buildings)
+	ObstacleManager.register_container(obstacles)
 
 	# Tile the ground texture across the whole world rect (world-space,
 	# so it pans correctly with the camera — unlike a screen-space shader).
@@ -32,11 +34,18 @@ func _ready() -> void:
 	GameManager.notify_world_ready()
 
 
-## Taps select/deselect buildings — unless the placer is using them.
+## Taps select buildings or obstacles — unless the placer is using them.
 func _on_world_tapped(_screen_pos: Vector2, world_pos: Vector2) -> void:
 	if placer.is_active():
 		return
-	BuildingManager.select_at(WorldManager.world_to_cell(world_pos))
+	var cell := WorldManager.world_to_cell(world_pos)
+	var occupant := WorldManager.occupant_at(cell)
+	if occupant is ObstacleEntity:
+		BuildingManager.deselect()
+		ObstacleManager.select(occupant)
+	else:
+		ObstacleManager.deselect()
+		BuildingManager.select_at(cell)
 
 
 ## Darken the world as night approaches (simple ambience; a lighting

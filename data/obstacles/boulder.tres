@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/obstacles/boulder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "boulder"
+display_name = "Boulder"
+description = "A monolith of granite. Needs demolitions research and a full crew."
+texture = ExtResource("2")
+grid_size = Vector2i(2, 2)
+clear_cost = {
+"food": 20,
+"metal": 10
+}
+clear_rewards = {
+"metal": 20,
+"stone": 160
+}
+clear_time = 90.0
+health = 400
+min_workers = 1
+max_workers = 4
+worker_time_bonus = 0.5
+required_tech = "demolitions"
+tags = Array[String](["high_level"])

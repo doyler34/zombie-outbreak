@@ -60,6 +60,34 @@ func is_area_free(cell: Vector2i, size_in_cells: Vector2i) -> bool:
 	return true
 
 
+## Like is_area_free, but occupants that don't block building (decorative
+## props, walkable rubble) don't count. Building placement uses this;
+## raw spawning uses is_area_free.
+func is_area_buildable(cell: Vector2i, size_in_cells: Vector2i) -> bool:
+	for x in size_in_cells.x:
+		for y in size_in_cells.y:
+			var c := cell + Vector2i(x, y)
+			if not is_cell_inside_world(c):
+				return false
+			var occupant: Node = _occupancy.get(c)
+			if occupant == null:
+				continue
+			# Occupants without the contract block by default (buildings).
+			if not occupant.has_method("blocks_building") or occupant.blocks_building():
+				return false
+	return true
+
+
+## For the future movement/pathfinding system: can a unit stand here?
+func is_cell_walkable(cell: Vector2i) -> bool:
+	if not is_cell_inside_world(cell):
+		return false
+	var occupant: Node = _occupancy.get(cell)
+	if occupant == null:
+		return true
+	return occupant.has_method("blocks_movement") and not occupant.blocks_movement()
+
+
 func occupy_area(cell: Vector2i, size_in_cells: Vector2i, occupant: Node) -> void:
 	for x in size_in_cells.x:
 		for y in size_in_cells.y:

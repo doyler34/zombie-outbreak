@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/obstacles/tree.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "tree"
+display_name = "Tree"
+description = "Old growth reclaiming the town. Good lumber under the bark."
+texture = ExtResource("2")
+grid_size = Vector2i(1, 1)
+clear_cost = {
+"food": 5
+}
+clear_rewards = {
+"wood": 40
+}
+clear_time = 20.0
+health = 80
+max_workers = 3
+worker_time_bonus = 0.5

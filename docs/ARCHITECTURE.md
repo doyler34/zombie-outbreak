@@ -40,8 +40,9 @@ assets/            art, audio, shaders (no logic)
 data/              ALL game content and tuning (no code)
   settings/        game_settings.tres — every tunable number
   buildings/       one BuildingDefinition .tres per building
+  obstacles/       one ObstacleDefinition .tres per obstacle type
   resources/       one ResourceDefinition .tres per resource
-  tables/          loose JSON data (name pools, zombie stats)
+  tables/          loose JSON data (name pools, zombies, world generation)
 docs/              this file
 scenes/
   main/            main_menu.tscn (entry scene)
@@ -60,7 +61,7 @@ project), and user preferences to `user://settings.cfg`.
 
 ---
 
-## The 12 Managers (autoload order matters)
+## The 13 Managers (autoload order matters)
 
 Registration order in `project.godot` is dependency order: EventBus and
 DataManager first because everything reads them; SaveManager before any
@@ -120,12 +121,28 @@ upgrades, removal, selection, daily production, passive effect totals
 (`total_effect("defense")`), and building save data. The world scene
 registers a container node on load; the manager spawns entities into it.
 
-### 9. AudioManager (`audio_manager.gd`)
+### 9. ObstacleManager (`obstacle_manager.gd`)
+Natural obstacles (trees, rocks, debris, ...) and the clearing loop:
+procedural scatter on new maps from `data/tables/world_generation.json`,
+timed clearing tasks that cost resources, optionally use workers (each
+assigned worker speeds the task; workers are reserved until it ends),
+grant rewards, and permanently free build space. Future hooks are wired
+in, not bolted on: `required_tech` gates clearing until a research
+system answers `is_tech_unlocked()`; the `infested` tag emits
+`obstacle_infestation_triggered` for a combat system to intercept;
+`finish_clearing_now()` is the premium speed-up entry point;
+`regrow_days` respawns vegetation via `day_passed`. Blocking is
+per-definition (`blocks_building` / `blocks_movement`), resolved by
+WorldManager's `is_area_buildable` / `is_cell_walkable` through a
+duck-typed occupant contract — so decorative, walkable and solid
+obstacles all use the same code path.
+
+### 10. AudioManager (`audio_manager.gd`)
 Creates Music/SFX buses at runtime, a round-robin SFX player pool (safe
 to spam on mobile), music crossfade, and volume persistence separate
 from game saves.
 
-### 10. InputManager (`input_manager.gd`)
+### 11. InputManager (`input_manager.gd`)
 Translates raw touch/mouse events into gestures: `tapped`,
 `long_pressed`, `drag_updated`, `zoom_requested`. Uses
 `_unhandled_input`, so any UI Control that accepts an event
@@ -134,13 +151,13 @@ anywhere. **Why:** gameplay code written against gestures works
 identically on Android touch and desktop mouse, and a replay/AI system
 can emit the same signals.
 
-### 11. UIManager (`ui_manager.gd`)
+### 12. UIManager (`ui_manager.gd`)
 Persistent CanvasLayers that survive scene changes: a modal screen stack
 (`push_screen`/`pop_screen`), toast notifications, and the fade
 transition overlay. Screens extend `UIScreen` for consistent open/close
 behaviour.
 
-### 12. GameManager (`game_manager.gd`)
+### 13. GameManager (`game_manager.gd`)
 Top-level state machine (MENU/LOADING/PLAYING/PAUSED) and the only
 system that changes scenes. New-game/continue flow: reset all session
 managers → load world scene → world calls `notify_world_ready()` →
@@ -202,8 +219,12 @@ research/tech system.
   "sections": {
     "time": {"day": 4, "fraction": 0.3, "is_night": false},
     "resources": {"wood": 320, "stone": 410},
-    "buildings": [{"id": "farm", "cx": 2, "cy": -1, "level": 2, "state": 1, "remaining": 0}],
-    "survivors": [{"name": "Mei Chen", "skill": "farming", "health": 100}]
+    "buildings": [{"id": "farm", "cx": 2, "cy": -1, "rot": 1, "level": 2, "state": 1, "remaining": 0}],
+    "survivors": [{"name": "Mei Chen", "skill": "farming", "health": 100}],
+    "obstacles": {
+      "entities": [{"id": "tree", "cx": 8, "cy": 3, "state": 1, "remaining": 12, "workers": 2, "health": 80}],
+      "regrow": [{"id": "bush", "cx": -4, "cy": 7, "days": 3}]
+    }
   }
 }
 ```

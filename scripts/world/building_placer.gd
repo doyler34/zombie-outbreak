@@ -97,7 +97,7 @@ func _footprint() -> Vector2i:
 func _move_ghost(cell: Vector2i) -> void:
 	_ghost_cell = cell
 	_ghost_sprite.position = WorldManager.area_center(cell, _footprint())
-	var valid := WorldManager.is_area_free(cell, _footprint())
+	var valid := WorldManager.is_area_buildable(cell, _footprint())
 	_ghost_sprite.modulate = VALID_TINT if valid else INVALID_TINT
 	queue_redraw()
 
@@ -128,5 +128,5 @@ func _draw() -> void:
 	# Footprint outline under the ghost.
 	var footprint := Rect2(WorldManager.cell_to_world(_ghost_cell),
 		Vector2(_footprint()) * cs)
-	var valid := WorldManager.is_area_free(_ghost_cell, _footprint())
+	var valid := WorldManager.is_area_buildable(_ghost_cell, _footprint())
 	draw_rect(footprint, Color(0.4, 1.0, 0.4, 0.9) if valid else Color(1.0, 0.3, 0.3, 0.9), false, 2.0)

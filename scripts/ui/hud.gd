@@ -37,6 +37,10 @@ func _ready() -> void:
 	EventBus.building_selected.connect(_on_building_selected)
 	EventBus.building_deselected.connect(func(): _info_panel.visible = false)
 	EventBus.building_upgraded.connect(_on_building_upgraded)
+	EventBus.obstacle_selected.connect(_on_obstacle_selected)
+	EventBus.obstacle_deselected.connect(func(): _info_panel.visible = false)
+	EventBus.obstacle_clear_started.connect(_on_obstacle_clear_started)
+	EventBus.workers_changed.connect(func(_a, _t): _refresh_selected_obstacle())
 	# A save load happens after the HUD's first refresh — refresh again.
 	EventBus.load_completed.connect(func(_slot): _refresh_all())
 
@@ -176,8 +180,7 @@ func _set_placement_mode(placing: bool) -> void:
 
 
 func _on_building_selected(entity: BuildingEntity) -> void:
-	for child in _info_content.get_children():
-		child.free()
+	_clear_info_content()
 
 	var def: BuildingDefinition = entity.definition
 
@@ -208,6 +211,120 @@ func _on_building_upgraded(entity: BuildingEntity, _new_level: int) -> void:
 	# Refresh the info panel if the upgraded building is the one shown.
 	if entity == BuildingManager.selected:
 		_on_building_selected(entity)
+
+
+# ── Obstacle info panel ──────────────────────────────────────────────────
+
+## Worker count chosen with the +/- selector for the selected obstacle.
+var _obstacle_workers: int = 0
+
+
+func _on_obstacle_selected(entity: ObstacleEntity) -> void:
+	_obstacle_workers = maxi(entity.definition.min_workers, 0)
+	_populate_obstacle_panel(entity)
+
+
+func _on_obstacle_clear_started(entity: ObstacleEntity, _workers: int) -> void:
+	if entity == ObstacleManager.selected:
+		_populate_obstacle_panel(entity)
+
+
+func _refresh_selected_obstacle() -> void:
+	if ObstacleManager.selected != null and _info_panel.visible:
+		_populate_obstacle_panel(ObstacleManager.selected)
+
+
+func _populate_obstacle_panel(entity: ObstacleEntity) -> void:
+	_clear_info_content()
+
+	var def: ObstacleDefinition = entity.definition
+
+	var title := Label.new()
+	title.text = def.display_name
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", UIStyle.BRASS_BRIGHT)
+	_info_content.add_child(title)
+
+	if entity.is_clearing():
+		var status := Label.new()
+		status.text = "Clearing…  ⛏ %ds left  (👷 %d)" % [ceili(entity.remaining_time), entity.assigned_workers]
+		status.add_theme_font_size_override("font_size", 14)
+		status.add_theme_color_override("font_color", UIStyle.TEXT_DIM)
+		_info_content.add_child(status)
+		# Future premium speed-up plugs in here:
+		# ObstacleManager.finish_clearing_now(entity)
+		_info_panel.visible = true
+		return
+
+	if not def.clearable:
+		var deco := Label.new()
+		deco.text = "Cannot be removed."
+		deco.add_theme_font_size_override("font_size", 14)
+		deco.add_theme_color_override("font_color", UIStyle.TEXT_DIM)
+		_info_content.add_child(deco)
+		_info_panel.visible = true
+		return
+
+	if not def.clear_cost.is_empty():
+		_info_content.add_child(_detail_label("Cost:  " + _cost_text(def.clear_cost)))
+	if not def.clear_rewards.is_empty():
+		_info_content.add_child(_detail_label("Yield:  " + _cost_text(def.clear_rewards)))
+
+	# Worker selector: more hands, faster work.
+	var worker_row := HBoxContainer.new()
+	worker_row.add_theme_constant_override("separation", 8)
+	_info_content.add_child(worker_row)
+
+	var minus := UIStyle.make_button("−", 15)
+	minus.pressed.connect(func(): _change_obstacle_workers(entity, -1))
+	worker_row.add_child(minus)
+
+	var worker_label := _detail_label("👷 %d   ⏱ %ds" % [
+		_obstacle_workers, ceili(def.effective_clear_time(_obstacle_workers))])
+	worker_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	worker_row.add_child(worker_label)
+
+	var plus := UIStyle.make_button("＋", 15)
+	plus.pressed.connect(func(): _change_obstacle_workers(entity, 1))
+	worker_row.add_child(plus)
+
+	var free_label := _detail_label("%d survivors free" % SurvivorManager.available_workers())
+	_info_content.add_child(free_label)
+
+	var locked := not ObstacleManager.is_tech_unlocked(def.required_tech)
+	var clear_btn := UIStyle.make_button(
+		"🔒 Needs %s" % def.required_tech.capitalize() if locked else "⛏  CLEAR", 15)
+	clear_btn.disabled = locked \
+		or not ResourceManager.can_afford(def.clear_cost) \
+		or _obstacle_workers < def.min_workers
+	clear_btn.pressed.connect(func(): ObstacleManager.start_clearing(entity, _obstacle_workers))
+	_info_content.add_child(clear_btn)
+
+	_info_panel.visible = true
+
+
+func _change_obstacle_workers(entity: ObstacleEntity, delta: int) -> void:
+	var def := entity.definition
+	var cap := mini(def.max_workers, SurvivorManager.available_workers())
+	_obstacle_workers = clampi(_obstacle_workers + delta, 0, cap)
+	_populate_obstacle_panel(entity)
+
+
+## queue_free (not free) — a rebuild is often triggered from a signal of
+## a button that is itself inside the panel; freeing it mid-emission
+## would error. remove_child first so the layout updates this frame.
+func _clear_info_content() -> void:
+	for child in _info_content.get_children():
+		_info_content.remove_child(child)
+		child.queue_free()
+
+
+func _detail_label(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", UIStyle.TEXT_DIM)
+	return label
 
 
 func _cost_text(cost: Dictionary) -> String:

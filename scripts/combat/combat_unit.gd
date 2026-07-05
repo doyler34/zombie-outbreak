@@ -65,6 +65,9 @@ func setup(battle: Node, unit_team: Team, definition: CombatantDefinition, roste
 	add_child(model)
 	if definition is ZombieDefinition:
 		ModelFactory.tint_model(model, definition.color)
+	elif definition is SurvivorRoleDefinition and definition.weapon != null:
+		ModelFactory.attach_weapon(model, definition.weapon, definition.weapon_bone,
+			definition.weapon_offset, definition.weapon_rotation, definition.weapon_scale)
 	_anim_player = ModelFactory.find_animation_player(model)
 	if _anim_player != null:
 		# One-shot clips must not loop, or animation_finished never fires

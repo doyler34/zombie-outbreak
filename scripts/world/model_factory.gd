@@ -103,6 +103,42 @@ static func model_height(node: Node) -> float:
 	return bounds.size.y if bounds.size.y > 0.01 else COMBATANT_PLACEHOLDER_HEIGHT
 
 
+## Attach a weapon model to a character's skeleton bone so it follows the
+## hand through animations. No-op if the model has no Skeleton3D or the
+## bone is missing (weapon just isn't shown). Returns the BoneAttachment3D
+## or null. Offset/rotation/scale are in the bone's local space — tuning
+## knobs, since exact hand placement varies per weapon.
+static func attach_weapon(character_root: Node, weapon_scene: PackedScene,
+		bone: String, offset: Vector3, rotation_degrees: Vector3, scale: float) -> BoneAttachment3D:
+	if weapon_scene == null:
+		return null
+	var skeleton := _find_skeleton(character_root)
+	if skeleton == null or skeleton.find_bone(bone) < 0:
+		push_warning("[ModelFactory] Weapon bone '%s' not found; weapon skipped." % bone)
+		return null
+
+	var attach := BoneAttachment3D.new()
+	attach.bone_name = bone
+	skeleton.add_child(attach)
+
+	var weapon: Node3D = weapon_scene.instantiate()
+	weapon.position = offset
+	weapon.rotation_degrees = rotation_degrees
+	weapon.scale = Vector3.ONE * scale
+	attach.add_child(weapon)
+	return attach
+
+
+static func _find_skeleton(node: Node) -> Skeleton3D:
+	if node is Skeleton3D:
+		return node as Skeleton3D
+	for child in node.get_children():
+		var found := _find_skeleton(child)
+		if found != null:
+			return found
+	return null
+
+
 ## Recursively find the first AnimationPlayer in an instanced model
 ## (glTF imports nest it under a few wrapper nodes).
 static func find_animation_player(node: Node) -> AnimationPlayer:

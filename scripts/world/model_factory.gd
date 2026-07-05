@@ -122,18 +122,24 @@ static func attach_weapon(character_root: Node, weapon_scene: PackedScene, model
 	attach.bone_name = bone
 	skeleton.add_child(attach)
 
-	var weapon: Node3D = weapon_scene.instantiate()
-	attach.add_child(weapon)
+	# Scale a wrapper, NOT the weapon root — FBX import bakes a scale onto
+	# the root transform, and overwriting it with weapon.scale would throw
+	# the fit math off (weapons ended up ~100x, off-screen). The wrapper
+	# also carries the bone-space offset/rotation.
+	var holder := Node3D.new()
+	holder.position = offset
+	holder.rotation_degrees = rotation_degrees
+	attach.add_child(holder)
 
-	# Fit the weapon to a real length, then divide out the character's
-	# model_scale that this node inherits through the skeleton.
+	var weapon: Node3D = weapon_scene.instantiate()
+	holder.add_child(weapon)
+
+	# Fit to a real length (AABB includes the weapon's own baked
+	# transform), then divide out the character's inherited model_scale.
 	var bounds := _combined_aabb(weapon, Transform3D.IDENTITY)
 	var longest := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
 	var ms := model_scale if model_scale > 0.0 else 1.0
-	var fit := (length / maxf(longest, 0.0001)) / ms
-	weapon.scale = Vector3.ONE * fit
-	weapon.position = offset
-	weapon.rotation_degrees = rotation_degrees
+	holder.scale = Vector3.ONE * (length / maxf(longest, 0.0001)) / ms
 	return attach
 
 

@@ -24,4 +24,4 @@ reward_bonus = 0.2
 weapon = ExtResource("3")
 weapon_offset = Vector3(0, -0.14, 0.04)
 weapon_rotation = Vector3(0, 0, 0)
-weapon_scale = 1.0
+weapon_length = 0.28

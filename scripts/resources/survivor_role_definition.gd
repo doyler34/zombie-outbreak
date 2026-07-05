@@ -22,8 +22,12 @@ extends CombatantDefinition
 ## Skeleton bone the weapon rides. Kenney mini-characters have single-bone
 ## arms; "arm-right" is the armed hand.
 @export var weapon_bone: String = "arm-right"
+## Target real-world length of the weapon in meters. The model is
+## auto-fit to this (its longest dimension), independent of the .fbx's
+## native units and the character's model_scale — so weapons are never
+## giant. e.g. knife 0.3, machete 0.6, hammer 0.75, handgun 0.25.
+@export var weapon_length: float = 0.5
 ## Placement of the weapon relative to the bone, in the bone's local
-## space. These are eyeball knobs — tune per weapon in the .tres.
+## space. Eyeball knobs — tune per weapon in the .tres.
 @export var weapon_offset: Vector3 = Vector3.ZERO
 @export var weapon_rotation: Vector3 = Vector3.ZERO  # Euler degrees
-@export var weapon_scale: float = 1.0

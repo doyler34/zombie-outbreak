@@ -23,4 +23,4 @@ dodge_chance = 0.05
 weapon = ExtResource("3")
 weapon_offset = Vector3(0, -0.16, 0.02)
 weapon_rotation = Vector3(0, 0, 0)
-weapon_scale = 1.0
+weapon_length = 0.6

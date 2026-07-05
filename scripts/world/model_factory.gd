@@ -104,12 +104,13 @@ static func model_height(node: Node) -> float:
 
 
 ## Attach a weapon model to a character's skeleton bone so it follows the
-## hand through animations. No-op if the model has no Skeleton3D or the
-## bone is missing (weapon just isn't shown). Returns the BoneAttachment3D
-## or null. Offset/rotation/scale are in the bone's local space — tuning
-## knobs, since exact hand placement varies per weapon.
-static func attach_weapon(character_root: Node, weapon_scene: PackedScene,
-		bone: String, offset: Vector3, rotation_degrees: Vector3, scale: float) -> BoneAttachment3D:
+## hand through animations. The weapon is AUTO-FIT to [param length]
+## meters (longest dimension) and counter-scaled by [param model_scale]
+## so it never inherits the character's oversize — regardless of the
+## .fbx's native units. No-op (returns null) if the model has no
+## Skeleton3D or the bone is missing. Offset/rotation are in bone space.
+static func attach_weapon(character_root: Node, weapon_scene: PackedScene, model_scale: float,
+		bone: String, offset: Vector3, rotation_degrees: Vector3, length: float) -> BoneAttachment3D:
 	if weapon_scene == null:
 		return null
 	var skeleton := _find_skeleton(character_root)
@@ -122,10 +123,17 @@ static func attach_weapon(character_root: Node, weapon_scene: PackedScene,
 	skeleton.add_child(attach)
 
 	var weapon: Node3D = weapon_scene.instantiate()
+	attach.add_child(weapon)
+
+	# Fit the weapon to a real length, then divide out the character's
+	# model_scale that this node inherits through the skeleton.
+	var bounds := _combined_aabb(weapon, Transform3D.IDENTITY)
+	var longest := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
+	var ms := model_scale if model_scale > 0.0 else 1.0
+	var fit := (length / maxf(longest, 0.0001)) / ms
+	weapon.scale = Vector3.ONE * fit
 	weapon.position = offset
 	weapon.rotation_degrees = rotation_degrees
-	weapon.scale = Vector3.ONE * scale
-	attach.add_child(weapon)
 	return attach
 
 

@@ -43,6 +43,12 @@ var _cooldown: float = 0.0
 var _rng := RandomNumberGenerator.new()
 var _anim_player: AnimationPlayer
 var _dying: bool = false
+## While a one-shot clip (attack/die) is mid-play, movement animations
+## must not interrupt it — otherwise the attack shows for a single frame.
+var _oneshot_active: bool = false
+## Playback speed so a fixed-length attack clip keeps pace with the
+## watch-speed toggle and matches the attack cooldown.
+var _anim_speed: float = 1.0
 
 var _health_fill: MeshInstance3D
 
@@ -60,9 +66,25 @@ func setup(battle: Node, unit_team: Team, definition: CombatantDefinition, roste
 	if definition is ZombieDefinition:
 		ModelFactory.tint_model(model, definition.color)
 	_anim_player = ModelFactory.find_animation_player(model)
+	if _anim_player != null:
+		# One-shot clips must not loop, or animation_finished never fires
+		# and the unit freezes mid-swing.
+		_force_no_loop(ANIM_ATTACK)
+		_force_no_loop(ANIM_DIE)
+		_anim_player.animation_finished.connect(_on_anim_finished)
 	_play_anim(ANIM_IDLE)
 
 	_build_health_bar(ModelFactory.model_height(model))
+
+
+func _force_no_loop(anim_name: String) -> void:
+	if _anim_player.has_animation(anim_name):
+		_anim_player.get_animation(anim_name).loop_mode = Animation.LOOP_NONE
+
+
+func _on_anim_finished(anim_name: String) -> void:
+	if anim_name == ANIM_ATTACK:
+		_oneshot_active = false
 
 
 func is_alive() -> bool:
@@ -72,7 +94,10 @@ func is_alive() -> bool:
 func _process(delta: float) -> void:
 	if not is_alive() or not _battle.is_running():
 		return
-	# combat_speed is the battle's watch-speed toggle (1x/2x/3x).
+	# combat_speed is the battle's watch-speed toggle (1x/2x/3x). Keep the
+	# animation playback in step so fast-forward looks right.
+	if _anim_player != null and not is_equal_approx(_anim_player.speed_scale, _current_anim_speed()):
+		_anim_player.speed_scale = _current_anim_speed()
 	delta *= _battle.combat_speed
 	_cooldown = maxf(_cooldown - delta, 0.0)
 
@@ -106,7 +131,7 @@ func _pursue(other: CombatUnit, delta: float, action: Callable) -> void:
 		if _cooldown <= 0.0:
 			_cooldown = stats.attack_interval
 			action.call()
-		else:
+		elif not _oneshot_active:
 			_play_anim(ANIM_IDLE)
 
 
@@ -119,7 +144,7 @@ func _face(dir: Vector3) -> void:
 
 
 func _attack(target: CombatUnit) -> void:
-	_play_anim(ANIM_ATTACK, false)
+	_play_oneshot(ANIM_ATTACK)
 	var dmg := stats.damage
 	var crit := _rng.randf() < stats.crit_chance
 	if crit:
@@ -160,7 +185,9 @@ func _die() -> void:
 	# died.emit() already fired above (battle end-checks time off it);
 	# only visuals are delayed so the death animation gets to play.
 	_dying = true
-	_play_anim(ANIM_DIE, false)
+	# Death overrides any in-progress swing.
+	_oneshot_active = false
+	_play_oneshot(ANIM_DIE)
 	if _health_fill != null:
 		_health_fill.get_parent().visible = false
 	var tw := create_tween()
@@ -218,9 +245,34 @@ func _popup_origin() -> Vector3:
 
 # ── Animation ────────────────────────────────────────────────────────────
 
-func _play_anim(anim_name: String, loop_hint: bool = true) -> void:
-	if _anim_player == null or not _anim_player.has_animation(anim_name):
+## Play a looping locomotion clip (idle/walk). Never interrupts an active
+## one-shot (attack/die) or restarts a clip that is already playing.
+func _play_anim(anim_name: String) -> void:
+	if _anim_player == null or _oneshot_active:
 		return
-	if _anim_player.current_animation == anim_name and (loop_hint or _anim_player.is_playing()):
+	if not _anim_player.has_animation(anim_name):
+		return
+	if _anim_player.current_animation == anim_name:
 		return
 	_anim_player.play(anim_name)
+
+
+## Play a protected one-shot clip. _on_anim_finished clears the lock for
+## attack; die stays locked (the unit is freed shortly after).
+func _play_oneshot(anim_name: String) -> void:
+	if _anim_player == null or not _anim_player.has_animation(anim_name):
+		return
+	_oneshot_active = true
+	_anim_player.play(anim_name)
+
+
+## Attack clips are fixed-length; scale playback so one plays within the
+## attack cooldown (and with the watch-speed toggle) instead of lagging.
+func _current_anim_speed() -> float:
+	var speed: float = _battle.combat_speed
+	if _oneshot_active and _anim_player.has_animation(ANIM_ATTACK):
+		var clip_len := _anim_player.get_animation(ANIM_ATTACK).length
+		if clip_len > 0.01 and stats.attack_interval > 0.01:
+			# Fit the swing into ~80% of the cooldown window.
+			speed *= maxf(clip_len / (stats.attack_interval * 0.8), 1.0)
+	return speed

@@ -8,10 +8,16 @@ extends Resource
 
 @export var id: String = ""
 @export var display_name: String = ""
-## Glyph shown on the unit in battle (e.g. "⚔", "🧟").
+## Glyph shown next to the unit's name in squad select / results.
 @export var icon: String = "●"
-## Unit body colour in the battle scene.
+## Zombies: multiplied over the model's texture as a tint (sickly greens
+## etc). Survivor roles keep their model's natural look — untinted.
 @export var color: Color = Color.WHITE
+## 3D character model (imported .glb) fought with in the battle arena.
+## When empty, ModelFactory falls back to a simple capsule placeholder.
+@export var model: PackedScene
+## Uniform scale applied to the model. 0 = use as authored.
+@export var model_scale: float = 0.0
 
 @export_group("Stats")
 @export var max_health: int = 100

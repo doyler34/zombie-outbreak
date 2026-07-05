@@ -143,9 +143,13 @@ obstacles all use the same code path.
 ### 10. CombatManager (`combat_manager.gd`)
 Squad missions against "infested" danger zones. Flow: tap a zone → the
 HUD shows risk/enemy estimate → squad select screen → BattleScene
-overlay (a CanvasLayer above the frozen world — no scene change) where
-survivors and zombies fight automatically while the player uses
-abilities → the outcome is resolved back into the settlement: injuries
+overlay (a CanvasLayer above the frozen world — no scene change; a
+full-screen SubViewport renders a 3D arena with an angled orthographic
+camera, and the UI draws on top) where survivor and zombie character
+models fight automatically — walk/attack/die animations from the
+imported .glb rig, billboard health bars, floating damage numbers,
+while the player uses abilities → the outcome is resolved back into the
+settlement: injuries
 (roster health), deaths, XP, rolled rewards with role bonuses
 (Scavenger loot, Engineer rewards), rescue chances, and zone removal.
 Mission composition lives in `data/tables/missions.json`; combat stats

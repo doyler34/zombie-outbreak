@@ -1,12 +1,15 @@
 class_name BattleScene
 extends CanvasLayer
-## The battle overlay: a small top-down arena where the squad and the
-## horde fight automatically while the player uses a few abilities.
+## The battle overlay: a small 3D arena where the squad and the horde
+## fight automatically while the player uses a few abilities.
 ##
-## Lives on a CanvasLayer above the game world (which is time-frozen in
-## the BATTLE state) — no scene change, so the settlement is untouched
-## underneath. CombatManager spawns this, feeds it a mission spec and a
-## squad, and resolves the emitted outcome into roster/reward changes.
+## Structure: a full-screen SubViewport renders the 3D fight (angled
+## orthographic camera, ground, character models) and the UI (status,
+## ability bar, speed toggle, result panel) is drawn on a Control on top.
+## Lives on a CanvasLayer above the game world (time-frozen in the BATTLE
+## state) — no scene change, so the settlement is untouched underneath.
+## CombatManager spawns this, feeds it a mission spec and a squad, and
+## resolves the emitted outcome into roster/reward changes.
 
 ## Raw battle outcome; CombatManager turns this into a mission result.
 signal finished(outcome: Dictionary)
@@ -22,6 +25,13 @@ const ABILITIES: Array = [
 	preload("res://scripts/combat/abilities/retreat_ability.gd"),
 ]
 
+## Arena half-extents in meters (XZ plane, centered on origin).
+const ARENA_HALF := Vector2(9.0, 5.0)
+## Camera framing — matches the Clash-style world view.
+const CAMERA_PITCH := -50.0
+const CAMERA_YAW := 40.0
+const CAMERA_SIZE := 14.0
+
 ## World-map expeditions run hands-off: no ability bar, pure auto-battle.
 ## Set by CombatManager before this node enters the tree.
 var auto_mode: bool = false
@@ -35,7 +45,6 @@ var combat_speed: float = 1.0
 
 var _speed_button: Button
 
-var _arena: Rect2
 var _units: Array[CombatUnit] = []
 var _dead_survivors: Array = []      # roster Survivors killed in this fight
 var _zombies_killed: int = 0
@@ -43,6 +52,9 @@ var _xp_earned: int = 0
 var _running: bool = false
 var _squad: Array = []               # roster Survivors sent in
 
+var _viewport: SubViewport
+var _camera: Camera3D
+var _arena_root: Node3D
 var _root: Control
 var _status_label: Label
 var _ability_bar: HBoxContainer
@@ -55,29 +67,29 @@ func _ready() -> void:
 
 
 ## Entry point, called by CombatManager.
-## [param spec] = {"zombies": Array[ZombieDefinition]}.
+## [param spec] = {"zombies": Array[CombatantDefinition]}.
 func start(spec: Dictionary, squad: Array) -> void:
 	_squad = squad
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 
-	# Squad enters from the left, spread vertically.
-	for i in squad.size():
-		var survivor = squad[i]
+	# Squad lines up on the left (−X), facing the horde.
+	var survivors: Array = squad
+	for i in survivors.size():
+		var survivor = survivors[i]
 		var role := DataManager.get_role(survivor.role)
 		if role == null:
 			role = DataManager.all_roles().front()
 		var unit := _spawn_unit(CombatUnit.Team.SURVIVORS, role, survivor)
-		unit.position = Vector2(
-			_arena.position.x + 70 + (i % 2) * 50,
-			_arena.get_center().y + (i - squad.size() / 2.0) * 70)
+		unit.position = _row_position(-1, i, survivors.size())
 
-	# Horde shambles in from the right.
-	for zombie_def: ZombieDefinition in spec.get("zombies", []):
-		var unit := _spawn_unit(CombatUnit.Team.ZOMBIES, zombie_def)
-		unit.position = Vector2(
-			_arena.end.x - 70 - rng.randf_range(0, 120),
-			rng.randf_range(_arena.position.y + 50, _arena.end.y - 50))
+	# Horde shambles in from the right (+X).
+	var horde: Array = spec.get("zombies", [])
+	for i in horde.size():
+		var unit := _spawn_unit(CombatUnit.Team.ZOMBIES, horde[i])
+		unit.position = Vector3(
+			ARENA_HALF.x - 1.2 - rng.randf_range(0.0, 3.0), 0.0,
+			rng.randf_range(-ARENA_HALF.y + 1.0, ARENA_HALF.y - 1.0))
 
 	_running = true
 	_update_status()
@@ -86,6 +98,13 @@ func start(spec: Dictionary, squad: Array) -> void:
 	# victory instead of an arena that can never end.
 	if team_units(CombatUnit.Team.ZOMBIES).is_empty():
 		end_battle("victory")
+
+
+## Even vertical spread along one side of the arena.
+func _row_position(side: int, index: int, count: int) -> Vector3:
+	var spread := ARENA_HALF.y * 1.4
+	var z := 0.0 if count <= 1 else lerpf(-spread / 2.0, spread / 2.0, float(index) / float(count - 1))
+	return Vector3(side * (ARENA_HALF.x - 1.5) + side * (index % 2) * 0.8, 0.0, z)
 
 
 func _process(delta: float) -> void:
@@ -138,13 +157,21 @@ func most_injured_ally(from: CombatUnit) -> CombatUnit:
 	return best
 
 
-func clamp_to_arena(pos: Vector2) -> Vector2:
-	return pos.clamp(_arena.position + Vector2.ONE * 30, _arena.end - Vector2.ONE * 30)
+## Clamp a unit position to the arena floor (XZ plane, Y untouched).
+func clamp_to_arena(pos: Vector3) -> Vector3:
+	pos.x = clampf(pos.x, -ARENA_HALF.x + 0.5, ARENA_HALF.x - 0.5)
+	pos.z = clampf(pos.z, -ARENA_HALF.y + 0.5, ARENA_HALF.y - 0.5)
+	pos.y = 0.0
+	return pos
 
 
-## Floating combat text (damage, MISS, CRIT, heals, deaths) so the
-## real-time fight is readable at a glance.
-func spawn_popup(at: Vector2, text: String, color: Color) -> void:
+## Floating combat text (damage, MISS, CRIT, heals, deaths). Takes a 3D
+## world position and projects it onto the UI layer so the numbers read
+## flat over the fight.
+func spawn_popup(world_pos: Vector3, text: String, color: Color) -> void:
+	if _camera == null:
+		return
+	var screen := _camera.unproject_position(world_pos)
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 15)
@@ -152,8 +179,8 @@ func spawn_popup(at: Vector2, text: String, color: Color) -> void:
 	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	label.add_theme_constant_override("outline_size", 5)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(label)
-	label.position = at + Vector2(randf_range(-14, 14), -34)
+	_root.add_child(label)
+	label.position = screen + Vector2(randf_range(-14, 14), -18)
 	var tween := label.create_tween()
 	tween.set_parallel()
 	tween.tween_property(label, "position:y", label.position.y - 34, 0.7)
@@ -233,7 +260,7 @@ func show_result(result: Dictionary) -> void:
 
 func _spawn_unit(team: CombatUnit.Team, def: CombatantDefinition, survivor = null) -> CombatUnit:
 	var unit := CombatUnit.new()
-	add_child(unit)
+	_arena_root.add_child(unit)
 	unit.setup(self, team, def, survivor)
 	unit.died.connect(_on_unit_died)
 	_units.append(unit)
@@ -242,7 +269,7 @@ func _spawn_unit(team: CombatUnit.Team, def: CombatantDefinition, survivor = nul
 
 func _on_unit_died(unit: CombatUnit) -> void:
 	_units.erase(unit)
-	spawn_popup(unit.position, "💀", Color(0.9, 0.9, 0.9))
+	spawn_popup(unit.global_position + Vector3(0, 0.5, 0), "💀", Color(0.9, 0.9, 0.9))
 	if unit.team == CombatUnit.Team.ZOMBIES:
 		_zombies_killed += 1
 		_xp_earned += (unit.stats as ZombieDefinition).xp_value
@@ -261,33 +288,37 @@ func _update_status() -> void:
 		team_units(CombatUnit.Team.ZOMBIES).size()]
 
 
+# ── Layout: 3D arena viewport + UI overlay ───────────────────────────────
+
 func _build_layout() -> void:
-	var viewport_size := Vector2(1280, 720)
+	# Opaque backdrop so the frozen world doesn't bleed through.
+	var backdrop := ColorRect.new()
+	backdrop.color = Color(0.04, 0.05, 0.06, 1.0)
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(backdrop)
+
+	var vp_container := SubViewportContainer.new()
+	vp_container.stretch = true
+	vp_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vp_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(vp_container)
+
+	_viewport = SubViewport.new()
+	_viewport.transparent_bg = true
+	_viewport.own_world_3d = true
+	_viewport.msaa_3d = Viewport.MSAA_2X
+	vp_container.add_child(_viewport)
+
+	_arena_root = Node3D.new()
+	_viewport.add_child(_arena_root)
+	_build_arena_environment()
+
+	# UI overlay above the viewport.
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_root.mouse_filter = Control.MOUSE_FILTER_STOP  # block world input
+	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
-	# Use the real viewport once inside the tree.
-	viewport_size = _root.get_viewport_rect().size if _root.is_inside_tree() else viewport_size
-
-	var bg := ColorRect.new()
-	bg.color = Color(0.05, 0.05, 0.06, 0.96)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(bg)
-
-	_arena = Rect2(40, 80, viewport_size.x - 80, viewport_size.y - 200)
-	var arena_rect := Panel.new()
-	var arena_style := StyleBoxFlat.new()
-	arena_style.bg_color = Color(0.10, 0.10, 0.08)
-	arena_style.set_border_width_all(2)
-	arena_style.border_color = UIStyle.BRASS.darkened(0.3)
-	arena_style.set_corner_radius_all(8)
-	arena_rect.add_theme_stylebox_override("panel", arena_style)
-	arena_rect.position = _arena.position
-	arena_rect.size = _arena.size
-	arena_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(arena_rect)
 
 	_status_label = Label.new()
 	_status_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -329,6 +360,55 @@ func _build_layout() -> void:
 		button.pressed.connect(func(): _use_ability(entry))
 		_ability_bar.add_child(button)
 		_abilities.append(entry)
+
+
+## Ground plane, angled orthographic camera, sun + ambient light.
+func _build_arena_environment() -> void:
+	var ground := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = ARENA_HALF * 2.0 + Vector2(2, 2)
+	ground.mesh = plane
+	var ground_mat := StandardMaterial3D.new()
+	ground_mat.albedo_color = Color(0.28, 0.26, 0.22)
+	ground_mat.roughness = 1.0
+	ground.material_override = ground_mat
+	_arena_root.add_child(ground)
+
+	# Brass border strip so the arena reads as a bounded pit.
+	var border := MeshInstance3D.new()
+	var border_mesh := PlaneMesh.new()
+	border_mesh.size = ARENA_HALF * 2.0 + Vector2(2.4, 2.4)
+	border.mesh = border_mesh
+	var border_mat := StandardMaterial3D.new()
+	border_mat.albedo_color = UIStyle.BRASS.darkened(0.35)
+	border.material_override = border_mat
+	border.position.y = -0.02
+	_arena_root.add_child(border)
+
+	_camera = Camera3D.new()
+	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	_camera.size = CAMERA_SIZE
+	_camera.rotation_degrees = Vector3(CAMERA_PITCH, CAMERA_YAW, 0)
+	_camera.position = _camera.transform.basis.z * 60.0
+	_camera.near = 1.0
+	_camera.far = 200.0
+	_arena_root.add_child(_camera)
+
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-52, -38, 0)
+	sun.light_energy = 1.15
+	sun.shadow_enabled = true
+	_arena_root.add_child(sun)
+
+	var env := WorldEnvironment.new()
+	var environment := Environment.new()
+	environment.background_mode = Environment.BG_COLOR
+	environment.background_color = Color(0.06, 0.06, 0.08)
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	environment.ambient_light_color = Color(0.7, 0.72, 0.72)
+	environment.ambient_light_energy = 0.6
+	env.environment = environment
+	_arena_root.add_child(env)
 
 
 func _cycle_speed() -> void:

@@ -1,6 +1,6 @@
 class_name ModelFactory
 extends RefCounted
-## Builds the 3D visual for buildings and obstacles.
+## Builds the 3D visual for buildings, obstacles and combat units.
 ##
 ## Definitions with a `model` PackedScene (imported .glb) get the real
 ## asset, auto-fitted to their grid footprint and grounded at Y = 0.
@@ -9,6 +9,9 @@ extends RefCounted
 ## later is a data change.
 
 const FOOTPRINT_FILL := 0.92
+## Default height (meters) for a combatant with no model — sized to
+## roughly match a Kenney mini-character.
+const COMBATANT_PLACEHOLDER_HEIGHT := 0.85
 
 
 ## [param footprint] is the building's world-space footprint in meters.
@@ -38,6 +41,78 @@ static func set_transparency(node: Node, value: float) -> void:
 		(node as GeometryInstance3D).transparency = value
 	for child in node.get_children():
 		set_transparency(child, value)
+
+
+# ── Combat units ─────────────────────────────────────────────────────────
+
+## Instance a CombatantDefinition's model (grounded at Y = 0, uniformly
+## scaled), or a simple capsule placeholder when it has none. Returns the
+## root Node3D; if the model has an AnimationPlayer it is left alone —
+## CombatUnit finds it via find_animation_player() and drives it.
+static func combatant_model(def: CombatantDefinition) -> Node3D:
+	if def.model == null:
+		return _combatant_placeholder(def.color)
+
+	var root := Node3D.new()
+	var model: Node3D = def.model.instantiate()
+	root.add_child(model)
+
+	var bounds := _combined_aabb(model, Transform3D.IDENTITY)
+	if bounds.size.length() > 0.001:
+		var s := def.model_scale if def.model_scale > 0.0 else 1.0
+		model.scale = Vector3.ONE * s
+		var center := bounds.get_center()
+		model.position = Vector3(-center.x * s, -bounds.position.y * s, -center.z * s)
+	return root
+
+
+static func _combatant_placeholder(color: Color) -> Node3D:
+	var root := Node3D.new()
+	var h := COMBATANT_PLACEHOLDER_HEIGHT
+	var capsule := CapsuleMesh.new()
+	capsule.radius = h * 0.22
+	capsule.height = h
+	root.add_child(_mesh_node(capsule, color, Vector3(0, h / 2.0, 0)))
+	return root
+
+
+## Recursively multiply every material's albedo by [param tint]
+## (duplicating materials first so sibling instances aren't affected).
+## Used to give zombies a sickly cast without separate texture skins.
+static func tint_model(node: Node, tint: Color) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		var mesh := mi.mesh
+		if mesh != null:
+			for i in mesh.get_surface_count():
+				var mat := mi.get_surface_override_material(i)
+				if mat == null:
+					mat = mesh.surface_get_material(i)
+				if mat is StandardMaterial3D:
+					var dup: StandardMaterial3D = mat.duplicate()
+					dup.albedo_color = dup.albedo_color * tint
+					mi.set_surface_override_material(i, dup)
+	for child in node.get_children():
+		tint_model(child, tint)
+
+
+## Total height (meters) of an instanced model, for placing a health bar
+## above its head. Falls back to the placeholder height for empty models.
+static func model_height(node: Node) -> float:
+	var bounds := _combined_aabb(node, Transform3D.IDENTITY)
+	return bounds.size.y if bounds.size.y > 0.01 else COMBATANT_PLACEHOLDER_HEIGHT
+
+
+## Recursively find the first AnimationPlayer in an instanced model
+## (glTF imports nest it under a few wrapper nodes).
+static func find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node as AnimationPlayer
+	for child in node.get_children():
+		var found := find_animation_player(child)
+		if found != null:
+			return found
+	return null
 
 
 # ── GLB fitting ──────────────────────────────────────────────────────────

@@ -1,15 +1,17 @@
 class_name CombatUnit
-extends Node2D
-## One unit in the battle arena — survivor or zombie, the same code.
+extends Node3D
+## One unit in the 3D battle arena — survivor or zombie, the same code.
 ##
 ## Fully automatic: acquire the nearest enemy, walk into range, attack on
 ## a cooldown. Medics (heal_power > 0) tend the most injured ally instead
 ## while anyone is hurt. All stats come from a CombatantDefinition, so
 ## new roles/zombie types change behaviour through data alone.
 ##
-## Visuals are drawn in _draw (colored disc + health bar) with a glyph
-## label — no textures needed for the prototype; swapping in animated
-## sprites later only touches this file.
+## Visual is a real character model (ModelFactory.combatant_model) driven
+## by whatever AnimationPlayer the imported .glb carries — Kenney's mini
+## character rig ships "idle" / "walk" / "attack-melee-right" / "die",
+## which is what this file plays. A billboard health bar and floating
+## combat text are built by hand (no textures needed for those).
 
 # Param untyped on purpose: a signal typing a parameter with the class
 # it is declared in is a self-reference some Godot versions reject.
@@ -17,7 +19,17 @@ signal died(unit)
 
 enum Team { SURVIVORS, ZOMBIES }
 
-const BODY_RADIUS := 18.0
+const BAR_WIDTH := 0.7
+const BAR_HEIGHT := 0.08
+const DEATH_LINGER := 0.9
+
+## Animation names shared by every mini-character in the roster —
+## Kenney's rig ships these across all skins, so units need no per-unit
+## animation configuration.
+const ANIM_IDLE := "idle"
+const ANIM_WALK := "walk"
+const ANIM_ATTACK := "attack-melee-right"
+const ANIM_DIE := "die"
 
 var team: Team
 var stats: CombatantDefinition
@@ -26,9 +38,13 @@ var hp: int
 ## mission result map battle damage back onto the settlement.
 var survivor  # SurvivorManager.Survivor
 
-var _battle: Node  # BattleScene — provides target queries
+var _battle: Node  # BattleScene — provides target queries + spawn_popup
 var _cooldown: float = 0.0
 var _rng := RandomNumberGenerator.new()
+var _anim_player: AnimationPlayer
+var _dying: bool = false
+
+var _health_fill: MeshInstance3D
 
 
 func setup(battle: Node, unit_team: Team, definition: CombatantDefinition, roster_survivor = null) -> void:
@@ -39,16 +55,18 @@ func setup(battle: Node, unit_team: Team, definition: CombatantDefinition, roste
 	survivor = roster_survivor
 	_rng.randomize()
 
-	var glyph := Label.new()
-	glyph.text = definition.icon
-	glyph.add_theme_font_size_override("font_size", 18)
-	glyph.position = Vector2(-11, -14)
-	glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(glyph)
+	var model := ModelFactory.combatant_model(definition)
+	add_child(model)
+	if definition is ZombieDefinition:
+		ModelFactory.tint_model(model, definition.color)
+	_anim_player = ModelFactory.find_animation_player(model)
+	_play_anim(ANIM_IDLE)
+
+	_build_health_bar(ModelFactory.model_height(model))
 
 
 func is_alive() -> bool:
-	return hp > 0
+	return hp > 0 and not _dying
 
 
 func _process(delta: float) -> void:
@@ -71,27 +89,41 @@ func _process(delta: float) -> void:
 
 
 ## Move toward [param other] until in range, then run [param action] on
-## the attack cooldown.
+## the attack cooldown. Movement is on the XZ ground plane (Y stays 0).
 func _pursue(other: CombatUnit, delta: float, action: Callable) -> void:
-	var distance := position.distance_to(other.position)
+	var to_other := other.position - position
+	to_other.y = 0.0
+	var distance := to_other.length()
 	if distance > stats.attack_range:
-		position += position.direction_to(other.position) * stats.move_speed * delta
+		var dir := to_other / distance
+		position += dir * stats.move_speed * delta
 		position = _battle.clamp_to_arena(position)
-	elif _cooldown <= 0.0:
-		_cooldown = stats.attack_interval
-		action.call()
+		_face(dir)
+		_play_anim(ANIM_WALK)
+	else:
+		if distance > 0.05:
+			_face(to_other / distance)
+		if _cooldown <= 0.0:
+			_cooldown = stats.attack_interval
+			action.call()
+		else:
+			_play_anim(ANIM_IDLE)
+
+
+func _face(dir: Vector3) -> void:
+	if dir.length_squared() < 0.0001:
+		return
+	# Kenney mini-characters model forward as +Z; look_at aims −Z at the
+	# target, so aim at the point behind to face the travel direction.
+	look_at(global_position - dir, Vector3.UP)
 
 
 func _attack(target: CombatUnit) -> void:
+	_play_anim(ANIM_ATTACK, false)
 	var dmg := stats.damage
 	var crit := _rng.randf() < stats.crit_chance
 	if crit:
 		dmg *= 2
-	# Quick lunge toward the target so attacks read on screen.
-	var punch := position.direction_to(target.position) * 12.0
-	var tween := create_tween()
-	tween.tween_property(self, "position", punch, 0.07).as_relative()
-	tween.tween_property(self, "position", -punch, 0.09).as_relative()
 	target.take_damage(dmg, crit)
 
 
@@ -99,19 +131,19 @@ func take_damage(amount: int, crit: bool = false) -> void:
 	if not is_alive():
 		return
 	if _rng.randf() < stats.dodge_chance:
-		_battle.spawn_popup(position, "MISS", Color(0.7, 0.7, 0.7))
+		_battle.spawn_popup(_popup_origin(), "MISS", Color(0.7, 0.7, 0.7))
 		return
 	var dealt := maxi(amount - stats.armor, 1)
 	hp -= dealt
 	if crit:
-		_battle.spawn_popup(position, "CRIT %d" % dealt, Color(1.0, 0.85, 0.2))
+		_battle.spawn_popup(_popup_origin(), "CRIT %d" % dealt, Color(1.0, 0.85, 0.2))
 	else:
-		_battle.spawn_popup(position, str(dealt), Color(1.0, 0.45, 0.35))
-	queue_redraw()
+		_battle.spawn_popup(_popup_origin(), str(dealt), Color(1.0, 0.45, 0.35))
+	_update_health_bar()
 	if hp <= 0:
 		hp = 0
 		died.emit(self)
-		queue_free()
+		_die()
 
 
 func heal(amount: int) -> void:
@@ -120,17 +152,75 @@ func heal(amount: int) -> void:
 	var before := hp
 	hp = mini(hp + amount, stats.max_health)
 	if hp > before:
-		_battle.spawn_popup(position, "+%d" % (hp - before), Color(0.45, 0.9, 0.4))
-	queue_redraw()
+		_battle.spawn_popup(_popup_origin(), "+%d" % (hp - before), Color(0.45, 0.9, 0.4))
+	_update_health_bar()
 
 
-func _draw() -> void:
-	# Body disc with a darker rim.
-	draw_circle(Vector2.ZERO, BODY_RADIUS, stats.color.darkened(0.35))
-	draw_circle(Vector2.ZERO, BODY_RADIUS - 3.0, stats.color)
-	# Health bar above the unit.
-	var ratio := float(hp) / float(stats.max_health)
-	var bar := Rect2(-20, -BODY_RADIUS - 14, 40, 6)
-	draw_rect(bar, Color(0, 0, 0, 0.7))
+func _die() -> void:
+	# died.emit() already fired above (battle end-checks time off it);
+	# only visuals are delayed so the death animation gets to play.
+	_dying = true
+	_play_anim(ANIM_DIE, false)
+	if _health_fill != null:
+		_health_fill.get_parent().visible = false
+	var tw := create_tween()
+	tw.tween_interval(DEATH_LINGER)
+	tw.tween_callback(queue_free)
+
+
+# ── Health bar (billboard quads) ─────────────────────────────────────────
+
+func _build_health_bar(model_height: float) -> void:
+	var bar_root := Node3D.new()
+	bar_root.position = Vector3(0, model_height + 0.18, 0)
+	add_child(bar_root)
+
+	var bg := MeshInstance3D.new()
+	bg.mesh = _bar_quad(BAR_WIDTH, BAR_HEIGHT)
+	bg.material_override = _billboard_material(Color(0, 0, 0, 0.7))
+	bar_root.add_child(bg)
+
+	_health_fill = MeshInstance3D.new()
+	_health_fill.mesh = _bar_quad(BAR_WIDTH, BAR_HEIGHT)
 	var fill_color := Color(0.35, 0.8, 0.3) if team == Team.SURVIVORS else Color(0.8, 0.3, 0.25)
-	draw_rect(Rect2(bar.position, Vector2(bar.size.x * ratio, bar.size.y)), fill_color)
+	_health_fill.material_override = _billboard_material(fill_color)
+	_health_fill.position.z = 0.005  # avoid z-fighting with the background
+	bar_root.add_child(_health_fill)
+
+
+func _update_health_bar() -> void:
+	if _health_fill == null:
+		return
+	var ratio := clampf(float(hp) / float(stats.max_health), 0.0, 1.0)
+	_health_fill.scale.x = maxf(ratio, 0.001)
+	_health_fill.position.x = -BAR_WIDTH * (1.0 - ratio) / 2.0
+
+
+func _bar_quad(width: float, height: float) -> QuadMesh:
+	var q := QuadMesh.new()
+	q.size = Vector2(width, height)
+	return q
+
+
+func _billboard_material(color: Color) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.no_depth_test = true
+	return mat
+
+
+func _popup_origin() -> Vector3:
+	return global_position + Vector3(0, 0.3, 0)
+
+
+# ── Animation ────────────────────────────────────────────────────────────
+
+func _play_anim(anim_name: String, loop_hint: bool = true) -> void:
+	if _anim_player == null or not _anim_player.has_animation(anim_name):
+		return
+	if _anim_player.current_animation == anim_name and (loop_hint or _anim_player.is_playing()):
+		return
+	_anim_player.play(anim_name)

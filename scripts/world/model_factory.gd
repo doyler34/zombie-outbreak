@@ -16,9 +16,18 @@ const COMBATANT_PLACEHOLDER_HEIGHT := 0.85
 
 ## [param footprint] is the building's world-space footprint in meters.
 static func building_model(def: BuildingDefinition, footprint: Vector2) -> Node3D:
-	if def.model != null:
-		return _fitted(def.model, footprint * FOOTPRINT_FILL, def.model_scale)
+	var scene := _load_scene(def.model_path)
+	if scene != null:
+		return _fitted(scene, footprint * FOOTPRINT_FILL, def.model_scale)
 	return _chunky_house(def.color, footprint)
+
+
+## Lazily load a model PackedScene by path, returning null (never
+## erroring) if the path is empty or the resource is missing/broken.
+static func _load_scene(path: String) -> PackedScene:
+	if path == "" or not ResourceLoader.exists(path):
+		return null
+	return load(path) as PackedScene
 
 
 static func obstacle_model(def: ObstacleDefinition, footprint: Vector2) -> Node3D:

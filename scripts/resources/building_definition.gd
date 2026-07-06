@@ -12,14 +12,17 @@ extends Resource
 @export_multiline var description: String = ""
 ## Icon shown in the build menu.
 @export var texture: Texture2D
-## 3D model placed in the world (imported .glb). When empty, a chunky
-## primitive placeholder in [member color] is generated instead.
-@export var model: PackedScene
+## Path to the 3D model (imported .glb), loaded lazily at spawn time.
+## Stored as a PATH, not a PackedScene ext_resource, on purpose: a model
+## that fails to load (e.g. a missing external texture in an exported
+## build) must NOT drop the whole building from the data — the building
+## still appears in the menu and falls back to the placeholder in-world.
+@export var model_path: String = ""
 ## Uniform scale applied to the model. 0 = auto-fit to the grid
 ## footprint (the default for normalized AI exports); set an explicit
 ## value when an asset should be larger or smaller than its plot.
 @export var model_scale: float = 0.0
-## Placeholder color used when no model is assigned.
+## Placeholder color used when no model is assigned or it fails to load.
 @export var color: Color = Color(0.55, 0.45, 0.35)
 ## Footprint on the grid, in cells.
 @export var grid_size: Vector2i = Vector2i(2, 2)

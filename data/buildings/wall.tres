@@ -1,12 +1,11 @@
-[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/building_definition.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/textures/buildings/wall.png" id="2"]
-[ext_resource type="PackedScene" path="res://assets/models/wall.glb" id="3"]
 
 [resource]
 script = ExtResource("1")
-model = ExtResource("3")
+model_path = "res://assets/models/wall.glb"
 id = "wall"
 display_name = "Perimeter Wall"
 description = "Cinder block and razor wire. Every metre of wall is a metre the dead can't cross. Rotate to build in any direction."

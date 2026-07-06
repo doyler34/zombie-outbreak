@@ -1,0 +1,94 @@
+# Zombie Outbreak — Project Context
+
+Compact working memory so a session can start without re-reading chat history.
+Deep design lives in `docs/ARCHITECTURE.md`; this file is the fast index +
+hard-won gotchas + current asset wiring.
+
+## What this is
+Godot 4.4, mobile-first (Android), Clash-style **orthographic 3D** top-down
+zombie survival game. Landscape 1280×720 base, `canvas_items`+`expand` stretch.
+Framework-first: 15 autoload managers, everything data-driven via `.tres` in
+`data/`. Adding content = drop a `.tres`, no code.
+
+## Architecture in one breath
+Autoload **managers own all state; scenes are disposable views**. Managers never
+call each other directly for reactions — they emit on **EventBus** and others
+subscribe. Order in `project.godot` is dependency order (EventBus, DataManager,
+SaveManager first; GameManager last). The 15: EventBus, DataManager, SaveManager,
+TimeManager, ResourceManager, WorldManager, SurvivorManager, BuildingManager,
+ObstacleManager, CombatManager, WorldMapManager, AudioManager, InputManager,
+UIManager, GameManager.
+
+World is 3D (Node3D + orthographic Camera3D pitch −55/yaw 45). Grid positions are
+**Vector3 on XZ plane, Y=0**, cell_size in meters (4.0). Taps raycast camera→ground.
+`ModelFactory` builds every visual: `.glb`/`.fbx` model when the def has one,
+else a bright primitive placeholder.
+
+## Data-driven content (all in `data/`)
+- `settings/game_settings.tres` — every tunable number (camera, grid, time, etc).
+- `buildings/` (8), `obstacles/` (8), `resources/` (5), `roles/` (5),
+  `zombies/` (4), `locations/` (12) — one `.tres` each, discovered by folder scan.
+- `tables/*.json` — missions, world_generation, survivor_names.
+
+## Current asset wiring
+**Buildings** (`model` field → auto-fit to grid plot unless `model_scale` set):
+- Capital(id `safe_house`) capital.glb, Wall wall.glb, Gate gate.glb — Tripo,
+  embedded textures.
+- Barracks→suburban_building-type-a, Farm→suburban_building-type-g,
+  Medical Bay→commercial_building-h, Workshop→commercial_building-c,
+  Watchtower→watchtower_skyscraper — Kenney City Kit.
+
+**Combat** (`data/roles`, `data/zombies`): each combatant has `model` +
+`model_scale`. Survivors = Kenney mini-characters (32 anims incl
+idle/walk/attack-melee-right/die). Zombies reuse mini-characters with a per-type
+albedo **tint** (walker green, runner red, brute purple, infected yellow-green).
+Role→weapon (attached to `arm-right` bone, auto-fit to `weapon_length` m):
+Fighter machete, Scavenger knife (melee); Engineer handgun, Medic revolver,
+Guard shotgun (guns). Medic still heals (weapon cosmetic).
+
+## HARD-WON GOTCHAS (do not re-learn these)
+1. **`const X = [ClassName, …]` is a parse error** — class_name refs aren't
+   constant expressions. It silently kills the script AND every dependent script.
+   Use `preload("res://…")` in consts. (This broke all combat once.)
+2. **Typed const collections** (`const X: Array[float] = …`) have broken
+   compilation here before — keep such consts untyped.
+3. **FBX bakes a scale (~0.01) on the root node.** Never set `.scale` directly on
+   an imported FBX root — wrap it in a holder Node3D and scale the holder, or the
+   fit math cancels wrong (weapons went ~100× off-screen).
+4. **Weapons/models inherit the character's model_scale** through the skeleton —
+   auto-fit divides it back out (`ModelFactory.attach_weapon`).
+5. **Viewport size**: `get_viewport().get_visible_rect().size` is PHYSICAL pixels;
+   Control children live in LOGICAL coords. (Legacy 2D-UI lesson; world is 3D now.)
+6. **Kenney GLBs reference an EXTERNAL `Textures/colormap.png`** (not embedded).
+   It must sit beside the glb. Placed shared palette at
+   `assets/buildings/Textures/colormap.png`; swap in the real City Kit colormap if
+   colors look off.
+7. **One-shot anims** (attack/die) must be forced non-looping and protected from
+   locomotion anims interrupting them, or they show 1 frame / freeze.
+
+## Workflow (follow this)
+- Branch: **`claude/ground-menu-alignment-lbkm58`**. User pushes assets to `main`;
+  merge main in when they say they've added assets.
+- **No Godot runtime in this sandbox.** Validate with: `gdparse $(find scripts -name '*.gd')`
+  for syntax, and the Python xref checker in scratchpad for manager symbol/arity.
+- **CI is the real test.** `.github/workflows/build-apk.yml` runs on `claude/**`
+  pushes: headless Godot `tools/validate_scripts.gd` force-loads every
+  script/scene/`.tres` (catches parse errors, bad refs, failed asset imports),
+  then builds the APK. Always push and confirm the run is `success` before
+  declaring done. Check via GitHub MCP `actions_list` (results can be large →
+  slice the saved file).
+- Commit style: clear subject + body; end with
+  `Co-Authored-By: Claude <noreply@anthropic.com>` and the Claude-Session trailer.
+- Data-only asset changes: still push + CI, because a newly-referenced model/texture
+  gets its FIRST import validation there.
+
+## Persistent problems history (all fixed)
+Ground texture, bottom-menu alignment, invisible building, landscape orientation,
+combat parse-error, invisible attack anim, giant/missing weapons. All resolved and
+CI-green. If a "feature doesn't show on device," first suspect: stale APK (old run)
+or a silent parse/import error — check the latest CI run's validate step.
+
+## Unused assets available (not yet wired)
+80+ Kenney city models (skyscrapers, fences, paths, driveways, trees), 6 farm crop
+FBX, extra weapons (ak47, smg, sniper, fire_axe, hammer, grenade, ammo). Ask before
+assuming which to use.

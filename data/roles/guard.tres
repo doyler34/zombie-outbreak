@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/resources/survivor_role_definition.gd" id="1"]
 [ext_resource type="PackedScene" path="res://assets/kenney_characters/mini_characters/character-male-c.glb" id="2"]
-[ext_resource type="PackedScene" path="res://assets/weapons/hammer.fbx" id="3"]
+[ext_resource type="PackedScene" path="res://assets/weapons/shotgun.fbx" id="3"]
 
 [resource]
 script = ExtResource("1")

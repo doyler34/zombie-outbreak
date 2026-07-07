@@ -71,7 +71,12 @@ jobs:
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        # Don't fail the whole run if artifact storage is full — the real
+        # signal is that validation + build succeeded above. Short
+        # retention + overwrite keeps storage from filling again.
+        continue-on-error: true
         with:
           name: zombie-outbreak-apk
           path: build/*.apk
-          retention-days: 30
+          retention-days: 5
+          overwrite: true

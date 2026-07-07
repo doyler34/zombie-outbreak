@@ -74,4 +74,4 @@ jobs:
         with:
           name: zombie-outbreak-apk
           path: build/*.apk
-          retention-days: 30
+          retention-days: 7

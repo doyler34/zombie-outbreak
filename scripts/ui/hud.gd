@@ -139,9 +139,11 @@ func _build_placement_bar() -> void:
 func _build_info_panel() -> void:
 	_info_panel = PanelContainer.new()
 	_info_panel.add_theme_stylebox_override("panel", UIStyle.panel_style())
-	_info_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_info_panel.offset_left = 12
+	# Bottom-right — bottom-left belongs to the movement joystick.
+	_info_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_info_panel.offset_right = -12
 	_info_panel.offset_bottom = -12
+	_info_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_info_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_info_panel.custom_minimum_size = Vector2(280, 0)
 	_info_panel.visible = false

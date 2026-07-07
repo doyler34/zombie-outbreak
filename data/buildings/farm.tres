@@ -6,7 +6,8 @@
 [resource]
 script = ExtResource("1")
 model_path = "res://assets/buildings/suburban_building-type-g.glb"
-color = Color(0.45, 0.68, 0.32, 1)
+color = Color(0.66, 0.33, 0.28, 1)
+flat_color = true
 id = "farm"
 display_name = "Farm"
 description = "Reclaimed soil under grow lamps. Keeps the colony fed."

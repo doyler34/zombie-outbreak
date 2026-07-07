@@ -24,6 +24,12 @@ extends Resource
 @export var model_scale: float = 0.0
 ## Placeholder color used when no model is assigned or it fails to load.
 @export var color: Color = Color(0.55, 0.45, 0.35)
+## When true, the loaded model is painted flat in [member color] instead
+## of using its own materials. Set for models whose texture atlas isn't
+## available (e.g. the Kenney City Kit's external colormap) so they read
+## as clean solid-color buildings instead of showing magenta
+## missing-texture surfaces. Turn OFF once the correct atlas is in place.
+@export var flat_color: bool = false
 ## Footprint on the grid, in cells.
 @export var grid_size: Vector2i = Vector2i(2, 2)
 ## Highest level this building can be upgraded to.

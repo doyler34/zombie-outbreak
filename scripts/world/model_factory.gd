@@ -18,8 +18,27 @@ const COMBATANT_PLACEHOLDER_HEIGHT := 0.85
 static func building_model(def: BuildingDefinition, footprint: Vector2) -> Node3D:
 	var scene := _load_scene(def.model_path)
 	if scene != null:
-		return _fitted(scene, footprint * FOOTPRINT_FILL, def.model_scale)
+		var node := _fitted(scene, footprint * FOOTPRINT_FILL, def.model_scale)
+		if def.flat_color:
+			paint_model(node, def.color)
+		return node
 	return _chunky_house(def.color, footprint)
+
+
+## Replace every material on a model with a flat, lightly-shaded color.
+## Used when a model's texture atlas is missing so it reads as a clean
+## solid building instead of magenta missing-texture surfaces.
+static func paint_model(node: Node, color: Color) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		if mi.mesh != null:
+			var mat := StandardMaterial3D.new()
+			mat.albedo_color = color
+			mat.roughness = 0.85
+			for i in mi.mesh.get_surface_count():
+				mi.set_surface_override_material(i, mat)
+	for child in node.get_children():
+		paint_model(child, color)
 
 
 ## Lazily load a model PackedScene by path, returning null (never

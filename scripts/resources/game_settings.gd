@@ -54,6 +54,14 @@ extends Resource
 ## their Interactable's range entirely.
 @export var interaction_reach: float = 2.6
 
+@export_group("Inventory")
+## Backpack capacity (slots).
+@export var inventory_slots: int = 20
+## Quick-use hotbar capacity (slots).
+@export var hotbar_slots: int = 5
+## Items granted on a new game: {item_id: count}.
+@export var starting_items: Dictionary = {}
+
 @export_group("Population")
 ## Survivors the player starts a new game with (the founding crew —
 ## exempt from the housing cap).

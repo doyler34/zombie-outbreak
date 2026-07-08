@@ -111,6 +111,7 @@ func _reset_session() -> void:
 	BuildingManager.reset()
 	WorldManager.reset()
 	SurvivorManager.reset()
+	InventoryManager.reset()
 	TimeManager.reset()
 	ResourceManager.reset()
 

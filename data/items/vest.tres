@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "vest"
+display_name = "Padded Vest"
+icon = "🦺"
+icon_color = Color(0.85, 0.55, 0.2, 1)
+description = "Layered padding that turns bites into bruises."
+type = 4
+max_stack = 1
+sort_order = 50

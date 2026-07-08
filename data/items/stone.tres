@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "stone"
+display_name = "Stone"
+icon = "🪨"
+icon_color = Color(0.6, 0.6, 0.62, 1)
+description = "Heavy chunks of rock for sturdy construction."
+type = 0
+max_stack = 50
+sort_order = 11

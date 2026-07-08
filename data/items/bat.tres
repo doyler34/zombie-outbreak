@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "bat"
+display_name = "Baseball Bat"
+icon = "🏏"
+icon_color = Color(0.75, 0.6, 0.4, 1)
+description = "A trusty length of hardwood. Quiet and dependable."
+type = 2
+max_stack = 1
+damage = 12
+sort_order = 30

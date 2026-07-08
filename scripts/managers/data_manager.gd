@@ -14,6 +14,7 @@ const SETTINGS_PATH := "res://data/settings/game_settings.tres"
 const BUILDINGS_DIR := "res://data/buildings"
 const RESOURCES_DIR := "res://data/resources"
 const OBSTACLES_DIR := "res://data/obstacles"
+const ITEMS_DIR := "res://data/items"
 const ROLES_DIR := "res://data/roles"
 const ZOMBIES_DIR := "res://data/zombies"
 const LOCATIONS_DIR := "res://data/locations"
@@ -24,6 +25,7 @@ var settings: GameSettings
 var _buildings: Dictionary = {}  # id -> BuildingDefinition
 var _resources: Dictionary = {}  # id -> ResourceDefinition
 var _obstacles: Dictionary = {}  # id -> ObstacleDefinition
+var _items: Dictionary = {}      # id -> ItemDefinition
 var _roles: Dictionary = {}      # id -> SurvivorRoleDefinition
 var _zombies: Dictionary = {}    # id -> ZombieDefinition
 var _locations: Dictionary = {}  # id -> LocationDefinition
@@ -36,12 +38,13 @@ func _ready() -> void:
 	_load_definitions(BUILDINGS_DIR, _buildings)
 	_load_definitions(RESOURCES_DIR, _resources)
 	_load_definitions(OBSTACLES_DIR, _obstacles)
+	_load_definitions(ITEMS_DIR, _items)
 	_load_definitions(ROLES_DIR, _roles)
 	_load_definitions(ZOMBIES_DIR, _zombies)
 	_load_definitions(LOCATIONS_DIR, _locations)
 	_load_tables()
-	print("[DataManager] %d buildings, %d resources, %d obstacles, %d roles, %d zombies, %d locations, %d tables" % [
-		_buildings.size(), _resources.size(), _obstacles.size(),
+	print("[DataManager] %d buildings, %d resources, %d obstacles, %d items, %d roles, %d zombies, %d locations, %d tables" % [
+		_buildings.size(), _resources.size(), _obstacles.size(), _items.size(),
 		_roles.size(), _zombies.size(), _locations.size(), _tables.size()])
 
 
@@ -84,6 +87,20 @@ func all_obstacles() -> Array[ObstacleDefinition]:
 	var list: Array[ObstacleDefinition] = []
 	for def: ObstacleDefinition in _obstacles.values():
 		list.append(def)
+	return list
+
+
+# ── Items ────────────────────────────────────────────────────────────────
+
+func get_item(id: String) -> ItemDefinition:
+	return _items.get(id)
+
+
+func all_items() -> Array[ItemDefinition]:
+	var list: Array[ItemDefinition] = []
+	for def: ItemDefinition in _items.values():
+		list.append(def)
+	list.sort_custom(func(a, b): return a.sort_order < b.sort_order)
 	return list
 
 

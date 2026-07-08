@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "axe"
+display_name = "Hatchet"
+icon = "🪓"
+icon_color = Color(0.7, 0.5, 0.3, 1)
+description = "Chops wood. In a pinch, chops other things."
+type = 3
+max_stack = 1
+tool_power = 10
+sort_order = 40

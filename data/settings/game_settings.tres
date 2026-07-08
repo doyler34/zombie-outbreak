@@ -22,6 +22,13 @@ long_press_duration = 0.6
 joystick_radius = 90.0
 joystick_dead_zone = 0.2
 interaction_reach = 2.6
+inventory_slots = 20
+hotbar_slots = 5
+starting_items = {
+"bandage": 3,
+"bat": 1,
+"ration": 2
+}
 starting_survivors = 3
 save_version = 1
 default_save_slot = 0

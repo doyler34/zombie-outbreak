@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "scrap"
+display_name = "Scrap Metal"
+icon = "⚙"
+icon_color = Color(0.7, 0.72, 0.78, 1)
+description = "Salvaged metal parts. The wasteland's most honest currency."
+type = 0
+max_stack = 50
+sort_order = 12

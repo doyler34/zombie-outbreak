@@ -12,6 +12,7 @@ const BUILD_MENU_SCENE := preload("res://scenes/ui/build_menu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
 const SQUAD_SELECT_SCENE := preload("res://scenes/ui/squad_select.tscn")
 const WORLD_MAP_SCENE := preload("res://scenes/ui/world_map.tscn")
+const INVENTORY_SCENE := preload("res://scenes/ui/inventory_screen.tscn")
 
 var _resource_labels: Dictionary = {}  # id -> Label
 var _day_label: Label
@@ -47,6 +48,14 @@ func _ready() -> void:
 	EventBus.load_completed.connect(func(_slot): _refresh_all())
 
 	_refresh_all()
+
+
+## Desktop shortcut: I opens the backpack (the screen closes itself on
+## the same key, so this only handles the open half).
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("inventory") and not UIManager.has_open_screen():
+		UIManager.push_screen(INVENTORY_SCENE)
+		get_viewport().set_input_as_handled()
 
 
 # ── Construction ─────────────────────────────────────────────────────────
@@ -103,6 +112,10 @@ func _build_action_bar() -> void:
 	var build_btn := UIStyle.make_button("⚙  BUILD")
 	build_btn.pressed.connect(func(): UIManager.push_screen(BUILD_MENU_SCENE))
 	_action_bar.add_child(build_btn)
+
+	var bag_btn := UIStyle.make_button("🎒  BAG")
+	bag_btn.pressed.connect(func(): UIManager.push_screen(INVENTORY_SCENE))
+	_action_bar.add_child(bag_btn)
 
 	var map_btn := UIStyle.make_button("🗺  MAP")
 	map_btn.pressed.connect(func(): UIManager.push_screen(WORLD_MAP_SCENE))

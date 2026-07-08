@@ -41,6 +41,7 @@ data/              ALL game content and tuning (no code)
   settings/        game_settings.tres — every tunable number
   buildings/       one BuildingDefinition .tres per building
   characters/      commander.tres — the playable Commander's stats/model
+  items/           one ItemDefinition .tres per inventory item
   obstacles/       one ObstacleDefinition .tres per obstacle type
   resources/       one ResourceDefinition .tres per resource
   roles/           one SurvivorRoleDefinition .tres per combat role
@@ -54,7 +55,7 @@ scenes/
   buildings/       building_entity.tscn
   ui/              modal screens (build menu, pause menu)
 scripts/
-  managers/        the 12 autoload singletons
+  managers/        the 16 autoload singletons
   resources/       custom Resource classes (definition schemas)
   world/           world-scene behaviour (camera, placer, entities)
   ui/              UI framework + screens
@@ -65,7 +66,7 @@ project), and user preferences to `user://settings.cfg`.
 
 ---
 
-## The 15 Managers (autoload order matters)
+## The 16 Managers (autoload order matters)
 
 Registration order in `project.godot` is dependency order: EventBus and
 DataManager first because everything reads them; SaveManager before any
@@ -119,13 +120,22 @@ The survivor roster framework: random generation from data tables,
 population cap derived from building effects, persistence. Survivors are
 pure data (`RefCounted`) until a future system gives them world presence.
 
-### 8. BuildingManager (`building_manager.gd`)
+### 8. InventoryManager (`inventory_manager.gd`)
+The Commander's backpack + quick-use hotbar. Fixed slot arrays of
+`{"id", "count"}` stacks; all rules (stacking limits, hotbar type
+restrictions, merge/swap moves, select-to-equip, use-to-consume) live
+here so the hotbar and inventory screen are dumb views redrawn on
+`inventory_changed` / `hotbar_changed`. Items are ItemDefinition .tres
+files in `data/items/` — future gathering, looting, combat and crafting
+plug in through `add_item()` / `remove_item()` / `equipped_weapon()`.
+
+### 9. BuildingManager (`building_manager.gd`)
 Owns every placed `BuildingEntity`: placement validation + payment,
 upgrades, removal, selection, daily production, passive effect totals
 (`total_effect("defense")`), and building save data. The world scene
 registers a container node on load; the manager spawns entities into it.
 
-### 9. ObstacleManager (`obstacle_manager.gd`)
+### 10. ObstacleManager (`obstacle_manager.gd`)
 Natural obstacles (trees, rocks, debris, ...) and the clearing loop:
 procedural scatter on new maps from `data/tables/world_generation.json`,
 timed clearing tasks that cost resources, optionally use workers (each
@@ -141,7 +151,7 @@ WorldManager's `is_area_buildable` / `is_cell_walkable` through a
 duck-typed occupant contract — so decorative, walkable and solid
 obstacles all use the same code path.
 
-### 10. CombatManager (`combat_manager.gd`)
+### 11. CombatManager (`combat_manager.gd`)
 Squad missions against "infested" danger zones. Flow: tap a zone → the
 HUD shows risk/enemy estimate → squad select screen → BattleScene
 overlay (a CanvasLayer above the frozen world — no scene change; a
@@ -158,7 +168,7 @@ in `data/roles/` and `data/zombies/` (both extend CombatantDefinition,
 so units share one code path). The ability bar is a list of
 CombatAbility subclasses — new abilities are one small class each.
 
-### 11. WorldMapManager (`world_map_manager.gd`)
+### 12. WorldMapManager (`world_map_manager.gd`)
 The Last-Day-on-Earth-style world layer. Fixed LocationDefinitions form
 a territory graph via their `requires` lists; states are LOCKED →
 AVAILABLE → CLEARED (or CONTROLLED for locations with
@@ -171,12 +181,12 @@ already shaped as data so multiple simultaneous squads is a small
 change. Locations carry future hooks: `resource_bonus` for controlled
 income, and the state enum supports event/story locations.
 
-### 12. AudioManager (`audio_manager.gd`)
+### 13. AudioManager (`audio_manager.gd`)
 Creates Music/SFX buses at runtime, a round-robin SFX player pool (safe
 to spam on mobile), music crossfade, and volume persistence separate
 from game saves.
 
-### 13. InputManager (`input_manager.gd`)
+### 14. InputManager (`input_manager.gd`)
 Translates raw touch/mouse events into gestures: `tapped`,
 `long_pressed`, `drag_updated`, `zoom_requested`. Uses
 `_unhandled_input`, so any UI Control that accepts an event
@@ -185,13 +195,13 @@ anywhere. **Why:** gameplay code written against gestures works
 identically on Android touch and desktop mouse, and a replay/AI system
 can emit the same signals.
 
-### 14. UIManager (`ui_manager.gd`)
+### 15. UIManager (`ui_manager.gd`)
 Persistent CanvasLayers that survive scene changes: a modal screen stack
 (`push_screen`/`pop_screen`), toast notifications, and the fade
 transition overlay. Screens extend `UIScreen` for consistent open/close
 behaviour.
 
-### 15. GameManager (`game_manager.gd`)
+### 16. GameManager (`game_manager.gd`)
 Top-level state machine (MENU/LOADING/PLAYING/PAUSED) and the only
 system that changes scenes. New-game/continue flow: reset all session
 managers → load world scene → world calls `notify_world_ready()` →
@@ -241,6 +251,12 @@ Disposable view over manager state:
   `SurvivorNpcs` spawns a talkable `SurvivorNPC` per roster survivor
   around the Capital. Every trigger also echoes globally as
   `EventBus.interaction_performed` for future tutorial/quest listeners.
+- **Hotbar + inventory** — `Hotbar` (HUDLayer, bottom-center, keys 1–5)
+  and the modal `InventoryScreen` (HUD bag button / I key) are both dumb
+  grids of the shared `ItemSlotButton` over InventoryManager state.
+  The screen uses tap-to-select → tap-to-place moves (touch-friendly;
+  no drag precision needed), with Use / To Hotbar / Drop actions in a
+  details pane. All rules live in the manager, never in these views.
 - **InputManager taps** raycast through the 3D camera onto the ground
   plane, so all grid logic stays in cell space.
 - **DayNightLayer / HUDLayer** — CanvasLayers render above the 3D
@@ -285,6 +301,11 @@ research/tech system.
     "resources": {"wood": 320, "stone": 410},
     "buildings": [{"id": "farm", "cx": 2, "cy": -1, "rot": 1, "level": 2, "state": 1, "remaining": 0}],
     "survivors": [{"name": "Mei Chen", "skill": "farming", "health": 100}],
+    "inventory": {
+      "slots": [{"id": "wood", "count": 32}, {}],
+      "hotbar": [{"id": "bat", "count": 1}],
+      "active": 0
+    },
     "obstacles": {
       "entities": [{"id": "tree", "cx": 8, "cy": 3, "state": 1, "remaining": 12, "workers": 2, "health": 80}],
       "regrow": [{"id": "bush", "cx": -4, "cy": 7, "days": 3}]

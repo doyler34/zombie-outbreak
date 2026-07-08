@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "wood"
+display_name = "Wood"
+icon = "🪵"
+icon_color = Color(0.72, 0.5, 0.22, 1)
+description = "Rough timber. Fuel for fires and material for building."
+type = 0
+max_stack = 50
+sort_order = 10

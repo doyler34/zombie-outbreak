@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/building_placer.gd" id="2"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/world/interaction_controller.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/world/survivor_npcs.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/ui/interact_button.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/ui/hotbar.gd" id="10"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -78,3 +79,7 @@ script = ExtResource("6")
 
 [node name="InteractButton" type="Button" parent="HUDLayer"]
 script = ExtResource("9")
+
+[node name="Hotbar" type="HBoxContainer" parent="HUDLayer"]
+layout_mode = 3
+script = ExtResource("10")

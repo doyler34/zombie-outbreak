@@ -42,6 +42,17 @@ signal obstacle_infestation_triggered(entity: ObstacleEntity)
 ## listeners that don't own the object (tutorial, audio, quests).
 signal interaction_performed(interactable: Interactable, actor: Node3D)
 
+# ── Inventory / hotbar ───────────────────────────────────────────────────
+## Backpack slots changed (add/remove/move/drop). UI redraws from
+## InventoryManager state; the payload stays empty on purpose.
+signal inventory_changed()
+## Hotbar slots changed (assign/use/drop).
+signal hotbar_changed()
+## A different hotbar slot became active (-1 / null = hands empty).
+signal hotbar_selection_changed(index: int, item: ItemDefinition)
+## A consumable/gear item was activated (audio, tutorial, quests...).
+signal item_used(item: ItemDefinition)
+
 # ── Combat / missions ────────────────────────────────────────────────────
 signal mission_started(zone: ObstacleEntity)
 ## result: {"outcome", "zombies_killed", "dead", "injured", "rewards",

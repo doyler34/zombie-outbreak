@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "medkit"
+display_name = "Medkit"
+icon = "🧰"
+icon_color = Color(0.85, 0.3, 0.28, 1)
+description = "A full first-aid kit. Restores a large amount of health."
+type = 1
+max_stack = 5
+heal_amount = 75
+sort_order = 22

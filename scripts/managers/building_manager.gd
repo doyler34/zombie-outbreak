@@ -116,6 +116,15 @@ func deselect() -> void:
 
 # ── Queries ──────────────────────────────────────────────────────────────
 
+## First placed building with this id, or null — e.g. the Capital as
+## the anchor point for survivor NPCs.
+func first_of(building_id: String) -> BuildingEntity:
+	for entity in _entities:
+		if entity.definition.id == building_id:
+			return entity
+	return null
+
+
 func count_of(building_id: String) -> int:
 	var n := 0
 	for entity in _entities:

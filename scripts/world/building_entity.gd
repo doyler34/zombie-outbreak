@@ -19,10 +19,14 @@ var level: int = 1
 var state: BuildingState = BuildingState.CONSTRUCTING
 ## Orientation in 90° steps (0-3).
 var rotation_index: int = 0
+## Gates only: whether the gate currently lets units through. Not saved
+## yet — gates load closed until gate state earns a save field.
+var gate_open: bool = false
 
 var _remaining_build_time: float = 0.0
 var _model_root: Node3D
 var _select_ring: MeshInstance3D
+var _interactable: Interactable
 
 @onready var _timer_label: Label3D = $TimerLabel
 
@@ -49,7 +53,56 @@ func setup(def: BuildingDefinition, grid_cell: Vector2i, rot: int = 0) -> void:
 
 	_timer_label.position.y = WorldManager.cell_size() * 1.6
 
+	# Reach covers the footprint plus the standard interaction margin,
+	# so big buildings are interactable from any side.
+	_interactable = Interactable.attach(self, _interaction_prompt(),
+		fp.length() / 2.0 + DataManager.settings.interaction_reach, _on_interacted)
+
 	_begin_construction(def.build_time)
+
+
+# ── Occupancy contract (duck-typed by WorldManager) ──────────────────────
+
+## Buildings are solid to units — except a gate standing open.
+func blocks_movement() -> bool:
+	return not (gate_open and _is_gate())
+
+
+# ── Interaction ──────────────────────────────────────────────────────────
+
+func _is_gate() -> bool:
+	return definition.id == "gate"
+
+
+func _interaction_prompt() -> String:
+	if _is_gate() and is_operational():
+		return "Close Gate" if gate_open else "Open Gate"
+	if definition.id == "safe_house":
+		return "Manage Base"
+	return "Manage"
+
+
+## Default building interaction: select it, which opens the existing
+## management panel (level, upgrade). Operational gates toggle instead.
+func _on_interacted(_actor: Node3D) -> void:
+	if _is_gate() and is_operational():
+		_toggle_gate()
+	else:
+		ObstacleManager.deselect()
+		BuildingManager.select_at(cell)
+	_interactable.prompt = _interaction_prompt()
+
+
+## Open/close the gate: the model sinks into the ground and the cells
+## become walkable (blocks_movement above feeds WorldManager).
+func _toggle_gate() -> void:
+	gate_open = not gate_open
+	var height := ModelFactory.model_height(_model_root)
+	var tween := create_tween()
+	tween.tween_property(_model_root, "position:y",
+		-height * 0.9 if gate_open else 0.0, 0.35) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
+	EventBus.notify("Gate opened." if gate_open else "Gate closed.", 0)
 
 
 ## Grid footprint with rotation applied (90°/270° swap the axes).
@@ -68,6 +121,8 @@ func finish_construction(silent: bool = false) -> void:
 	state = BuildingState.OPERATIONAL
 	_remaining_build_time = 0.0
 	_timer_label.visible = false
+	# Gates gain their toggle prompt once operational.
+	_interactable.prompt = _interaction_prompt()
 	if silent:
 		_model_root.scale = Vector3.ONE
 		return

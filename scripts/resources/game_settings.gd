@@ -48,6 +48,12 @@ extends Resource
 ## Knob deflections below this fraction of the radius are ignored.
 @export var joystick_dead_zone: float = 0.2
 
+@export_group("Interaction")
+## Extra reach (m) beyond an object's footprint radius from which the
+## Commander can interact with it. Individual objects can still override
+## their Interactable's range entirely.
+@export var interaction_reach: float = 2.6
+
 @export_group("Population")
 ## Survivors the player starts a new game with (the founding crew —
 ## exempt from the housing cap).

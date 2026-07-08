@@ -229,6 +229,18 @@ Disposable view over manager state:
 - **MovementJoystick** (HUDLayer) — fixed bottom-left touch joystick,
   drawn with `_draw`. As a Control it consumes its own touches, so
   steering never pans the camera. The Commander polls its `direction`.
+- **Interaction framework** — `Interactable` is a component: attach it
+  to any world object (a one-liner via `Interactable.attach`) with a
+  prompt and a per-object range, connect its `interacted` signal, and
+  the object is interactable — behaviour lives with the owner, never in
+  the player. `InteractionController` picks the nearest in-range
+  component around the Commander; the HUD's `InteractButton`
+  (bottom-right, desktop E key) shows the prompt and triggers it.
+  Buildings open their management panel (gates toggle open/closed and
+  become walkable), obstacles show placeholder messages, and
+  `SurvivorNpcs` spawns a talkable `SurvivorNPC` per roster survivor
+  around the Capital. Every trigger also echoes globally as
+  `EventBus.interaction_performed` for future tutorial/quest listeners.
 - **InputManager taps** raycast through the 3D camera onto the ground
   plane, so all grid logic stays in cell space.
 - **DayNightLayer / HUDLayer** — CanvasLayers render above the 3D

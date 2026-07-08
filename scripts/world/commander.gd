@@ -17,8 +17,10 @@ extends Node3D
 
 const DEFINITION := preload("res://data/characters/commander.tres")
 
-const ANIM_IDLE := "idle"
-const ANIM_WALK := "walk"
+## Resolved per-model via ModelFactory.find_anim, so both the Kenney
+## naming ("idle"/"walk") and the shared library names work.
+var _anim_idle := ""
+var _anim_walk := ""
 ## How far ahead of the Commander a cell is probed before entering it —
 ## keeps the model's feet from clipping into walls before stopping.
 const WALL_PROBE := 0.35
@@ -38,10 +40,13 @@ var _was_moving := false
 
 
 func _ready() -> void:
+	add_to_group("commander")
 	var model := ModelFactory.combatant_model(_definition)
 	add_child(model)
 	_anim_player = ModelFactory.find_animation_player(model)
-	_play_anim(ANIM_IDLE)
+	_anim_idle = ModelFactory.find_anim(_anim_player, ModelFactory.IDLE_CANDIDATES)
+	_anim_walk = ModelFactory.find_anim(_anim_player, ModelFactory.WALK_CANDIDATES)
+	_play_anim(_anim_idle)
 
 	# Buildings can appear on top of the spawn point (loading a save,
 	# the starting base, player placement) — step aside when they do.
@@ -56,11 +61,11 @@ func _physics_process(delta: float) -> void:
 		var direction := _camera_relative(input)
 		_step(direction, input.length(), delta)
 		_face(direction)
-		_play_anim(ANIM_WALK)
+		_play_anim(_anim_walk)
 		if not _was_moving:
 			movement_started.emit()
 	else:
-		_play_anim(ANIM_IDLE)
+		_play_anim(_anim_idle)
 	_was_moving = moving
 
 
@@ -139,7 +144,7 @@ func _ensure_walkable() -> void:
 # ── Animation ────────────────────────────────────────────────────────────
 
 func _play_anim(anim_name: String) -> void:
-	if _anim_player == null or not _anim_player.has_animation(anim_name):
+	if _anim_player == null or anim_name == "" or not _anim_player.has_animation(anim_name):
 		return
 	if _anim_player.current_animation == anim_name:
 		return

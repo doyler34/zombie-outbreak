@@ -5,8 +5,10 @@ extends Node3D
 ## Purely presentational: rebuilt from SurvivorManager whenever the
 ## world loads or the population changes, so it can never drift from
 ## the roster (the same disposable-view philosophy as the rest of the
-## world scene). NPCs cluster on walkable cells around the Capital —
-## or the map centre until one is built — and don't occupy the grid.
+## world scene). NPCs spawn on walkable cells around the Capital — or
+## the map centre until one is built — then move on their own: each
+## SurvivorNPC follows the Commander until the Capital exists and roams
+## around it afterwards. They don't occupy the grid.
 
 ## How far out (in rings of cells) to look for free standing spots.
 const SEARCH_RADIUS := 10

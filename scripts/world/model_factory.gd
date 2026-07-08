@@ -13,6 +13,20 @@ const FOOTPRINT_FILL := 0.92
 ## roughly match a Kenney mini-character.
 const COMBATANT_PLACEHOLDER_HEIGHT := 0.85
 
+## Quaternius Universal Animation Library (CC0) — 46 clips on a Rigify
+## (DEF-*) skeleton. Merged into any character model whose rig matches
+## (see apply_shared_animations); Kenney minis carry their own clips.
+const ANIM_LIBRARY_PATH := "res://assets/animations/AnimationLibrary_Godot_Standard.glb"
+
+## Clip-name candidates, in preference order, covering both the Kenney
+## naming ("idle"/"walk") and the shared library ("Idle_Loop"...).
+## Resolve once per character with find_anim().
+const IDLE_CANDIDATES: Array[String] = ["idle", "Idle", "Idle_Loop"]
+const WALK_CANDIDATES: Array[String] = ["walk", "Walk", "Walk_Loop", "Jog_Fwd_Loop"]
+
+static var _shared_libs: Array[AnimationLibrary] = []
+static var _shared_libs_loaded := false
+
 
 ## [param footprint] is the building's world-space footprint in meters.
 static func building_model(def: BuildingDefinition, footprint: Vector2) -> Node3D:
@@ -84,6 +98,7 @@ static func combatant_model(def: CombatantDefinition) -> Node3D:
 	var root := Node3D.new()
 	var model: Node3D = def.model.instantiate()
 	root.add_child(model)
+	apply_shared_animations(model)
 
 	var bounds := _combined_aabb(model, Transform3D.IDENTITY)
 	if bounds.size.length() > 0.001:
@@ -191,6 +206,68 @@ static func find_animation_player(node: Node) -> AnimationPlayer:
 		if found != null:
 			return found
 	return null
+
+
+# ── Shared animation library ─────────────────────────────────────────────
+
+## Merge the Quaternius library's clips into a character model's
+## AnimationPlayer — but only when the model uses the same Rigify
+## skeleton (checked by its signature "DEF-hips" bone), because clips
+## can't retarget across unrelated rigs at runtime. Kenney minis fail
+## the check and keep using their own 32 built-in clips. No-op when the
+## library asset or an AnimationPlayer is missing, so it can never
+## break a model that was working without it.
+static func apply_shared_animations(model: Node) -> void:
+	var skeleton := _find_skeleton(model)
+	if skeleton == null or skeleton.find_bone("DEF-hips") < 0:
+		return
+	var player := find_animation_player(model)
+	if player == null:
+		return
+	var index := 0
+	for lib in _shared_animation_libraries():
+		var lib_name := "shared" if index == 0 else "shared%d" % index
+		if not player.has_animation_library(lib_name):
+			player.add_animation_library(lib_name, lib)
+		index += 1
+
+
+## First clip a player actually has from a candidate list — checked as
+## bare names first, then inside each animation library ("lib/name").
+## Returns "" when none match; callers treat that as "don't animate".
+static func find_anim(player: AnimationPlayer, candidates: Array[String]) -> String:
+	if player == null:
+		return ""
+	for candidate in candidates:
+		if player.has_animation(candidate):
+			return candidate
+	for lib_name in player.get_animation_library_list():
+		if lib_name == "":
+			continue
+		for candidate in candidates:
+			var full := "%s/%s" % [lib_name, candidate]
+			if player.has_animation(full):
+				return full
+	return ""
+
+
+static func _shared_animation_libraries() -> Array[AnimationLibrary]:
+	if _shared_libs_loaded:
+		return _shared_libs
+	_shared_libs_loaded = true
+	var scene := _load_scene(ANIM_LIBRARY_PATH)
+	if scene == null:
+		return _shared_libs
+	var instance := scene.instantiate()
+	var player := find_animation_player(instance)
+	if player != null:
+		for lib_name in player.get_animation_library_list():
+			var lib := player.get_animation_library(lib_name)
+			if lib != null:
+				# Resources survive the instance being freed.
+				_shared_libs.append(lib)
+	instance.free()
+	return _shared_libs
 
 
 # ── GLB fitting ──────────────────────────────────────────────────────────

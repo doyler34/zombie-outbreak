@@ -78,5 +78,5 @@ jobs:
         with:
           name: zombie-outbreak-apk
           path: build/*.apk
-          retention-days: 5
+          retention-days: 1
           overwrite: true

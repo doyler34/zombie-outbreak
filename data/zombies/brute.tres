@@ -1,12 +1,12 @@
 [gd_resource type="Resource" script_class="ZombieDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/zombie_definition.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/kenney_characters/mini_characters/character-male-e.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/animations/UAL2_Standard.glb" id="2"]
 
 [resource]
 script = ExtResource("1")
 model = ExtResource("2")
-model_scale = 3.1
+model_scale = 0.9
 id = "brute"
 display_name = "Brute"
 icon = "🧟"

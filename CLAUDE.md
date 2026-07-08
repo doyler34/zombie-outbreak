@@ -39,12 +39,18 @@ else a bright primitive placeholder.
   Watchtower→watchtower_skyscraper — Kenney City Kit.
 
 **Combat** (`data/roles`, `data/zombies`): each combatant has `model` +
-`model_scale`. Survivors = Kenney mini-characters (32 anims incl
-idle/walk/attack-melee-right/die). Zombies reuse mini-characters with a per-type
-albedo **tint** (walker green, runner red, brute purple, infected yellow-green).
-Role→weapon (attached to `arm-right` bone, auto-fit to `weapon_length` m):
+`model_scale`. Characters = Quaternius animation-library mannequins from
+`assets/animations/` (CC0): Commander + survivors on UAL1 (Rigify rig —
+Idle_Loop/Walk_Loop/Punch_Cross/Death01...), zombies on UAL2 (UE rig —
+Zombie_Idle/Walk_Fwd/Scratch, Hit_Knockback as death). Mannequins are gray, so
+ModelFactory.combatant_model tints them with the definition color. Clip names
+resolve per rig via ModelFactory.find_anim candidate lists; the two libraries
+use DIFFERENT skeletons (UAL1 "DEF-hips", UAL2 "pelvis") and only merge into
+matching rigs. Kenney mini-characters (32 anims) remain in assets as a fallback.
+Role→weapon (attached to `DEF-hand.R` bone, auto-fit to `weapon_length` m):
 Fighter machete, Scavenger knife (melee); Engineer handgun, Medic revolver,
-Guard shotgun (guns). Medic still heals (weapon cosmetic).
+Guard shotgun (guns). Medic still heals (weapon cosmetic). Weapon offsets were
+tuned for the old Kenney rig — may need re-tuning on the mannequins.
 
 ## HARD-WON GOTCHAS (do not re-learn these)
 1. **`const X = [ClassName, …]` is a parse error** — class_name refs aren't

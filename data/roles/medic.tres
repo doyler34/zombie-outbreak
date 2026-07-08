@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="SurvivorRoleDefinition" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/survivor_role_definition.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/kenney_characters/mini_characters/character-female-b.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/animations/AnimationLibrary_Godot_Standard.glb" id="2"]
 [ext_resource type="PackedScene" path="res://assets/weapons/revolver.fbx" id="3"]
 
 [resource]
 script = ExtResource("1")
 model = ExtResource("2")
-model_scale = 2.5
+model_scale = 0.9
 id = "medic"
 display_name = "Medic"
 icon = "⚕"
@@ -21,6 +21,7 @@ armor = 0
 crit_chance = 0.03
 dodge_chance = 0.1
 heal_power = 8
+weapon_bone = "DEF-hand.R"
 weapon = ExtResource("3")
 weapon_offset = Vector3(0, -0.14, 0.04)
 weapon_rotation = Vector3(0, 0, 0)

@@ -8,10 +8,11 @@ extends Node3D
 ## new roles/zombie types change behaviour through data alone.
 ##
 ## Visual is a real character model (ModelFactory.combatant_model) driven
-## by whatever AnimationPlayer the imported .glb carries — Kenney's mini
-## character rig ships "idle" / "walk" / "attack-melee-right" / "die",
-## which is what this file plays. A billboard health bar and floating
-## combat text are built by hand (no textures needed for those).
+## by whatever AnimationPlayer the imported .glb carries — clip names
+## are resolved per rig from candidate lists (Kenney's "idle"/"die",
+## the shared libraries' "Idle_Loop"/"Death01", the zombie set...).
+## A billboard health bar and floating combat text are built by hand
+## (no textures needed for those).
 
 # Param untyped on purpose: a signal typing a parameter with the class
 # it is declared in is a self-reference some Godot versions reject.
@@ -23,13 +24,17 @@ const BAR_WIDTH := 0.7
 const BAR_HEIGHT := 0.08
 const DEATH_LINGER := 0.9
 
-## Animation names shared by every mini-character in the roster —
-## Kenney's rig ships these across all skins, so units need no per-unit
-## animation configuration.
-const ANIM_IDLE := "idle"
-const ANIM_WALK := "walk"
-const ANIM_ATTACK := "attack-melee-right"
-const ANIM_DIE := "die"
+## Clip-name candidates covering every rig in the roster: Kenney minis
+## ("idle"/"attack-melee-right"...), the shared animation libraries
+## ("Idle_Loop"/"Punch_Cross"...) and their zombie set. Resolved per
+## unit in setup() — zombies prefer their shamble/scratch clips.
+const ATTACK_CANDIDATES: Array[String] = ["attack-melee-right", "Punch_Cross", "Sword_Attack", "Melee_Hook"]
+const DIE_CANDIDATES: Array[String] = ["die", "Death01", "Hit_Knockback"]
+
+var _anim_idle := ""
+var _anim_walk := ""
+var _anim_attack := ""
+var _anim_die := ""
 
 var team: Team
 var stats: CombatantDefinition
@@ -63,31 +68,47 @@ func setup(battle: Node, unit_team: Team, definition: CombatantDefinition, roste
 
 	var model := ModelFactory.combatant_model(definition)
 	add_child(model)
-	if definition is ZombieDefinition:
-		ModelFactory.tint_model(model, definition.color)
-	elif definition is SurvivorRoleDefinition and definition.weapon != null:
+	if definition is SurvivorRoleDefinition and definition.weapon != null:
 		ModelFactory.attach_weapon(model, definition.weapon, definition.model_scale,
 			definition.weapon_bone, definition.weapon_offset, definition.weapon_rotation,
 			definition.weapon_length)
 	_anim_player = ModelFactory.find_animation_player(model)
+	_resolve_anims(definition is ZombieDefinition)
 	if _anim_player != null:
 		# One-shot clips must not loop, or animation_finished never fires
 		# and the unit freezes mid-swing.
-		_force_no_loop(ANIM_ATTACK)
-		_force_no_loop(ANIM_DIE)
+		_force_no_loop(_anim_attack)
+		_force_no_loop(_anim_die)
 		_anim_player.animation_finished.connect(_on_anim_finished)
-	_play_anim(ANIM_IDLE)
+	_play_anim(_anim_idle)
 
 	_build_health_bar(ModelFactory.model_height(model))
 
 
+## Pick this unit's clips from what its rig actually ships. Zombies try
+## their dedicated shamble/scratch set first, then the shared names.
+func _resolve_anims(zombie: bool) -> void:
+	_anim_idle = _resolve(zombie, "Zombie_Idle_Loop", ModelFactory.IDLE_CANDIDATES)
+	_anim_walk = _resolve(zombie, "Zombie_Walk_Fwd_Loop", ModelFactory.WALK_CANDIDATES)
+	_anim_attack = _resolve(zombie, "Zombie_Scratch", ATTACK_CANDIDATES)
+	_anim_die = _resolve(zombie, "", DIE_CANDIDATES)
+
+
+func _resolve(zombie: bool, zombie_clip: String, base: Array[String]) -> String:
+	var candidates: Array[String] = []
+	if zombie and zombie_clip != "":
+		candidates.append(zombie_clip)
+	candidates.append_array(base)
+	return ModelFactory.find_anim(_anim_player, candidates)
+
+
 func _force_no_loop(anim_name: String) -> void:
-	if _anim_player.has_animation(anim_name):
+	if anim_name != "" and _anim_player.has_animation(anim_name):
 		_anim_player.get_animation(anim_name).loop_mode = Animation.LOOP_NONE
 
 
-func _on_anim_finished(anim_name: String) -> void:
-	if anim_name == ANIM_ATTACK:
+func _on_anim_finished(anim_name: StringName) -> void:
+	if String(anim_name) == _anim_attack:
 		_oneshot_active = false
 
 
@@ -128,7 +149,7 @@ func _pursue(other: CombatUnit, delta: float, action: Callable) -> void:
 		position += dir * stats.move_speed * delta
 		position = _battle.clamp_to_arena(position)
 		_face(dir)
-		_play_anim(ANIM_WALK)
+		_play_anim(_anim_walk)
 	else:
 		if distance > 0.05:
 			_face(to_other / distance)
@@ -136,7 +157,7 @@ func _pursue(other: CombatUnit, delta: float, action: Callable) -> void:
 			_cooldown = stats.attack_interval
 			action.call()
 		elif not _oneshot_active:
-			_play_anim(ANIM_IDLE)
+			_play_anim(_anim_idle)
 
 
 func _face(dir: Vector3) -> void:
@@ -148,7 +169,7 @@ func _face(dir: Vector3) -> void:
 
 
 func _attack(target: CombatUnit) -> void:
-	_play_oneshot(ANIM_ATTACK)
+	_play_oneshot(_anim_attack)
 	var dmg := stats.damage
 	var crit := _rng.randf() < stats.crit_chance
 	if crit:
@@ -191,7 +212,7 @@ func _die() -> void:
 	_dying = true
 	# Death overrides any in-progress swing.
 	_oneshot_active = false
-	_play_oneshot(ANIM_DIE)
+	_play_oneshot(_anim_die)
 	if _health_fill != null:
 		_health_fill.get_parent().visible = false
 	var tw := create_tween()
@@ -274,8 +295,8 @@ func _play_oneshot(anim_name: String) -> void:
 ## attack cooldown (and with the watch-speed toggle) instead of lagging.
 func _current_anim_speed() -> float:
 	var speed: float = _battle.combat_speed
-	if _oneshot_active and _anim_player.has_animation(ANIM_ATTACK):
-		var clip_len := _anim_player.get_animation(ANIM_ATTACK).length
+	if _oneshot_active and _anim_attack != "" and _anim_player.has_animation(_anim_attack):
+		var clip_len := _anim_player.get_animation(_anim_attack).length
 		if clip_len > 0.01 and stats.attack_interval > 0.01:
 			# Fit the swing into ~80% of the cooldown window.
 			speed *= maxf(clip_len / (stats.attack_interval * 0.8), 1.0)

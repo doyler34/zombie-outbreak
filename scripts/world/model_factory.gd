@@ -106,6 +106,11 @@ static func combatant_model(def: CombatantDefinition) -> Node3D:
 	var model: Node3D = def.model.instantiate()
 	root.add_child(model)
 	apply_shared_animations(model)
+	# The animation-library mannequins are untextured gray — tint them
+	# with the definition's color so roles/zombies read at a glance.
+	# Textured character models (e.g. Kenney skins) are left alone.
+	if def.model.resource_path.begins_with("res://assets/animations/"):
+		tint_model(model, def.color)
 
 	var bounds := _combined_aabb(model, Transform3D.IDENTITY)
 	if bounds.size.length() > 0.001:

@@ -36,7 +36,7 @@ func setup(roster_survivor) -> void:
 	# attention in the same direction.
 	rotation.y = float(hash(survivor.uid) % 628) / 100.0
 
-	var first_name := survivor.survivor_name.get_slice(" ", 0)
+	var first_name: String = survivor.survivor_name.get_slice(" ", 0)
 	Interactable.attach(self, "Talk to %s" % first_name,
 		DataManager.settings.interaction_reach, _on_interacted)
 

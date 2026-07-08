@@ -9,15 +9,15 @@ extends Button
 ## at once.
 
 ## Lift above the bottom-right selection info panel.
-const LIFT := 170.0
-const MARGIN := 18.0
+const LIFT := 100.0
+const MARGIN := 12.0
 
 var _keyboard_hint: bool = false
 
 
 func _ready() -> void:
-	UIStyle.style_button(self, 19)
-	custom_minimum_size = Vector2(190, 62)
+	UIStyle.style_button(self, 16)
+	custom_minimum_size = Vector2(140, 50)
 	visible = false
 	_keyboard_hint = not DisplayServer.is_touchscreen_available()
 	set_anchors_and_offsets_preset(

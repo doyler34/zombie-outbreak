@@ -1,5 +1,5 @@
 ; Zombie Outbreak: Colony Survival
-; Godot 4.4 — mobile-first top-down strategy framework
+; Godot 4.7 — mobile-first top-down strategy framework
 ;
 ; Autoload order matters: EventBus and DataManager first (everything reads
 ; them), SaveManager before any manager that registers a save section,
@@ -13,7 +13,7 @@ config/name="ZombieOutbreak"
 config/description="Top-down zombie strategy game. Build, scavenge, survive."
 config/version="0.2.0"
 run/main_scene="res://scenes/main/main_menu.tscn"
-config/features=PackedStringArray("4.4")
+config/features=PackedStringArray("4.7")
 config/icon="res://assets/icon.svg"
 
 [autoload]

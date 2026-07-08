@@ -1,6 +1,6 @@
 # Zombie Outbreak — Framework Architecture
 
-A mobile-first, top-down strategy framework for Godot 4.4. This document
+A mobile-first, top-down strategy framework for Godot 4.7. This document
 explains every major system, the reasoning behind its design, and how to
 extend it.
 

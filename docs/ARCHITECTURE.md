@@ -256,8 +256,10 @@ Disposable view over manager state:
   globally as `EventBus.interaction_performed` for future
   tutorial/quest listeners. Character animation names are resolved per
   model (`ModelFactory.find_anim`), and the CC0 Quaternius animation
-  library in `assets/animations/` auto-merges into any character whose
-  Rigify skeleton matches it — Kenney minis keep their built-in clips.
+  libraries in `assets/animations/` (UAL1 on the Rigify rig, UAL2 on
+  the UE-mannequin rig, incl. zombie/farming/chopping clips) auto-merge
+  into any character whose skeleton matches — Kenney minis keep their
+  built-in clips.
 - **Hotbar + inventory** — `Hotbar` (HUDLayer, bottom-center, keys 1–5)
   and the modal `InventoryScreen` (HUD bag button / I key) are both dumb
   grids of the shared `ItemSlotButton` over InventoryManager state.

@@ -21,6 +21,7 @@ tap_max_duration = 0.35
 long_press_duration = 0.6
 joystick_radius = 90.0
 joystick_dead_zone = 0.2
+interaction_reach = 2.6
 starting_survivors = 3
 save_version = 1
 default_save_slot = 0

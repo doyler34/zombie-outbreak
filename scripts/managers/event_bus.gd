@@ -36,6 +36,12 @@ signal obstacle_cleared(entity: ObstacleEntity, rewards: Dictionary)
 ## the future combat system.
 signal obstacle_infestation_triggered(entity: ObstacleEntity)
 
+# ── Interaction ──────────────────────────────────────────────────────────
+## Something in the world was interacted with. The Interactable's own
+## `interacted` signal drives the behaviour; this global echo is for
+## listeners that don't own the object (tutorial, audio, quests).
+signal interaction_performed(interactable: Interactable, actor: Node3D)
+
 # ── Combat / missions ────────────────────────────────────────────────────
 signal mission_started(zone: ObstacleEntity)
 ## result: {"outcome", "zombies_killed", "dead", "injured", "rewards",

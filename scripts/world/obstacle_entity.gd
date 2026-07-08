@@ -44,6 +44,9 @@ func setup(def: ObstacleDefinition, grid_cell: Vector2i) -> void:
 
 	_timer_label.position.y = WorldManager.cell_size() * 1.3
 
+	Interactable.attach(self, "Examine",
+		fp.length() / 2.0 + DataManager.settings.interaction_reach, _on_interacted)
+
 
 # ── Occupancy contract (duck-typed by WorldManager) ──────────────────────
 
@@ -53,6 +56,27 @@ func blocks_building() -> bool:
 
 func blocks_movement() -> bool:
 	return definition.blocks_movement
+
+
+# ── Interaction ──────────────────────────────────────────────────────────
+
+## Placeholder interactions until gathering/combat land — each kind of
+## obstacle acknowledges the Commander with what it will become.
+func _on_interacted(_actor: Node3D) -> void:
+	EventBus.notify(_placeholder_message(), 0)
+
+
+func _placeholder_message() -> String:
+	if definition.has_tag("infested"):
+		return "Best not to disturb the %s without a squad." % definition.display_name.to_lower()
+	match definition.id:
+		"tree", "bush":
+			return "Tree interaction coming soon."
+		"rock", "boulder":
+			return "Rock interaction coming soon."
+	if not definition.clear_rewards.is_empty():
+		return "Resource gathering coming soon."
+	return "Nothing to do here yet."
 
 
 # ── Clearing task ────────────────────────────────────────────────────────

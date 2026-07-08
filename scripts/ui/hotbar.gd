@@ -1,5 +1,5 @@
 class_name Hotbar
-extends HBoxContainer
+extends Control
 ## Quick-use bar above the HUD's action buttons (bottom-center).
 ##
 ## A row of ItemSlotButtons over InventoryManager's hotbar area. Tap a
@@ -7,6 +7,10 @@ extends HBoxContainer
 ## usables arm on the first press and consume one on the second — all of
 ## that logic lives in InventoryManager.select_hotbar(); this Control
 ## only draws state and forwards input.
+##
+## Structured like HUD's action bar: a full-rect Control wrapper (so the
+## anchored row has a reliable parent rect even under a CanvasLayer)
+## with the HBoxContainer anchored to bottom-center inside it.
 
 ## Clearance above the BUILD/BAG/MAP/MENU action bar.
 const LIFT := 68.0
@@ -17,16 +21,21 @@ var _buttons: Array[ItemSlotButton] = []
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	grow_horizontal = Control.GROW_DIRECTION_BOTH
-	grow_vertical = Control.GROW_DIRECTION_BEGIN
-	offset_bottom = -LIFT
-	add_theme_constant_override("separation", 6)
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var row := HBoxContainer.new()
+	row.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	row.offset_bottom = -LIFT
+	row.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	row.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	row.add_theme_constant_override("separation", 6)
+	add_child(row)
 
 	for i in InventoryManager.hotbar_size():
 		var btn := ItemSlotButton.new(InventoryManager.AREA_HOTBAR, i)
 		btn.pressed.connect(func(): InventoryManager.select_hotbar(btn.index))
-		add_child(btn)
+		row.add_child(btn)
 		_buttons.append(btn)
 
 	EventBus.hotbar_changed.connect(_refresh)

@@ -23,6 +23,10 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, int(MARGIN))
 	offset_top = -48 - LIFT
 	offset_bottom = -LIFT
+	# Prompt text changes the button's width — grow LEFT from the
+	# bottom-right corner so it never slides off screen.
+	grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 
 ## Wire to the world's InteractionController (called by GameWorld).

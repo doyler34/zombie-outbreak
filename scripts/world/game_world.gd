@@ -19,7 +19,7 @@ const GROUND_SHADER := preload("res://assets/shaders/ground_tiles.gdshader")
 @onready var placer: BuildingPlacer = $BuildingPlacer
 @onready var camera_rig: CameraController = $CameraRig
 @onready var commander: Commander = $Commander
-@onready var joystick: VirtualJoystick = $HUDLayer/VirtualJoystick
+@onready var joystick: MovementJoystick = $HUDLayer/MovementJoystick
 @onready var day_night_overlay: ColorRect = $DayNightLayer/DayNightOverlay
 
 

@@ -216,7 +216,7 @@ Disposable view over manager state:
 - **BuildingPlacer** — translucent ghost model + green/red footprint
   quad, tap to position, rotate/confirm/cancel via HUD.
 - **Commander** — the player's directly-controlled character (hybrid
-  builder/survival gameplay). Steered by the on-screen VirtualJoystick
+  builder/survival gameplay). Steered by the on-screen MovementJoystick
   or WASD/arrows, camera-relative on the ground plane; movement respects
   `WorldManager.is_cell_walkable` per axis so it slides along building
   edges. Model + stats come from `data/characters/commander.tres`
@@ -226,7 +226,7 @@ Disposable view over manager state:
   Commander through its smoothing; drag pans along camera-relative XZ
   axes and pauses the follow (it resumes when the Commander moves),
   pinch/wheel changes orthographic size, clamped to world bounds.
-- **VirtualJoystick** (HUDLayer) — fixed bottom-left touch joystick,
+- **MovementJoystick** (HUDLayer) — fixed bottom-left touch joystick,
   drawn with `_draw`. As a Control it consumes its own touches, so
   steering never pans the camera. The Commander polls its `direction`.
 - **InputManager taps** raycast through the 3D camera onto the ground

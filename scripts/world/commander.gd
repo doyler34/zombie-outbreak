@@ -2,7 +2,7 @@ class_name Commander
 extends Node3D
 ## The player's directly-controlled character — walks around the base.
 ##
-## Input comes from the on-screen VirtualJoystick (mobile) or the
+## Input comes from the on-screen MovementJoystick (mobile) or the
 ## move_* keyboard actions (WASD / arrows, desktop), both expressed in
 ## screen space and converted to camera-relative ground motion so "up"
 ## always means "up on screen". Movement respects the same grid the

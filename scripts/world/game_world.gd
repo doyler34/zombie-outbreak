@@ -19,7 +19,9 @@ const GROUND_SHADER := preload("res://assets/shaders/ground_tiles.gdshader")
 @onready var placer: BuildingPlacer = $BuildingPlacer
 @onready var camera_rig: CameraController = $CameraRig
 @onready var commander: Commander = $Commander
-@onready var joystick: VirtualJoystick = $HUDLayer/VirtualJoystick
+@onready var joystick: MovementJoystick = $HUDLayer/MovementJoystick
+@onready var interaction: InteractionController = $InteractionController
+@onready var interact_button: InteractButton = $HUDLayer/InteractButton
 @onready var day_night_overlay: ColorRect = $DayNightLayer/DayNightOverlay
 
 
@@ -41,6 +43,12 @@ func _ready() -> void:
 	commander.movement_started.connect(camera_rig.resume_follow)
 	camera_rig.follow(commander)
 	camera_rig.jump_to(commander.global_position)
+
+	# Interactions are measured from the Commander; the HUD button shows
+	# whatever the controller currently targets.
+	interaction.actor = commander
+	interact_button.bind(interaction)
+
 	GameManager.notify_world_ready()
 
 

@@ -7,6 +7,11 @@ extends Node3D
 ## look, pulled back along its view axis. Drag pans the rig across the
 ## XZ plane in camera-relative directions; pinch/wheel changes the
 ## orthographic size (chunky zoom). All tuning lives in GameSettings.
+##
+## When a follow target is set (the Commander), the rig tracks it every
+## frame through the same smoothing. A manual drag pauses following so
+## the player can look around; it resumes as soon as the target moves
+## again (GameWorld wires Commander.movement_started to resume_follow).
 
 ## Distance the camera sits back along its view direction. With an
 ## orthographic projection this only needs to clear the tallest object.
@@ -14,6 +19,8 @@ const CAMERA_DISTANCE := 90.0
 
 var _target_position: Vector3
 var _target_size: float
+var _follow_target: Node3D
+var _follow_paused: bool = false
 
 @onready var camera: Camera3D = $Camera
 
@@ -35,6 +42,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if is_instance_valid(_follow_target) and not _follow_paused:
+		_target_position = _clamped(_follow_target.global_position)
 	var weight := clampf(DataManager.settings.camera_smoothing * delta, 0.0, 1.0)
 	position = position.lerp(_target_position, weight)
 	camera.size = lerpf(camera.size, _target_size, weight)
@@ -46,9 +55,22 @@ func jump_to(world_pos: Vector3) -> void:
 	position = _target_position
 
 
+## Track [param target] every frame (pass null to stop following).
+func follow(target: Node3D) -> void:
+	_follow_target = target
+	_follow_paused = false
+
+
+## Re-engage a follow that a manual pan paused.
+func resume_follow() -> void:
+	_follow_paused = false
+
+
 # ── Gestures ─────────────────────────────────────────────────────────────
 
 func _on_drag(delta_screen: Vector2) -> void:
+	# A manual pan takes over from following until the target moves again.
+	_follow_paused = true
 	# World units per screen pixel at the current zoom (ortho size is
 	# the vertical extent of the view).
 	var units_per_px := camera.size / get_viewport().get_visible_rect().size.y

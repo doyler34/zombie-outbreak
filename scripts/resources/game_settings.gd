@@ -42,6 +42,12 @@ extends Resource
 ## Press duration (seconds) after which a long-press fires.
 @export var long_press_duration: float = 0.6
 
+@export_group("Virtual Joystick")
+## Radius (px) of the on-screen movement joystick's base circle.
+@export var joystick_radius: float = 90.0
+## Knob deflections below this fraction of the radius are ignored.
+@export var joystick_dead_zone: float = 0.2
+
 @export_group("Population")
 ## Survivors the player starts a new game with (the founding crew —
 ## exempt from the housing cap).

@@ -40,6 +40,7 @@ assets/            art, audio, shaders (no logic)
 data/              ALL game content and tuning (no code)
   settings/        game_settings.tres — every tunable number
   buildings/       one BuildingDefinition .tres per building
+  characters/      commander.tres — the playable Commander's stats/model
   obstacles/       one ObstacleDefinition .tres per obstacle type
   resources/       one ResourceDefinition .tres per resource
   roles/           one SurvivorRoleDefinition .tres per combat role
@@ -214,9 +215,20 @@ Disposable view over manager state:
   before art exists.
 - **BuildingPlacer** — translucent ghost model + green/red footprint
   quad, tap to position, rotate/confirm/cancel via HUD.
-- **CameraController** — a rig on the ground plane: drag pans along
-  camera-relative XZ axes, pinch/wheel changes orthographic size,
-  clamped to world bounds, smoothed. Gesture-driven only.
+- **Commander** — the player's directly-controlled character (hybrid
+  builder/survival gameplay). Steered by the on-screen VirtualJoystick
+  or WASD/arrows, camera-relative on the ground plane; movement respects
+  `WorldManager.is_cell_walkable` per axis so it slides along building
+  edges. Model + stats come from `data/characters/commander.tres`
+  (a CombatantDefinition). Locomotion only for now — no combat or
+  inventory.
+- **CameraController** — a rig on the ground plane: follows the
+  Commander through its smoothing; drag pans along camera-relative XZ
+  axes and pauses the follow (it resumes when the Commander moves),
+  pinch/wheel changes orthographic size, clamped to world bounds.
+- **VirtualJoystick** (HUDLayer) — fixed bottom-left touch joystick,
+  drawn with `_draw`. As a Control it consumes its own touches, so
+  steering never pans the camera. The Commander polls its `direction`.
 - **InputManager taps** raycast through the 3D camera onto the ground
   plane, so all grid logic stays in cell space.
 - **DayNightLayer / HUDLayer** — CanvasLayers render above the 3D

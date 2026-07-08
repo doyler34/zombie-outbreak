@@ -18,6 +18,8 @@ const GROUND_SHADER := preload("res://assets/shaders/ground_tiles.gdshader")
 @onready var obstacles: Node3D = $Obstacles
 @onready var placer: BuildingPlacer = $BuildingPlacer
 @onready var camera_rig: CameraController = $CameraRig
+@onready var commander: Commander = $Commander
+@onready var joystick: VirtualJoystick = $HUDLayer/VirtualJoystick
 @onready var day_night_overlay: ColorRect = $DayNightLayer/DayNightOverlay
 
 
@@ -33,7 +35,12 @@ func _ready() -> void:
 	InputManager.tapped.connect(_on_world_tapped)
 	EventBus.game_tick.connect(_update_day_night)
 
-	camera_rig.jump_to(Vector3.ZERO)
+	# The camera tracks the Commander; a manual pan pauses the follow and
+	# the Commander moving again resumes it.
+	commander.joystick = joystick
+	commander.movement_started.connect(camera_rig.resume_follow)
+	camera_rig.follow(commander)
+	camera_rig.jump_to(commander.global_position)
 	GameManager.notify_world_ready()
 
 

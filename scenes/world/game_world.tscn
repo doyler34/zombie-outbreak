@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/building_placer.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/world/camera_controller.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/world/commander.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/ui/virtual_joystick.gd" id="6"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -33,6 +35,9 @@ shadow_bias = 0.05
 [node name="BuildingPlacer" type="Node3D" parent="." groups=["building_placer"]]
 script = ExtResource("2")
 
+[node name="Commander" type="Node3D" parent="."]
+script = ExtResource("5")
+
 [node name="CameraRig" type="Node3D" parent="."]
 script = ExtResource("3")
 
@@ -57,3 +62,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("4")
+
+[node name="VirtualJoystick" type="Control" parent="HUDLayer"]
+layout_mode = 3
+script = ExtResource("6")

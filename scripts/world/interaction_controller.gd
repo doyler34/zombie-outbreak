@@ -32,6 +32,10 @@ func _process(delta: float) -> void:
 		_refresh_target()
 
 
+func _ready() -> void:
+	InputManager.double_tapped.connect(_on_double_tapped)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		if interact():
@@ -80,3 +84,20 @@ func _input_blocked() -> bool:
 		return true
 	var placer := get_tree().get_first_node_in_group("building_placer")
 	return placer != null and placer.is_active()
+
+
+func _on_double_tapped(_screen_pos: Vector2, world_pos: Vector3) -> void:
+	if _input_blocked() or actor == null:
+		return
+	var best: Interactable = null
+	var best_distance := INF
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var candidate := node as Interactable
+		if candidate == null or not candidate.can_target():
+			continue
+		var distance := candidate.distance_to(world_pos)
+		if distance <= candidate.interaction_range and distance < best_distance:
+			best_distance = distance
+			best = candidate
+	if best != null:
+		best.interact(actor)

@@ -15,6 +15,7 @@ extends Node
 ## UI" checks anywhere.
 
 signal tapped(screen_pos: Vector2, world_pos: Vector3)
+signal double_tapped(screen_pos: Vector2, world_pos: Vector3)
 signal long_pressed(screen_pos: Vector2, world_pos: Vector3)
 signal drag_started(screen_pos: Vector2)
 signal drag_updated(delta: Vector2)
@@ -28,6 +29,10 @@ var _pressing: bool = false
 var _dragging: bool = false
 var _long_press_fired: bool = false
 var _pinch_distance: float = 0.0
+var _last_tap_pos: Vector2 = Vector2.ZERO
+var _last_tap_time: float = -10.0
+const DOUBLE_TAP_THRESHOLD := 0.3
+const DOUBLE_TAP_DISTANCE := 30.0
 
 
 func _process(delta: float) -> void:
@@ -105,7 +110,16 @@ func _end_single_gesture(is_tap: bool, release_pos: Vector2 = Vector2.ZERO) -> v
 	if _dragging:
 		drag_ended.emit()
 	if is_tap:
-		tapped.emit(release_pos, _to_world(release_pos))
+		var now := Time.get_ticks_msec() / 1000.0
+		var time_since_last := now - _last_tap_time
+		var distance_to_last := release_pos.distance_to(_last_tap_pos)
+		if time_since_last < DOUBLE_TAP_THRESHOLD and distance_to_last < DOUBLE_TAP_DISTANCE:
+			double_tapped.emit(release_pos, _to_world(release_pos))
+			_last_tap_time = -10.0
+		else:
+			tapped.emit(release_pos, _to_world(release_pos))
+			_last_tap_pos = release_pos
+			_last_tap_time = now
 	_pressing = false
 	_dragging = false
 

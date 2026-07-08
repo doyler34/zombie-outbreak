@@ -30,7 +30,7 @@ const RELOCATE_RADIUS := 8
 signal movement_started()
 
 ## Assigned by GameWorld; polled every frame for touch input.
-var joystick: VirtualJoystick
+var joystick: MovementJoystick
 
 var _definition: CombatantDefinition = DEFINITION
 var _anim_player: AnimationPlayer

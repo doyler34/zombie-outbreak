@@ -1,4 +1,4 @@
-class_name VirtualJoystick
+class_name MovementJoystick
 extends Control
 ## Fixed on-screen movement joystick (bottom-left thumb zone).
 ##

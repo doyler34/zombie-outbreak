@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://scripts/world/camera_controller.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/world/commander.gd" id="5"]
-[ext_resource type="Script" path="res://scripts/ui/virtual_joystick.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/ui/movement_joystick.gd" id="6"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1

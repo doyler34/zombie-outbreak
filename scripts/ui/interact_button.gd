@@ -20,12 +20,9 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(120, 48)
 	visible = false
 	_keyboard_hint = not DisplayServer.is_touchscreen_available()
-	anchor_right = 1.0
-	anchor_bottom = 1.0
-	offset_right = -MARGIN
-	offset_bottom = -MARGIN - LIFT
-	offset_left = offset_right - 120
-	offset_top = offset_bottom - 48
+	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, int(MARGIN))
+	offset_top = -48 - LIFT
+	offset_bottom = -LIFT
 
 
 ## Wire to the world's InteractionController (called by GameWorld).

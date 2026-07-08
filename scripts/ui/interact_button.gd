@@ -17,13 +17,15 @@ var _keyboard_hint: bool = false
 
 func _ready() -> void:
 	UIStyle.style_button(self, 16)
-	custom_minimum_size = Vector2(140, 50)
+	custom_minimum_size = Vector2(120, 48)
 	visible = false
 	_keyboard_hint = not DisplayServer.is_touchscreen_available()
-	set_anchors_and_offsets_preset(
-		Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, int(MARGIN))
-	offset_top -= LIFT
-	offset_bottom -= LIFT
+	anchor_right = 1.0
+	anchor_bottom = 1.0
+	offset_right = -MARGIN
+	offset_bottom = -MARGIN - LIFT
+	offset_left = offset_right - 120
+	offset_top = offset_bottom - 48
 
 
 ## Wire to the world's InteractionController (called by GameWorld).

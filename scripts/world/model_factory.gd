@@ -81,6 +81,8 @@ static func obstacle_model(def: ObstacleDefinition, footprint: Vector2) -> Node3
 		"log": return _log(footprint)
 		"pile": return _pile(footprint)
 		"nest": return _nest(footprint)
+		"crate": return _crate(footprint, Color(0.62, 0.46, 0.24), Color(0.45, 0.32, 0.16))
+		"crate_med": return _crate(footprint, Color(0.92, 0.92, 0.90), Color(0.85, 0.25, 0.2))
 		_: return _box(Color(0.6, 0.55, 0.5), footprint)
 
 
@@ -445,6 +447,19 @@ static func _pile(fp: Vector2) -> Node3D:
 			Vector3((i - 1) * s * 0.16, s * (0.09 + i * 0.11), (i % 2 - 0.5) * s * 0.2))
 		mi.rotation.y = i * 0.6
 		root.add_child(mi)
+	return root
+
+
+static func _crate(fp: Vector2, body: Color, band: Color) -> Node3D:
+	var root := Node3D.new()
+	var s := minf(fp.x, fp.y) * 0.45
+	var box := BoxMesh.new()
+	box.size = Vector3(s, s * 0.75, s)
+	root.add_child(_mesh_node(box, body, Vector3(0, s * 0.375, 0)))
+	# A contrasting band across the lid so crates read as containers.
+	var strap := BoxMesh.new()
+	strap.size = Vector3(s * 1.04, s * 0.78, s * 0.24)
+	root.add_child(_mesh_node(strap, band, Vector3(0, s * 0.375, 0)))
 	return root
 
 

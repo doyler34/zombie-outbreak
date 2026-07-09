@@ -52,6 +52,10 @@ signal hotbar_changed()
 signal hotbar_selection_changed(index: int, item: ItemDefinition)
 ## A consumable/gear item was activated (audio, tutorial, quests...).
 signal item_used(item: ItemDefinition)
+## The Commander gathered from a resource node (tree, rock, crate...).
+signal resource_gathered(node: Node3D, item_id: String, amount: int)
+## A slot was thrown away — GroundItems turns it into a world pickup.
+signal item_dropped(item_id: String, count: int)
 
 # ── Combat / missions ────────────────────────────────────────────────────
 signal mission_started(zone: ObstacleEntity)

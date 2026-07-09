@@ -44,6 +44,27 @@ extends Resource
 ## demolition). Unused by the base clearing flow.
 @export var health: int = 100
 
+@export_group("Gathering")
+## Inventory item the Commander gathers here ("" = not gatherable).
+## Gathering is personal and immediate (goes to the Commander's
+## backpack); the worker "Clearing" task above stays the settlement-
+## scale way to remove the node wholesale.
+@export var gather_item: String = ""
+## Units of gather_item a fresh node holds before it runs dry.
+@export var gather_stock: int = 0
+## Units granted per completed gather cycle.
+@export var gather_yield: int = 1
+## Seconds one gather cycle takes (the ideal tool works 30% faster).
+@export var gather_time: float = 2.5
+## Item id of the ideal tool. "" = bare hands work; anything else means
+## SOME tool must be equipped, and the named one is fastest.
+@export var gather_tool: String = ""
+## Verb for the interaction prompt ("Chop", "Mine", "Search"...).
+@export var gather_verb: String = "Gather"
+## Preferred Commander action clip while gathering (e.g.
+## "TreeChopping_Loop"); generic interact clips are the fallback.
+@export var gather_anim: String = ""
+
 @export_group("Workers")
 ## Workers required before the task can start (0 = optional).
 @export var min_workers: int = 0
@@ -64,6 +85,10 @@ extends Resource
 ## Free-form behaviour markers for future systems, e.g. "infested"
 ## (triggers combat when clearing starts), "rare_node", "high_level".
 @export var tags: Array[String] = []
+
+
+func is_gatherable() -> bool:
+	return gather_item != "" and gather_stock > 0
 
 
 ## Task duration with [param workers] assigned.

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "medical_crate"
+display_name = "Medical Crate"
+description = "A first-aid supply box, white with a red cross. Still sealed."
+model_kind = "crate_med"
+grid_size = Vector2i(1, 1)
+clearable = true
+blocks_building = true
+blocks_movement = true
+clear_time = 5.0
+gather_item = "bandage"
+gather_stock = 4
+gather_yield = 1
+gather_time = 1.5
+gather_verb = "Search"

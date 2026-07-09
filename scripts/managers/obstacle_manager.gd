@@ -154,6 +154,20 @@ func clear_zone(entity: ObstacleEntity) -> void:
 	_remove(entity)
 
 
+## A gatherable node ran dry: free its spot. Vegetation with
+## regrow_days re-enters the same regrowth queue clearing uses.
+func deplete(entity: ObstacleEntity) -> void:
+	if entity.definition.regrow_days > 0:
+		_regrow_queue.append({
+			"id": entity.definition.id,
+			"cx": entity.cell.x, "cy": entity.cell.y,
+			"days": entity.definition.regrow_days,
+		})
+	EventBus.notify("%s depleted." % entity.definition.display_name, 0)
+	EventBus.obstacle_cleared.emit(entity, {})
+	_remove(entity)
+
+
 ## Research gate. Returns true until a research/tech system exists —
 ## replace the body with a ResearchManager lookup when it lands.
 func is_tech_unlocked(tech_id: String) -> bool:

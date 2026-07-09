@@ -49,8 +49,10 @@ func notify_world_ready() -> void:
 		_load_after_world_ready = false
 		SaveManager.load_game()
 	else:
-		# Fresh map: scatter natural obstacles (saved games restore theirs).
+		# Fresh map: scatter natural obstacles (saved games restore theirs)
+		# and the starter ground pickups (not persisted, so new games only).
 		ObstacleManager.generate_initial_obstacles()
+		get_tree().call_group("ground_items", "scatter_initial")
 	EventBus.world_ready.emit()
 	_set_state(State.PLAYING)
 

@@ -21,6 +21,9 @@ const DEFINITION := preload("res://data/characters/commander.tres")
 ## naming ("idle"/"walk") and the shared library names work.
 var _anim_idle := ""
 var _anim_walk := ""
+## While set, this clip plays instead of idle when standing still
+## (gathering, using, ...). Any movement clears it back to locomotion.
+var _action_anim := ""
 ## How far ahead of the Commander a cell is probed before entering it —
 ## keeps the model's feet from clipping into walls before stopping.
 const WALL_PROBE := 0.35
@@ -61,9 +64,16 @@ func _physics_process(delta: float) -> void:
 		var direction := _camera_relative(input)
 		_step(direction, input.length(), delta)
 		_face(direction)
+		_action_anim = ""
 		_play_anim(_anim_walk)
 		if not _was_moving:
 			movement_started.emit()
+	elif _action_anim != "":
+		_play_anim(_action_anim)
+		# Non-looping action clips (e.g. "Interact") restart so the
+		# action reads as ongoing until stop_action() is called.
+		if _anim_player != null and not _anim_player.is_playing():
+			_anim_player.play(_action_anim)
 	else:
 		_play_anim(_anim_idle)
 	_was_moving = moving
@@ -142,6 +152,21 @@ func _ensure_walkable() -> void:
 
 
 # ── Animation ────────────────────────────────────────────────────────────
+
+## Hold an action clip (gathering, fixing, ...) while standing still.
+## The first candidate the model actually has is used; walking cancels
+## the action automatically (callers watch movement_started for that).
+func play_action(candidates: Array[String]) -> void:
+	_action_anim = ModelFactory.find_anim(_anim_player, candidates)
+	if _action_anim != "":
+		_anim_player.play(_action_anim)
+
+
+func stop_action() -> void:
+	_action_anim = ""
+	if not _was_moving:
+		_play_anim(_anim_idle)
+
 
 func _play_anim(anim_name: String) -> void:
 	if _anim_player == null or anim_name == "" or not _anim_player.has_animation(anim_name):

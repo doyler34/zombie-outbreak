@@ -260,6 +260,18 @@ Disposable view over manager state:
   the UE-mannequin rig, incl. zombie/farming/chopping clips) auto-merge
   into any character whose skeleton matches — Kenney minis keep their
   built-in clips.
+- **Gathering + ground items** — gatherable data lives on
+  ObstacleDefinition (`gather_item/stock/yield/time/tool/verb/anim`):
+  interacting with a tree/rock/scrap pile/crate runs auto-repeating
+  timed cycles that feed the Commander's backpack, prefer the ideal
+  tool (any equipped tool unlocks tool-gated nodes; the named one is
+  30% faster), play the node's action clip on the Commander
+  (`play_action`), stop when they walk away, and deplete the node into
+  the regrowth queue. `GroundItems` scatters loose pickups on new maps
+  (world_generation.json "ground_items"), respawns dropped slots at the
+  Commander's feet, and each `GroundItem` is a bobbing icon with a
+  "Pick up" Interactable that routes through `InventoryManager`
+  (partial pickups stay on the ground; full backpack toasts).
 - **Hotbar + inventory** — `Hotbar` (HUDLayer, bottom-center, keys 1–5)
   and the modal `InventoryScreen` (HUD bag button / I key) are both dumb
   grids of the shared `ItemSlotButton` over InventoryManager state.

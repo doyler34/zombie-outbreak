@@ -1,13 +1,72 @@
 {
   "spawn_clear_radius_cells": 6,
   "obstacles": [
-    {"id": "tree", "count": 46},
-    {"id": "bush", "count": 24},
-    {"id": "rock", "count": 20},
-    {"id": "fallen_log", "count": 12},
-    {"id": "rubble", "count": 14},
-    {"id": "debris", "count": 10},
-    {"id": "boulder", "count": 6},
-    {"id": "zombie_nest", "count": 8}
+    {
+      "id": "tree",
+      "count": 46
+    },
+    {
+      "id": "bush",
+      "count": 24
+    },
+    {
+      "id": "rock",
+      "count": 20
+    },
+    {
+      "id": "fallen_log",
+      "count": 12
+    },
+    {
+      "id": "rubble",
+      "count": 14
+    },
+    {
+      "id": "debris",
+      "count": 10
+    },
+    {
+      "id": "boulder",
+      "count": 6
+    },
+    {
+      "id": "zombie_nest",
+      "count": 8
+    },
+    {
+      "id": "food_crate",
+      "count": 6
+    },
+    {
+      "id": "medical_crate",
+      "count": 4
+    }
+  ],
+  "ground_items": [
+    {
+      "id": "scrap",
+      "count": 2,
+      "nodes": 5
+    },
+    {
+      "id": "wood",
+      "count": 3,
+      "nodes": 4
+    },
+    {
+      "id": "ration",
+      "count": 1,
+      "nodes": 3
+    },
+    {
+      "id": "axe",
+      "count": 1,
+      "nodes": 1
+    },
+    {
+      "id": "pickaxe",
+      "count": 1,
+      "nodes": 1
+    }
   ]
 }

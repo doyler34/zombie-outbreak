@@ -211,8 +211,9 @@ func move(from_area: String, from_index: int, to_area: String, to_index: int) ->
 	return true
 
 
-## Throw away a whole slot (there is no ground-drop entity yet — dropped
-## items are simply gone; a world pickup can replace this later).
+## Throw away a whole slot. item_dropped lets the world turn it into a
+## ground pickup at the Commander's feet (GroundItems listens); with no
+## world loaded, nothing listens and the items are simply gone.
 func drop(area: String, index: int) -> void:
 	var arr := _area(area)
 	if index < 0 or index >= arr.size() or arr[index].is_empty():
@@ -222,6 +223,7 @@ func drop(area: String, index: int) -> void:
 	var label := def.display_name if def != null else String(s["id"])
 	arr[index] = {}
 	EventBus.notify("Dropped %d× %s." % [int(s["count"]), label], 0)
+	EventBus.item_dropped.emit(String(s["id"]), int(s["count"]))
 	EventBus.inventory_changed.emit()
 	EventBus.hotbar_changed.emit()
 	_validate_selection()

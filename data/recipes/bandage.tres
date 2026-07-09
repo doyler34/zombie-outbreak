@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RecipeDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/recipe_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "bandage"
+result_item = "bandage"
+result_count = 1
+ingredients = {
+"cloth": 2
+}
+sort_order = 30

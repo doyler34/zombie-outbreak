@@ -43,6 +43,7 @@ data/              ALL game content and tuning (no code)
   buildings/       one BuildingDefinition .tres per building
   characters/      commander.tres — the playable Commander's stats/model
   items/           one ItemDefinition .tres per inventory item
+  recipes/         one RecipeDefinition .tres per crafting recipe
   obstacles/       one ObstacleDefinition .tres per obstacle type
   resources/       one ResourceDefinition .tres per resource
   roles/           one SurvivorRoleDefinition .tres per combat role
@@ -56,7 +57,7 @@ scenes/
   buildings/       building_entity.tscn
   ui/              modal screens (build menu, pause menu)
 scripts/
-  managers/        the 16 autoload singletons
+  managers/        the 17 autoload singletons
   resources/       custom Resource classes (definition schemas)
   world/           world-scene behaviour (camera, placer, entities)
   ui/              UI framework + screens
@@ -67,7 +68,7 @@ project), and user preferences to `user://settings.cfg`.
 
 ---
 
-## The 16 Managers (autoload order matters)
+## The 17 Managers (autoload order matters)
 
 Registration order in `project.godot` is dependency order: EventBus and
 DataManager first because everything reads them; SaveManager before any
@@ -130,13 +131,21 @@ here so the hotbar and inventory screen are dumb views redrawn on
 files in `data/items/` — future gathering, looting, combat and crafting
 plug in through `add_item()` / `remove_item()` / `equipped_weapon()`.
 
-### 9. BuildingManager (`building_manager.gd`)
+### 9. CraftingManager (`crafting_manager.gd`)
+Turns inventory items into other items via RecipeDefinitions
+(`data/recipes/`). Pure rules — missing()/can_craft()/craft() count
+ingredients across backpack + hotbar and route results through
+InventoryManager, so stacking and capacity rules apply unchanged. The
+crafting screen is a dumb view; future crafting stations just filter
+recipes by RecipeDefinition.station.
+
+### 10. BuildingManager (`building_manager.gd`)
 Owns every placed `BuildingEntity`: placement validation + payment,
 upgrades, removal, selection, daily production, passive effect totals
 (`total_effect("defense")`), and building save data. The world scene
 registers a container node on load; the manager spawns entities into it.
 
-### 10. ObstacleManager (`obstacle_manager.gd`)
+### 11. ObstacleManager (`obstacle_manager.gd`)
 Natural obstacles (trees, rocks, debris, ...) and the clearing loop:
 procedural scatter on new maps from `data/tables/world_generation.json`,
 timed clearing tasks that cost resources, optionally use workers (each
@@ -152,7 +161,7 @@ WorldManager's `is_area_buildable` / `is_cell_walkable` through a
 duck-typed occupant contract — so decorative, walkable and solid
 obstacles all use the same code path.
 
-### 11. CombatManager (`combat_manager.gd`)
+### 12. CombatManager (`combat_manager.gd`)
 Squad missions against "infested" danger zones. Flow: tap a zone → the
 HUD shows risk/enemy estimate → squad select screen → BattleScene
 overlay (a CanvasLayer above the frozen world — no scene change; a
@@ -169,7 +178,7 @@ in `data/roles/` and `data/zombies/` (both extend CombatantDefinition,
 so units share one code path). The ability bar is a list of
 CombatAbility subclasses — new abilities are one small class each.
 
-### 12. WorldMapManager (`world_map_manager.gd`)
+### 13. WorldMapManager (`world_map_manager.gd`)
 The Last-Day-on-Earth-style world layer. Fixed LocationDefinitions form
 a territory graph via their `requires` lists; states are LOCKED →
 AVAILABLE → CLEARED (or CONTROLLED for locations with
@@ -182,12 +191,12 @@ already shaped as data so multiple simultaneous squads is a small
 change. Locations carry future hooks: `resource_bonus` for controlled
 income, and the state enum supports event/story locations.
 
-### 13. AudioManager (`audio_manager.gd`)
+### 14. AudioManager (`audio_manager.gd`)
 Creates Music/SFX buses at runtime, a round-robin SFX player pool (safe
 to spam on mobile), music crossfade, and volume persistence separate
 from game saves.
 
-### 14. InputManager (`input_manager.gd`)
+### 15. InputManager (`input_manager.gd`)
 Translates raw touch/mouse events into gestures: `tapped`,
 `long_pressed`, `drag_updated`, `zoom_requested`. Uses
 `_unhandled_input`, so any UI Control that accepts an event
@@ -196,13 +205,13 @@ anywhere. **Why:** gameplay code written against gestures works
 identically on Android touch and desktop mouse, and a replay/AI system
 can emit the same signals.
 
-### 15. UIManager (`ui_manager.gd`)
+### 16. UIManager (`ui_manager.gd`)
 Persistent CanvasLayers that survive scene changes: a modal screen stack
 (`push_screen`/`pop_screen`), toast notifications, and the fade
 transition overlay. Screens extend `UIScreen` for consistent open/close
 behaviour.
 
-### 16. GameManager (`game_manager.gd`)
+### 17. GameManager (`game_manager.gd`)
 Top-level state machine (MENU/LOADING/PLAYING/PAUSED) and the only
 system that changes scenes. New-game/continue flow: reset all session
 managers → load world scene → world calls `notify_world_ready()` →

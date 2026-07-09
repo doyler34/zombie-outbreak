@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "spear"
+display_name = "Wooden Spear"
+icon = "🔱"
+icon_color = Color(0.8,0.62,0.4, 1)
+description = "A sharpened hardwood spear. Simple, silent, effective."
+type = 2
+max_stack = 1
+damage = 14
+sort_order = 32

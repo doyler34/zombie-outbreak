@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "wall_segment"
+display_name = "Wall Segment"
+icon = "🧱"
+icon_color = Color(0.7,0.45,0.3, 1)
+description = "A prefab defensive wall piece, ready to place."
+type = 0
+max_stack = 10
+sort_order = 60

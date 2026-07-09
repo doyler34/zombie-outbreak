@@ -15,6 +15,7 @@ const BUILDINGS_DIR := "res://data/buildings"
 const RESOURCES_DIR := "res://data/resources"
 const OBSTACLES_DIR := "res://data/obstacles"
 const ITEMS_DIR := "res://data/items"
+const RECIPES_DIR := "res://data/recipes"
 const ROLES_DIR := "res://data/roles"
 const ZOMBIES_DIR := "res://data/zombies"
 const LOCATIONS_DIR := "res://data/locations"
@@ -26,6 +27,7 @@ var _buildings: Dictionary = {}  # id -> BuildingDefinition
 var _resources: Dictionary = {}  # id -> ResourceDefinition
 var _obstacles: Dictionary = {}  # id -> ObstacleDefinition
 var _items: Dictionary = {}      # id -> ItemDefinition
+var _recipes: Dictionary = {}    # id -> RecipeDefinition
 var _roles: Dictionary = {}      # id -> SurvivorRoleDefinition
 var _zombies: Dictionary = {}    # id -> ZombieDefinition
 var _locations: Dictionary = {}  # id -> LocationDefinition
@@ -39,13 +41,14 @@ func _ready() -> void:
 	_load_definitions(RESOURCES_DIR, _resources)
 	_load_definitions(OBSTACLES_DIR, _obstacles)
 	_load_definitions(ITEMS_DIR, _items)
+	_load_definitions(RECIPES_DIR, _recipes)
 	_load_definitions(ROLES_DIR, _roles)
 	_load_definitions(ZOMBIES_DIR, _zombies)
 	_load_definitions(LOCATIONS_DIR, _locations)
 	_load_tables()
-	print("[DataManager] %d buildings, %d resources, %d obstacles, %d items, %d roles, %d zombies, %d locations, %d tables" % [
+	print("[DataManager] %d buildings, %d resources, %d obstacles, %d items, %d recipes, %d roles, %d zombies, %d locations, %d tables" % [
 		_buildings.size(), _resources.size(), _obstacles.size(), _items.size(),
-		_roles.size(), _zombies.size(), _locations.size(), _tables.size()])
+		_recipes.size(), _roles.size(), _zombies.size(), _locations.size(), _tables.size()])
 
 
 # ── Buildings ────────────────────────────────────────────────────────────
@@ -100,6 +103,21 @@ func all_items() -> Array[ItemDefinition]:
 	var list: Array[ItemDefinition] = []
 	for def: ItemDefinition in _items.values():
 		list.append(def)
+	list.sort_custom(func(a, b): return a.sort_order < b.sort_order)
+	return list
+
+
+# ── Recipes ──────────────────────────────────────────────────────────────
+
+func get_recipe(id: String) -> RecipeDefinition:
+	return _recipes.get(id)
+
+
+func all_recipes() -> Array[RecipeDefinition]:
+	var list: Array[RecipeDefinition] = []
+	for def: RecipeDefinition in _recipes.values():
+		if def.unlocked_from_start:
+			list.append(def)
 	list.sort_custom(func(a, b): return a.sort_order < b.sort_order)
 	return list
 

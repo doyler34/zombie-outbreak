@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "cloth"
+display_name = "Cloth"
+icon = "🧵"
+icon_color = Color(0.85,0.8,0.7, 1)
+description = "Scavenged fabric and plant fibre. Bandage material."
+type = 0
+max_stack = 30
+sort_order = 14

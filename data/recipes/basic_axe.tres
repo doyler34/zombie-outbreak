@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="RecipeDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/recipe_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "basic_axe"
+result_item = "axe"
+result_count = 1
+ingredients = {
+"stone": 2,
+"wood": 3
+}
+sort_order = 20

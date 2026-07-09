@@ -67,6 +67,16 @@
       "id": "pickaxe",
       "count": 1,
       "nodes": 1
+    },
+    {
+      "id": "cloth",
+      "count": 2,
+      "nodes": 3
+    },
+    {
+      "id": "electronics",
+      "count": 1,
+      "nodes": 3
     }
   ]
 }

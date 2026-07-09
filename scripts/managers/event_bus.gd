@@ -56,6 +56,8 @@ signal item_used(item: ItemDefinition)
 signal resource_gathered(node: Node3D, item_id: String, amount: int)
 ## A slot was thrown away — GroundItems turns it into a world pickup.
 signal item_dropped(item_id: String, count: int)
+## A recipe was successfully crafted (tutorial, quests, audio...).
+signal item_crafted(recipe: RecipeDefinition, result: ItemDefinition)
 
 # ── Combat / missions ────────────────────────────────────────────────────
 signal mission_started(zone: ObstacleEntity)

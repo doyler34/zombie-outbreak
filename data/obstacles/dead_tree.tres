@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/nature/DeadTree_1.gltf" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "dead_tree"
+display_name = "Dead Tree"
+description = "Long dead and bone dry. Easy firewood."
+model = ExtResource("2")
+model_kind = "tree"
+grid_size = Vector2i(1, 1)
+clear_rewards = {
+"wood": 25
+}
+clear_time = 12.0
+health = 60
+max_workers = 2
+worker_time_bonus = 0.5
+gather_item = "wood"
+gather_stock = 6
+gather_yield = 2
+gather_time = 1.6
+gather_verb = "Gather"

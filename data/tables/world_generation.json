@@ -40,6 +40,10 @@
     {
       "id": "medical_crate",
       "count": 4
+    },
+    {
+      "id": "dead_tree",
+      "count": 14
     }
   ],
   "ground_items": [

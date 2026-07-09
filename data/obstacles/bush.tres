@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/nature/Bush_Common.gltf" id="3"]
 [ext_resource type="Texture2D" path="res://assets/textures/obstacles/bush.png" id="2"]
 
 [resource]
@@ -9,6 +10,7 @@ model_kind = "bush"
 id = "bush"
 display_name = "Berry Bush"
 description = "Wild berries. Quick to clear — and it grows back."
+model = ExtResource("3")
 texture = ExtResource("2")
 grid_size = Vector2i(1, 1)
 blocks_movement = false

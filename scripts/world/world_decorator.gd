@@ -44,14 +44,53 @@ const FOLIAGE_RULES: Array[Dictionary] = [
 	},
 ]
 
+## Terrain mesh density: one vertex every this many meters.
+const TERRAIN_STEP := 2.0
+
 var _region: RegionMap
+var _heights: Heightfield
 
 
-## Called by GameWorld after the ground plane exists.
+## Called by GameWorld after the ground node exists.
 func setup(ground: MeshInstance3D) -> void:
 	_region = RegionMap.load_default()
+	_heights = Heightfield.create_default(_region)
+	# Register FIRST: everything placed after this (obstacles, buildings,
+	# pickups, NPCs) lands at the right elevation via WorldManager.
+	WorldManager.set_heightfield(_heights)
+	_build_terrain(ground)
 	_paint_ground(ground)
 	_plant_foliage()
+
+
+## Replace the flat plane with a heightfield mesh sampled from the same
+## Heightfield gameplay stands on. Vertices are in world space (the
+## ground node sits at the origin); the splat shader keys off world XZ,
+## so painting works identically on the relief.
+func _build_terrain(ground: MeshInstance3D) -> void:
+	var world := WorldManager.world_rect()
+	var cols := int(ceil(world.size.x / TERRAIN_STEP))
+	var rows := int(ceil(world.size.y / TERRAIN_STEP))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for row in rows + 1:
+		for col in cols + 1:
+			var xz := world.position + Vector2(col, row) * TERRAIN_STEP
+			xz = xz.min(world.end)
+			st.set_normal(_heights.normal_at(xz))
+			st.add_vertex(Vector3(xz.x, _heights.height_at(xz), xz.y))
+	var stride := cols + 1
+	for row in rows:
+		for col in cols:
+			var i := row * stride + col
+			st.add_index(i)
+			st.add_index(i + 1)
+			st.add_index(i + stride)
+			st.add_index(i + 1)
+			st.add_index(i + stride + 1)
+			st.add_index(i + stride)
+	ground.mesh = st.commit()
+	ground.position = Vector3.ZERO
 
 
 # ── Ground painting ──────────────────────────────────────────────────────
@@ -150,7 +189,7 @@ func _scatter(mesh: Mesh, rule: Dictionary, count: int, rng: RandomNumberGenerat
 		var xf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU)
 			.scaled(Vector3.ONE * rng.randf_range(
 				float(rule.scale_min), float(rule.scale_max))),
-			Vector3(xz.x, 0, xz.y))
+			Vector3(xz.x, _heights.height_at(xz), xz.y))
 		transforms.append(xf)
 
 	var multimesh := MultiMesh.new()

@@ -119,6 +119,7 @@ func _step(direction: Vector3, strength: float, delta: float) -> void:
 		var probe := next + Vector3(0, 0, motion.z + signf(motion.z) * WALL_PROBE)
 		if _is_walkable(probe):
 			next.z += motion.z
+	next.y = WorldManager.ground_height(next)
 	position = next
 
 

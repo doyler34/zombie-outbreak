@@ -159,6 +159,7 @@ func _seek(target: Vector3, delta: float) -> bool:
 		if _is_walkable(probe):
 			next.z += motion.z
 			moved = true
+	next.y = WorldManager.ground_height(next)
 	position = next
 
 	if not moved:

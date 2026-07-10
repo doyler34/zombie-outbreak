@@ -134,9 +134,11 @@ func _touch_center() -> Vector2:
 	return (positions[0] + positions[1]) / 2.0 if positions.size() >= 2 else Vector2.ZERO
 
 
-## Screen → world by casting the active 3D camera's ray onto the ground
-## plane (Y = 0). Returns Vector3.ZERO when no 3D camera is active
-## (menus) or the ray is parallel to the ground.
+## Screen → world by casting the active 3D camera's ray onto the
+## ground. Returns Vector3.ZERO when no 3D camera is active (menus) or
+## the ray is parallel to the ground. Terrain relief is handled by
+## re-intersecting against the local ground height a couple of times —
+## exact enough for tap selection on gentle hills without physics.
 func _to_world(screen_pos: Vector2) -> Vector3:
 	var camera := get_viewport().get_camera_3d()
 	if camera == null:
@@ -145,5 +147,10 @@ func _to_world(screen_pos: Vector2) -> Vector3:
 	var direction := camera.project_ray_normal(screen_pos)
 	if absf(direction.y) < 0.0001:
 		return Vector3.ZERO
-	var t := -origin.y / direction.y
-	return origin + direction * t
+	var ground := 0.0
+	var hit := origin
+	for _refine in 3:
+		var t := (ground - origin.y) / direction.y
+		hit = origin + direction * t
+		ground = WorldManager.ground_height(hit)
+	return hit

@@ -28,7 +28,8 @@ func spawn(item_id: String, count: int, world_pos: Vector3) -> GroundItem:
 	var pickup := GroundItem.new()
 	add_child(pickup)
 	pickup.setup(item_id, count)
-	pickup.position = Vector3(world_pos.x, 0, world_pos.z)
+	pickup.position = Vector3(world_pos.x,
+		WorldManager.ground_height(world_pos), world_pos.z)
 	return pickup
 
 

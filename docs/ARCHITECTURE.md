@@ -269,6 +269,14 @@ Disposable view over manager state:
   the UE-mannequin rig, incl. zombie/farming/chopping clips) auto-merge
   into any character whose skeleton matches — Kenney minis keep their
   built-in clips.
+- **Elevation** — `Heightfield` is deterministic authored noise:
+  gentle rolling hills that flatten across the HQ clearing (from the
+  region layout). `WorldDecorator` builds the terrain mesh from it and
+  registers it on `WorldManager`, whose `ground_height()` /
+  `cell_to_world()` / `area_center()` ground EVERYTHING — characters,
+  props, pickups, camera focus and tap raycasts all stand on the same
+  surface the renderer draws. Amplitude is a GameSettings knob
+  (0 = flat); a future terrain backend swaps the sampling source only.
 - **Handcrafted region** — `RegionMap` loads
   `data/tables/region_layout.json`: authored zone circles (HQ clearing,
   dense forest, rocky ridge, campsite, resource field, town entrance,

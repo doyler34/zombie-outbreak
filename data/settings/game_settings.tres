@@ -22,6 +22,7 @@ long_press_duration = 0.6
 joystick_radius = 90.0
 joystick_dead_zone = 0.2
 interaction_reach = 2.6
+terrain_amplitude = 2.4
 desktop_foliage_density = 1.0
 mobile_foliage_density = 0.35
 mobile_shadows = true

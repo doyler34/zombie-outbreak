@@ -62,6 +62,10 @@ extends Resource
 ## Items granted on a new game: {item_id: count}.
 @export var starting_items: Dictionary = {}
 
+@export_group("Terrain")
+## Rolling-hill height range (m) outside the HQ clearing. 0 = flat world.
+@export var terrain_amplitude: float = 2.4
+
 @export_group("Quality")
 ## Foliage instance-count multiplier on desktop (1.0 = authored density).
 @export var desktop_foliage_density: float = 1.0

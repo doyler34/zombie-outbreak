@@ -108,10 +108,11 @@ func _on_zoom(factor: float, _screen_pos: Vector2) -> void:
 
 # ── Internal ─────────────────────────────────────────────────────────────
 
-## Keep the focus point inside the world rect (XZ plane).
+## Keep the focus point inside the world rect, resting on the terrain
+## so hills don't drift the subject off-frame.
 func _clamped(pos: Vector3) -> Vector3:
 	var world := WorldManager.world_rect()
 	pos.x = clampf(pos.x, world.position.x, world.end.x)
 	pos.z = clampf(pos.z, world.position.y, world.end.y)
-	pos.y = 0.0
+	pos.y = WorldManager.ground_height(pos)
 	return pos

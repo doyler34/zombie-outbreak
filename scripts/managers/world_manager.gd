@@ -11,15 +11,32 @@ extends Node
 ## reference — buildings, future props and blockers all use the same API.
 
 var _occupancy: Dictionary = {}  # Vector2i -> Node
+## Elevation source registered by the world scene (null = flat world).
+var _heightfield: Heightfield = null
 
 
 func reset() -> void:
 	_occupancy.clear()
 
 
+# ── Elevation ────────────────────────────────────────────────────────────
+
+## Registered by WorldDecorator once the region's terrain is built;
+## everything that stands on the ground asks here so gameplay and the
+## rendered terrain can never disagree.
+func set_heightfield(heightfield: Heightfield) -> void:
+	_heightfield = heightfield
+
+
+func ground_height(world_pos: Vector3) -> float:
+	if _heightfield == null:
+		return 0.0
+	return _heightfield.height_at(Vector2(world_pos.x, world_pos.z))
+
+
 # ── Grid math ────────────────────────────────────────────────────────────
 # Cells are 2D indices; world positions are Vector3 on the XZ ground
-# plane (cell.x → world X, cell.y → world Z, ground at Y = 0).
+# plane (cell.x → world X, cell.y → world Z, Y from ground_height).
 
 func cell_size() -> float:
 	return DataManager.settings.cell_size
@@ -37,15 +54,23 @@ func world_to_cell(world_pos: Vector3) -> Vector2i:
 		floori(world_pos.z / cell_size()))
 
 
-## Corner of a cell (minimum X/Z), on the ground plane.
+## Corner of a cell (minimum X/Z), resting on the ground.
 func cell_to_world(cell: Vector2i) -> Vector3:
-	return Vector3(cell.x * cell_size(), 0.0, cell.y * cell_size())
+	var pos := Vector3(cell.x * cell_size(), 0.0, cell.y * cell_size())
+	pos.y = ground_height(pos)
+	return pos
 
 
-## Center of a footprint whose corner cell is [param cell].
+## Center of a footprint whose corner cell is [param cell], resting on
+## the ground — so everything placed by cell is automatically at the
+## right elevation.
 func area_center(cell: Vector2i, size_in_cells: Vector2i) -> Vector3:
-	return cell_to_world(cell) + Vector3(
-		size_in_cells.x * cell_size() / 2.0, 0.0, size_in_cells.y * cell_size() / 2.0)
+	var pos := Vector3(
+		cell.x * cell_size() + size_in_cells.x * cell_size() / 2.0,
+		0.0,
+		cell.y * cell_size() + size_in_cells.y * cell_size() / 2.0)
+	pos.y = ground_height(pos)
+	return pos
 
 
 func is_cell_inside_world(cell: Vector2i) -> bool:

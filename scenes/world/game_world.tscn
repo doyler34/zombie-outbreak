@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/building_placer.gd" id="2"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/ui/interact_button.gd" id="9"]
 [ext_resource type="Script" path="res://scripts/ui/hotbar.gd" id="10"]
 [ext_resource type="Script" path="res://scripts/world/ground_items.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/world/world_decorator.gd" id="12"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -32,6 +33,9 @@ directional_shadow_blend_splits = true
 shadow_bias = 0.05
 
 [node name="Ground" type="MeshInstance3D" parent="."]
+
+[node name="WorldDecorator" type="Node3D" parent="."]
+script = ExtResource("12")
 
 [node name="Obstacles" type="Node3D" parent="."]
 

@@ -1,0 +1,20 @@
+{
+  "comment": "Handcrafted layout of the first region. Positions/radii in grid cells (world is 48x48, so +/-24). Zones tint the ground, gate obstacle scatter and steer foliage density; roads/pads are painted surfaces kept clear of foliage and obstacles.",
+  "zones": [
+    {"id": "hq_clearing",    "type": "clearing", "center": [0, 0],     "radius": 7},
+    {"id": "dense_forest",   "type": "forest",   "center": [-13, -10], "radius": 9},
+    {"id": "north_woods",    "type": "forest",   "center": [4, -16],   "radius": 6},
+    {"id": "rocky_ridge",    "type": "rocky",    "center": [14, -11],  "radius": 7},
+    {"id": "campsite",       "type": "campsite", "center": [-5, 13],   "radius": 3},
+    {"id": "resource_field", "type": "resource", "center": [-15, 9],   "radius": 6},
+    {"id": "town_entrance",  "type": "town",     "center": [21, 2],    "radius": 4},
+    {"id": "south_reserve",  "type": "reserved", "center": [10, 16],   "radius": 7}
+  ],
+  "roads": [
+    {"from": [2, 0],   "to": [21, 2],   "width": 2.4, "surface": "asphalt"},
+    {"from": [0, 2],   "to": [-4, 12],  "width": 1.1, "surface": "dirt"},
+    {"from": [-2, -1], "to": [-12, -9], "width": 1.1, "surface": "dirt"},
+    {"from": [-3, 2],  "to": [-14, 8],  "width": 1.2, "surface": "gravel"}
+  ],
+  "hq_pad": {"center": [0, 0], "radius": 3.2}
+}

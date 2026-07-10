@@ -269,6 +269,20 @@ Disposable view over manager state:
   the UE-mannequin rig, incl. zombie/farming/chopping clips) auto-merge
   into any character whose skeleton matches — Kenney minis keep their
   built-in clips.
+- **Handcrafted region** — `RegionMap` loads
+  `data/tables/region_layout.json`: authored zone circles (HQ clearing,
+  dense forest, rocky ridge, campsite, resource field, town entrance,
+  reserved expansion space), painted roads/footpaths and the HQ
+  concrete pad. `WorldDecorator` rasterizes that layout into a splat
+  map the ground shader blends (grass base + dirt/mud, gravel, cracked
+  asphalt, concrete — all procedural detail, no ground textures), and
+  plants instanced foliage (MultiMesh grass/flowers, one draw call per
+  type) with per-zone density weights, kept off pavement.
+  `ObstacleManager`'s scatter is zone-aware too — trees fill forests,
+  rocks the ridge, crates the campsite. `QualityProfile` scales foliage
+  counts, draw distance and sun shadows down on Android. The layout is
+  renderer-agnostic: a future terrain backend (e.g. Terrain3D) replaces
+  only the painting/mesh, not the design data or queries.
 - **Gathering + ground items** — gatherable data lives on
   ObstacleDefinition (`gather_item/stock/yield/time/tool/verb/anim`):
   interacting with a tree/rock/scrap pile/crate runs auto-repeating

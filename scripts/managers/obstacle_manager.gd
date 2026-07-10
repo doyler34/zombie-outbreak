@@ -47,11 +47,17 @@ func reset() -> void:
 
 ## Scatter obstacles for a NEW game, from data/tables/world_generation.json.
 ## Never called when loading — saved obstacles are restored instead.
+##
+## Entries may pin themselves to region zones ("zones": ["forest"]) so
+## the map reads authored: trees crowd the forests, rocks the ridge,
+## crates the campsite. Zoneless entries scatter map-wide. Everything
+## stays off painted roads/paths and the HQ slab.
 func generate_initial_obstacles() -> void:
 	var table: Dictionary = DataManager.get_table("world_generation")
 	if table == null:
 		push_warning("[ObstacleManager] No world_generation table; map will be empty.")
 		return
+	var region := RegionMap.load_default()
 	var clear_radius := int(table.get("spawn_clear_radius_cells", 5))
 	var half := DataManager.settings.world_size / 2
 	var rng := RandomNumberGenerator.new()
@@ -62,22 +68,46 @@ func generate_initial_obstacles() -> void:
 		if def == null:
 			push_warning("[ObstacleManager] world_generation references unknown obstacle: %s" % entry)
 			continue
+		var home_zones := _zones_for_entry(region, entry)
 		var placed := 0
 		var attempts := 0
 		var target := int(entry.get("count", 0))
 		# Cap attempts so a crowded map can't hang generation.
-		while placed < target and attempts < target * 20:
+		while placed < target and attempts < target * 24:
 			attempts += 1
-			var cell := Vector2i(
-				rng.randi_range(-half.x, half.x - def.grid_size.x),
-				rng.randi_range(-half.y, half.y - def.grid_size.y))
+			var cell := _candidate_cell(region, home_zones, def, half, rng)
 			# Keep the starting area buildable.
 			if Vector2(cell + def.grid_size / 2).length() < clear_radius:
 				continue
 			if not WorldManager.is_area_free(cell, def.grid_size):
 				continue
+			# Roads, footpaths and the slab stay clear.
+			var center := WorldManager.area_center(cell, def.grid_size)
+			if region.is_paved(Vector2(center.x, center.z)):
+				continue
 			_spawn(def, cell)
 			placed += 1
+
+
+func _zones_for_entry(region: RegionMap, entry: Dictionary) -> Array:
+	var out := []
+	for type in entry.get("zones", []):
+		out.append_array(region.zones_of_type(String(type)))
+	return out
+
+
+func _candidate_cell(region: RegionMap, home_zones: Array, def: ObstacleDefinition,
+		half: Vector2i, rng: RandomNumberGenerator) -> Vector2i:
+	if home_zones.is_empty():
+		return Vector2i(
+			rng.randi_range(-half.x, half.x - def.grid_size.x),
+			rng.randi_range(-half.y, half.y - def.grid_size.y))
+	var zone: Dictionary = home_zones[rng.randi() % home_zones.size()]
+	var point := region.random_point_in(zone, rng)
+	var cell := WorldManager.world_to_cell(Vector3(point.x, 0, point.y))
+	cell.x = clampi(cell.x, -half.x, half.x - def.grid_size.x)
+	cell.y = clampi(cell.y, -half.y, half.y - def.grid_size.y)
+	return cell
 
 
 # ── Clearing flow ────────────────────────────────────────────────────────

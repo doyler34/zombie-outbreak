@@ -62,6 +62,17 @@ extends Resource
 ## Items granted on a new game: {item_id: count}.
 @export var starting_items: Dictionary = {}
 
+@export_group("Quality")
+## Foliage instance-count multiplier on desktop (1.0 = authored density).
+@export var desktop_foliage_density: float = 1.0
+## Foliage multiplier on Android/iOS.
+@export var mobile_foliage_density: float = 0.35
+## Whether the sun casts shadows on mobile (desktop always does).
+@export var mobile_shadows: bool = false
+## Foliage draw distance (m) per platform.
+@export var desktop_foliage_view_distance: float = 110.0
+@export var mobile_foliage_view_distance: float = 60.0
+
 @export_group("Population")
 ## Survivors the player starts a new game with (the founding crew —
 ## exempt from the housing cap).

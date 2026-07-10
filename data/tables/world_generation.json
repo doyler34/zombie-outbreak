@@ -3,47 +3,103 @@
   "obstacles": [
     {
       "id": "tree",
-      "count": 46
+      "count": 46,
+      "zones": [
+        "forest"
+      ]
     },
     {
       "id": "bush",
-      "count": 24
+      "count": 24,
+      "zones": [
+        "forest",
+        "resource"
+      ]
     },
     {
       "id": "rock",
-      "count": 20
+      "count": 20,
+      "zones": [
+        "rocky",
+        "resource"
+      ]
     },
     {
       "id": "fallen_log",
-      "count": 12
+      "count": 12,
+      "zones": [
+        "forest",
+        "resource"
+      ]
     },
     {
       "id": "rubble",
-      "count": 14
+      "count": 14,
+      "zones": [
+        "town",
+        "resource"
+      ]
     },
     {
       "id": "debris",
-      "count": 10
+      "count": 10,
+      "zones": [
+        "resource",
+        "town",
+        "campsite"
+      ]
     },
     {
       "id": "boulder",
-      "count": 6
+      "count": 6,
+      "zones": [
+        "rocky"
+      ]
     },
     {
       "id": "zombie_nest",
-      "count": 8
+      "count": 8,
+      "zones": [
+        "forest",
+        "rocky",
+        "reserved"
+      ]
     },
     {
       "id": "food_crate",
-      "count": 6
+      "count": 6,
+      "zones": [
+        "campsite",
+        "resource"
+      ]
     },
     {
       "id": "medical_crate",
-      "count": 4
+      "count": 4,
+      "zones": [
+        "campsite",
+        "town"
+      ]
     },
     {
       "id": "dead_tree",
-      "count": 14
+      "count": 14,
+      "zones": [
+        "forest",
+        "rocky"
+      ]
+    },
+    {
+      "id": "dead_tree",
+      "count": 6
+    },
+    {
+      "id": "rock",
+      "count": 5
+    },
+    {
+      "id": "bush",
+      "count": 8
     }
   ],
   "ground_items": [

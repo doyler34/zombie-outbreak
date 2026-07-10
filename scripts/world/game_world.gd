@@ -13,6 +13,7 @@ extends Node3D
 const GROUND_SHADER := preload("res://assets/shaders/ground_tiles.gdshader")
 
 @onready var ground: MeshInstance3D = $Ground
+@onready var decorator: WorldDecorator = $WorldDecorator
 @onready var sun: DirectionalLight3D = $Sun
 @onready var buildings: Node3D = $Buildings
 @onready var obstacles: Node3D = $Obstacles
@@ -29,10 +30,14 @@ func _ready() -> void:
 	BuildingManager.register_container(buildings)
 	ObstacleManager.register_container(obstacles)
 
-	# Angled sun for big readable shadows.
+	# Angled sun for big readable shadows (mobile may disable them).
 	sun.rotation_degrees = Vector3(-50, -35, 0)
+	sun.shadow_enabled = QualityProfile.shadows_enabled()
 
 	_setup_ground()
+	# Paint roads/paths/the HQ slab and plant instanced foliage from the
+	# handcrafted region layout.
+	decorator.setup(ground)
 
 	InputManager.tapped.connect(_on_world_tapped)
 	EventBus.game_tick.connect(_update_day_night)

@@ -68,7 +68,9 @@ extends Resource
 ## Foliage multiplier on Android/iOS.
 @export var mobile_foliage_density: float = 0.35
 ## Whether the sun casts shadows on mobile (desktop always does).
-@export var mobile_shadows: bool = false
+## Shadows are the strongest depth cue the scene has — leave them on
+## unless a low-end device profile really needs them gone.
+@export var mobile_shadows: bool = true
 ## Foliage draw distance (m) per platform.
 @export var desktop_foliage_view_distance: float = 110.0
 @export var mobile_foliage_view_distance: float = 60.0

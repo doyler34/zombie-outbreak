@@ -1,24 +1,30 @@
 class_name CameraController
 extends Node3D
-## Clash-style orthographic camera rig.
+## LDoE-style perspective camera rig.
 ##
 ## This node is the look-at target on the ground plane; the child
-## Camera3D is pitched down and yawed 45° for the diagonal isometric
-## look, pulled back along its view axis. Drag pans the rig across the
-## XZ plane in camera-relative directions; pinch/wheel changes the
-## orthographic size (chunky zoom). All tuning lives in GameSettings.
+## Camera3D is pitched down and pulled back along its view axis with a
+## real PERSPECTIVE projection — near things are bigger, far things
+## shrink, object sides are visible, so the world reads unmistakably 3D
+## (an orthographic camera flattens exactly this away). Drag pans the
+## rig across the XZ plane in camera-relative directions; pinch/wheel
+## flies the camera closer/further. All tuning lives in GameSettings —
+## camera_*_size values are the approximate visible ground height (m),
+## converted to a camera distance for the chosen field of view.
 ##
 ## When a follow target is set (the Commander), the rig tracks it every
 ## frame through the same smoothing. A manual drag pauses following so
 ## the player can look around; it resumes as soon as the target moves
 ## again (GameWorld wires Commander.movement_started to resume_follow).
 
-## Distance the camera sits back along its view direction. With an
-## orthographic projection this only needs to clear the tallest object.
-const CAMERA_DISTANCE := 90.0
+## Vertical field of view (degrees). Modest, so the top-down framing
+## keeps gentle perspective instead of fisheye distortion.
+const FOV_DEGREES := 50.0
 
 var _target_position: Vector3
-var _target_size: float
+## Camera boom length (m), smoothed toward _target_distance.
+var _distance: float
+var _target_distance: float
 var _follow_target: Node3D
 var _follow_paused: bool = false
 
@@ -27,16 +33,17 @@ var _follow_paused: bool = false
 
 func _ready() -> void:
 	var settings := DataManager.settings
-	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	camera.fov = FOV_DEGREES
 	camera.rotation_degrees = Vector3(settings.camera_pitch_degrees, settings.camera_yaw_degrees, 0)
-	camera.size = settings.camera_default_size
-	camera.near = 1.0
+	camera.near = 0.5
 	camera.far = 400.0
-	# Pull back along the view direction so the rig origin is the focus.
-	camera.position = camera.transform.basis.z * CAMERA_DISTANCE
+
+	_distance = _distance_for_view_height(settings.camera_default_size)
+	_target_distance = _distance
+	camera.position = camera.transform.basis.z * _distance
 
 	_target_position = position
-	_target_size = camera.size
 	InputManager.drag_updated.connect(_on_drag)
 	InputManager.zoom_requested.connect(_on_zoom)
 
@@ -46,7 +53,14 @@ func _process(delta: float) -> void:
 		_target_position = _clamped(_follow_target.global_position)
 	var weight := clampf(DataManager.settings.camera_smoothing * delta, 0.0, 1.0)
 	position = position.lerp(_target_position, weight)
-	camera.size = lerpf(camera.size, _target_size, weight)
+	_distance = lerpf(_distance, _target_distance, weight)
+	camera.position = camera.transform.basis.z * _distance
+
+
+## Boom length that shows roughly [param height] meters of ground
+## vertically at the focus point.
+func _distance_for_view_height(height: float) -> float:
+	return height / (2.0 * tan(deg_to_rad(FOV_DEGREES) * 0.5))
 
 
 ## Snap instantly (e.g. when the world loads centered on the base).
@@ -71,9 +85,10 @@ func resume_follow() -> void:
 func _on_drag(delta_screen: Vector2) -> void:
 	# A manual pan takes over from following until the target moves again.
 	_follow_paused = true
-	# World units per screen pixel at the current zoom (ortho size is
-	# the vertical extent of the view).
-	var units_per_px := camera.size / get_viewport().get_visible_rect().size.y
+	# World units per screen pixel: how much ground height the current
+	# boom length shows, divided by the viewport height.
+	var view_height := _distance * 2.0 * tan(deg_to_rad(FOV_DEGREES) * 0.5)
+	var units_per_px := view_height / get_viewport().get_visible_rect().size.y
 	# Camera-relative axes flattened onto the ground plane.
 	var basis := camera.global_transform.basis
 	var right := Vector3(basis.x.x, 0, basis.x.z).normalized()
@@ -84,7 +99,9 @@ func _on_drag(delta_screen: Vector2) -> void:
 
 func _on_zoom(factor: float, _screen_pos: Vector2) -> void:
 	var settings := DataManager.settings
-	_target_size = clampf(_target_size / factor, settings.camera_min_size, settings.camera_max_size)
+	_target_distance = clampf(_target_distance / factor,
+		_distance_for_view_height(settings.camera_min_size),
+		_distance_for_view_height(settings.camera_max_size))
 	# Zooming changes how much world fits on screen — re-clamp the pan.
 	_target_position = _clamped(_target_position)
 

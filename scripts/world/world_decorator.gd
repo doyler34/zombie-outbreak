@@ -16,7 +16,7 @@ extends Node3D
 ## lands, the splat build feeds its material instead — the layout
 ## queries and foliage rules carry over unchanged.
 
-const SPLAT_RESOLUTION := 192
+const SPLAT_RESOLUTION := 288
 ## Deterministic so the same map paints/plants identically every load.
 const FOLIAGE_SEED := 1337
 
@@ -76,29 +76,27 @@ func _paint_ground(ground: MeshInstance3D) -> void:
 
 func _splat_for(xz: Vector2) -> Color:
 	var c := Color(0, 0, 0, 0)
-	match _region.surface_at(xz):
-		"concrete":
-			c.a = 1.0
-		"asphalt":
-			c.b = 1.0
-		"gravel":
-			c.g = 1.0
-		"dirt":
-			c.r = 1.0
-		_:
-			# Natural ground: zones leave soft fingerprints so areas read
-			# differently even before their props load in.
-			match _region.zone_type_at(xz):
-				"rocky":
-					c.g = 0.45 * _blotch(xz, 0.22)
-				"forest":
-					c.r = 0.35 * _blotch(xz, 0.16)
-				"campsite":
-					c.g = 0.6 * _blotch(xz, 0.5)
-				"resource":
-					c.r = 0.25 * _blotch(xz, 0.3)
-				"town":
-					c.b = 0.3 * _blotch(xz, 0.25)
+	var paint := _region.surface_coverage(xz)
+	c.r = float(paint.get("dirt", 0.0))
+	c.g = float(paint.get("gravel", 0.0))
+	c.b = float(paint.get("asphalt", 0.0))
+	c.a = float(paint.get("concrete", 0.0))
+
+	# Natural ground: zones leave soft fingerprints so areas read
+	# differently even before their props load in.
+	var open := 1.0 - minf(c.r + c.g + c.b + c.a, 1.0)
+	if open > 0.05:
+		match _region.zone_type_at(xz):
+			"rocky":
+				c.g = maxf(c.g, 0.4 * _blotch(xz, 0.22) * open)
+			"forest":
+				c.r = maxf(c.r, 0.3 * _blotch(xz, 0.16) * open)
+			"campsite":
+				c.g = maxf(c.g, 0.55 * _blotch(xz, 0.5) * open)
+			"resource":
+				c.r = maxf(c.r, 0.22 * _blotch(xz, 0.3) * open)
+			"town":
+				c.b = maxf(c.b, 0.25 * _blotch(xz, 0.25) * open)
 	return c
 
 
@@ -165,8 +163,9 @@ func _scatter(mesh: Mesh, rule: Dictionary, count: int, rng: RandomNumberGenerat
 	var instance := MultiMeshInstance3D.new()
 	instance.multimesh = multimesh
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	instance.visibility_range_end = QualityProfile.foliage_view_distance()
-	instance.visibility_range_end_margin = 8.0
+	# NOTE: no visibility_range here — the orthographic camera sits far
+	# from the ground, so distance-based ranges cull everything. Density
+	# scaling (QualityProfile) is the mobile lever instead.
 	add_child(instance)
 
 

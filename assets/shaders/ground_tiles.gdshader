@@ -7,9 +7,9 @@ shader_type spatial;
 // asphalt, expansion joints in the concrete — so no ground textures
 // ship with the game and it stays cheap on mobile GPUs.
 
-uniform vec3 grass_light : source_color = vec3(0.46, 0.63, 0.33);
-uniform vec3 grass_dark : source_color = vec3(0.40, 0.56, 0.29);
-uniform vec3 seam_color : source_color = vec3(0.37, 0.52, 0.27);
+uniform vec3 grass_light : source_color = vec3(0.42, 0.55, 0.31);
+uniform vec3 grass_dark : source_color = vec3(0.35, 0.47, 0.27);
+uniform vec3 seam_color : source_color = vec3(0.32, 0.43, 0.25);
 uniform vec3 dirt_color : source_color = vec3(0.47, 0.36, 0.24);
 uniform vec3 mud_color : source_color = vec3(0.33, 0.26, 0.18);
 uniform vec3 gravel_color : source_color = vec3(0.52, 0.50, 0.46);
@@ -54,25 +54,30 @@ void fragment() {
 	// ── Painted layers from the splat map ────────────────────────────
 	vec2 splat_uv = (world_xz - world_origin) / world_extent;
 	vec4 splat = texture(splat_map, splat_uv);
-	// Organic edge break-up so painted shapes don't look vector-clean.
-	float fray = noise(world_xz * 0.9) * 0.30 - 0.15;
+	// Gentle organic edge wobble (large-scale, so it bends the painted
+	// outline instead of pixelating it).
+	float fray = (noise(world_xz * 0.30) - 0.5) * 0.35;
 
-	float w_dirt = clamp(splat.r + fray * splat.r, 0.0, 1.0);
-	float w_gravel = clamp(splat.g + fray * splat.g, 0.0, 1.0);
+	float w_dirt = clamp(splat.r * (1.0 + fray), 0.0, 1.0);
+	float w_gravel = clamp(splat.g * (1.0 + fray), 0.0, 1.0);
 	float w_asphalt = clamp(splat.b, 0.0, 1.0);
 	float w_concrete = clamp(splat.a, 0.0, 1.0);
 
 	// Dirt with darker trodden mud pockets.
 	float mud = smoothstep(0.55, 0.8, noise(world_xz * 0.35));
-	vec3 dirt = mix(dirt_color, mud_color, mud * 0.8);
-	// Gravel speckle.
-	vec3 gravel = gravel_color * (0.88 + 0.24 * hash(floor(world_xz * 3.0)));
-	// Asphalt: worn tone variation + crack lines from ridged noise.
-	float wear = noise(world_xz * 0.22);
-	float ridge = abs(noise(world_xz * 0.8) * 2.0 - 1.0);
-	float crack = 1.0 - smoothstep(0.0, 0.09, ridge);
-	vec3 asphalt = asphalt_color * (0.85 + 0.3 * wear);
-	asphalt = mix(asphalt, asphalt * 0.55, crack * 0.8);
+	vec3 dirt = mix(dirt_color, mud_color, mud * 0.7);
+	// Gravel: soft pebbly variation, not static noise.
+	float pebble = noise(world_xz * 1.6);
+	vec3 gravel = gravel_color * (0.9 + 0.18 * pebble);
+	// Asphalt: subtle wear + thin crack lines from ridged noise.
+	float wear = noise(world_xz * 0.15);
+	float ridge = abs(noise(world_xz * 0.45) * 2.0 - 1.0);
+	float crack = 1.0 - smoothstep(0.02, 0.05, ridge);
+	vec3 asphalt = asphalt_color * (0.92 + 0.14 * wear);
+	asphalt = mix(asphalt, asphalt * 0.6, crack * 0.6);
+	// Faded centre line down the highway.
+	// (kept procedural: distance to the painted strip's own middle is
+	// unknown here, so wear does the storytelling instead)
 	// Concrete slab with expansion joints every two cells.
 	vec2 slab = abs(fract(world_xz / (cell_size * 2.0)) - 0.5);
 	float joint = smoothstep(0.47, 0.5, max(slab.x, slab.y));

@@ -21,6 +21,10 @@ extends Resource
 ## Placeholder shape when no model is assigned:
 ## "tree", "bush", "rock", "boulder", "log", "pile", "nest" or "box".
 @export var model_kind: String = "box"
+## Albedo tint multiplied onto the model's materials (WHITE = none).
+## Lets one kit asset serve several looks — e.g. recoloring red
+## autumn foliage to living green.
+@export var model_tint: Color = Color.WHITE
 ## Footprint on the grid, in cells.
 @export var grid_size: Vector2i = Vector2i(1, 1)
 

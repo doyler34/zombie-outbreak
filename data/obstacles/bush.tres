@@ -30,3 +30,4 @@ gather_stock = 4
 gather_yield = 1
 gather_time = 1.6
 gather_verb = "Gather"
+model_tint = Color(0.55, 0.72, 0.4, 1)

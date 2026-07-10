@@ -72,7 +72,10 @@ static func _load_scene(path: String) -> PackedScene:
 
 static func obstacle_model(def: ObstacleDefinition, footprint: Vector2) -> Node3D:
 	if def.model != null:
-		return _fitted(def.model, footprint * FOOTPRINT_FILL, def.model_scale)
+		var node := _fitted(def.model, footprint * FOOTPRINT_FILL, def.model_scale)
+		if def.model_tint != Color.WHITE:
+			tint_model(node, def.model_tint)
+		return node
 	match def.model_kind:
 		"tree": return _tree(footprint)
 		"bush": return _bush(footprint)

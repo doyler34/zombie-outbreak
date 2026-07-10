@@ -110,6 +110,26 @@ func is_paved(xz: Vector2) -> bool:
 	return surface_at(xz) != ""
 
 
+## Anti-aliased paint weights at a point: {surface: 0..1}. Full strength
+## on the surface, feathering out over ~1.5 m — the splat map stays low
+## resolution but edges rasterize smooth instead of stair-stepped.
+func surface_coverage(xz: Vector2) -> Dictionary:
+	var weights := {}
+	if pad_radius > 0.0:
+		# Chebyshev distance: the slab is a square pad, reads man-made.
+		var d := maxf(absf(xz.x - pad_center.x), absf(xz.y - pad_center.y))
+		var w := 1.0 - smoothstep(pad_radius - 0.5, pad_radius + 1.5, d)
+		if w > 0.0:
+			weights["concrete"] = w
+	for road in roads:
+		var dist := _distance_to_segment(xz, road.a, road.b)
+		var half: float = road.width * 0.5
+		var w := 1.0 - smoothstep(half - 0.4, half + 1.4, dist)
+		if w > 0.0:
+			weights[road.surface] = maxf(w, float(weights.get(road.surface, 0.0)))
+	return weights
+
+
 func _distance_to_segment(p: Vector2, a: Vector2, b: Vector2) -> float:
 	var ab := b - a
 	var t := clampf((p - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)

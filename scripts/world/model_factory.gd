@@ -236,20 +236,30 @@ static func find_animation_player(node: Node) -> AnimationPlayer:
 ## (checked by the library's signature bone) into its AnimationPlayer.
 ## Clips can't retarget across unrelated rigs at runtime, so mismatched
 ## libraries are skipped — Kenney minis keep their own 32 built-in
-## clips. No-op when no library matches or an AnimationPlayer is
-## missing, so it can never break a model that worked without it.
+## clips.
+##
+## Animation-LESS character models (e.g. the Universal Base Characters,
+## which ship as pure meshes on the UAL2 rig) import without an
+## AnimationPlayer at all, so one is created for them: the library's
+## track paths ("Armature/Skeleton3D:bone") resolve identically as long
+## as the model uses the library's scene naming, which same-rig
+## Quaternius exports do.
 static func apply_shared_animations(model: Node) -> void:
 	var skeleton := _find_skeleton(model)
 	if skeleton == null:
 		return
 	var player := find_animation_player(model)
-	if player == null:
-		return
 	var index := 0
 	for entry in SHARED_LIBRARIES:
 		if skeleton.find_bone(entry.bone) < 0:
 			continue
 		for lib in _libraries_from(entry.path):
+			if player == null:
+				player = AnimationPlayer.new()
+				# Child of the scene root, so the default root_node
+				# ("..") resolves paths exactly like the library's own
+				# scene did.
+				model.add_child(player)
 			var lib_name: String = "shared" if index == 0 else "shared%d" % index
 			if not player.has_animation_library(lib_name):
 				player.add_animation_library(lib_name, lib)

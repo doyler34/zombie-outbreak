@@ -26,11 +26,13 @@ const SHARED_LIBRARIES: Array[Dictionary] = [
 	{"path": "res://assets/animations/UAL2_Standard.glb", "bone": "pelvis"},
 ]
 
-## Clip-name candidates, in preference order, covering both the Kenney
-## naming ("idle"/"walk") and the shared library ("Idle_Loop"...).
+## Clip-name candidates, in preference order, covering the Kenney
+## naming ("idle"/"walk"), the Rigify library ("Idle_Loop"...) and the
+## UE-rig UAL2 set (which has no plain idle/walk — its fold-arms idle
+## and carry walk stand in until the UE-rig base library is added).
 ## Resolve once per character with find_anim().
-const IDLE_CANDIDATES: Array[String] = ["idle", "Idle", "Idle_Loop"]
-const WALK_CANDIDATES: Array[String] = ["walk", "Walk", "Walk_Loop", "Jog_Fwd_Loop"]
+const IDLE_CANDIDATES: Array[String] = ["idle", "Idle", "Idle_Loop", "Idle_FoldArms_Loop", "Idle_Rail_Loop"]
+const WALK_CANDIDATES: Array[String] = ["walk", "Walk", "Walk_Loop", "Jog_Fwd_Loop", "Walk_Carry_Loop"]
 
 static var _library_cache: Dictionary = {}  # path -> Array[AnimationLibrary]
 
@@ -112,9 +114,12 @@ static func combatant_model(def: CombatantDefinition) -> Node3D:
 	root.add_child(model)
 	apply_shared_animations(model)
 	# The animation-library mannequins are untextured gray — tint them
-	# with the definition's color so roles/zombies read at a glance.
-	# Textured character models (e.g. Kenney skins) are left alone.
-	if def.model.resource_path.begins_with("res://assets/animations/"):
+	# with the definition's color so roles read at a glance. Zombies are
+	# ALWAYS tinted (their per-type color is how walkers/runners/brutes
+	# tell apart even on real textured character models). Other textured
+	# characters (Kenney skins, base characters) are left alone.
+	if def is ZombieDefinition \
+			or def.model.resource_path.begins_with("res://assets/animations/"):
 		tint_model(model, def.color)
 
 	var bounds := _combined_aabb(model, Transform3D.IDENTITY)

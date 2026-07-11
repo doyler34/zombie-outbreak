@@ -46,7 +46,10 @@ Zombie_Idle/Walk_Fwd/Scratch, Hit_Knockback as death). Mannequins are gray, so
 ModelFactory.combatant_model tints them with the definition color. Clip names
 resolve per rig via ModelFactory.find_anim candidate lists; the two libraries
 use DIFFERENT skeletons (UAL1 "DEF-hips", UAL2 "pelvis") and only merge into
-matching rigs. Kenney mini-characters (32 anims) remain in assets as a fallback.
+matching rigs. Kenney mini-characters (32 anims) remain in assets as a fallback. Playable
+cast now = Universal Base Characters (superhero male/female GLTF, UE rig,
+assets/characters/universal_base) - UAL2 clips drive them; zombies are the
+same models tinted per-type.
 Role→weapon (attached to `DEF-hand.R` bone, auto-fit to `weapon_length` m):
 Fighter machete, Scavenger knife (melee); Engineer handgun, Medic revolver,
 Guard shotgun (guns). Medic still heals (weapon cosmetic). Weapon offsets were

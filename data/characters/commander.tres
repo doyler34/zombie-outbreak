@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CombatantDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/combatant_definition.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/animations/AnimationLibrary_Godot_Standard.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/characters/universal_base/Superhero_Male_FullBody.gltf" id="2"]
 
 [resource]
 script = ExtResource("1")

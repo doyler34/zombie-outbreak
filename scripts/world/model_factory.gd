@@ -241,43 +241,53 @@ static func find_animation_player(node: Node) -> AnimationPlayer:
 ## clips.
 ##
 ## Animation-LESS character models (e.g. the Universal Base Characters,
-## which ship as pure meshes on the UAL2 rig) import without an
-## AnimationPlayer at all, so one is created for them: the library's
-## track paths ("Armature/Skeleton3D:bone") resolve identically as long
-## as the model uses the library's scene naming, which same-rig
-## Quaternius exports do.
+## which ship as pure meshes with zero clips) import without an
+## AnimationPlayer at all, so one is created here — parented DIRECTLY
+## on the Skeleton3D. That makes the skeleton the player's root_node
+## (the default ".."), so merged bone tracks are simple self-relative
+## ":bone_name" paths — no hand-built node path to get wrong, and it
+## works regardless of how many wrapper nodes (Armature, etc.) the
+## glTF importer collapsed or kept above the skeleton.
 static func apply_shared_animations(model: Node) -> void:
 	var skeleton := _find_skeleton(model)
 	if skeleton == null:
 		return
 	var player := find_animation_player(model)
+	if player == null:
+		player = AnimationPlayer.new()
+		skeleton.add_child(player)
+
+	var root_node: Node = player.get_node(player.root_node) \
+		if player.root_node != NodePath() else player.get_parent()
+	if root_node == null:
+		push_warning("[ModelFactory] AnimationPlayer.root_node didn't resolve; animations skipped.")
+		return
+	# Empty when root_node IS the skeleton (always true for a player we
+	# just created above); Node.get_path_to() handles any other case
+	# (a pre-existing player whose root_node sits higher up) correctly
+	# regardless of how deep the skeleton is nested under it.
+	var skeleton_rel := "" if root_node == skeleton else String(root_node.get_path_to(skeleton))
+
 	var index := 0
 	for entry in SHARED_LIBRARIES:
 		if skeleton.find_bone(entry.bone) < 0:
 			continue
 		for lib in _libraries_from(entry.path):
-			if player == null:
-				player = AnimationPlayer.new()
-				# Child of the scene root, so root_node ("..") is the
-				# model root the remapped track paths start from.
-				model.add_child(player)
 			var lib_name: String = "shared" if index == 0 else "shared%d" % index
 			if not player.has_animation_library(lib_name):
-				var skel_path := _descendant_path(model, skeleton)
 				player.add_animation_library(lib_name,
-					_remapped_library(lib, String(entry.path), skel_path))
+					_remapped_library(lib, String(entry.path), skeleton_rel))
 			index += 1
 
 
-## Clone a library with every bone track re-pointed at THIS model's
-## skeleton node. Imported clips address the skeleton by the node path
-## it had in the library's own scene; a character whose importer named
-## nodes differently would silently receive no motion (T-pose). Bone
+## Clone a library with every bone track re-pointed at [param
+## skeleton_rel] (the path from the target AnimationPlayer's root_node
+## to the target skeleton — "" when root_node IS the skeleton). Bone
 ## names live in the sub-path after ":" and are rig-defined, so only
-## the node part needs rewriting.
+## the node part is rewritten.
 static func _remapped_library(lib: AnimationLibrary, lib_path: String,
-		skeleton_path: String) -> AnimationLibrary:
-	var key := "%s|%s" % [lib_path, skeleton_path]
+		skeleton_rel: String) -> AnimationLibrary:
+	var key := "%s|%s" % [lib_path, skeleton_rel]
 	if _remap_cache.has(key):
 		return _remap_cache[key]
 	var out := AnimationLibrary.new()
@@ -288,21 +298,10 @@ static func _remapped_library(lib: AnimationLibrary, lib_path: String,
 			var colon := track.find(":")
 			if colon >= 0:
 				anim.track_set_path(t, NodePath(
-					"%s:%s" % [skeleton_path, track.substr(colon + 1)]))
+					"%s:%s" % [skeleton_rel, track.substr(colon + 1)]))
 		out.add_animation(anim_name, anim)
 	_remap_cache[key] = out
 	return out
-
-
-## Slash path from an ancestor to a descendant node ("Armature/
-## Skeleton3D"), built by hand so it works before entering the tree.
-static func _descendant_path(ancestor: Node, node: Node) -> String:
-	var parts: Array[String] = []
-	var walk := node
-	while walk != null and walk != ancestor:
-		parts.push_front(String(walk.name))
-		walk = walk.get_parent()
-	return "/".join(parts)
 
 
 ## First clip a player actually has from a candidate list — checked as

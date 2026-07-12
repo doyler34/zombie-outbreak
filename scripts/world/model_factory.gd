@@ -35,6 +35,8 @@ const IDLE_CANDIDATES: Array[String] = ["idle", "Idle", "Idle_Loop", "Idle_FoldA
 const WALK_CANDIDATES: Array[String] = ["walk", "Walk", "Walk_Loop", "Jog_Fwd_Loop", "Walk_Carry_Loop"]
 
 static var _library_cache: Dictionary = {}  # path -> Array[AnimationLibrary]
+## Libraries re-pointed at a specific skeleton path: "glb|skel" -> lib.
+static var _remap_cache: Dictionary = {}
 
 
 ## [param footprint] is the building's world-space footprint in meters.
@@ -256,14 +258,51 @@ static func apply_shared_animations(model: Node) -> void:
 		for lib in _libraries_from(entry.path):
 			if player == null:
 				player = AnimationPlayer.new()
-				# Child of the scene root, so the default root_node
-				# ("..") resolves paths exactly like the library's own
-				# scene did.
+				# Child of the scene root, so root_node ("..") is the
+				# model root the remapped track paths start from.
 				model.add_child(player)
 			var lib_name: String = "shared" if index == 0 else "shared%d" % index
 			if not player.has_animation_library(lib_name):
-				player.add_animation_library(lib_name, lib)
+				var skel_path := _descendant_path(model, skeleton)
+				player.add_animation_library(lib_name,
+					_remapped_library(lib, String(entry.path), skel_path))
 			index += 1
+
+
+## Clone a library with every bone track re-pointed at THIS model's
+## skeleton node. Imported clips address the skeleton by the node path
+## it had in the library's own scene; a character whose importer named
+## nodes differently would silently receive no motion (T-pose). Bone
+## names live in the sub-path after ":" and are rig-defined, so only
+## the node part needs rewriting.
+static func _remapped_library(lib: AnimationLibrary, lib_path: String,
+		skeleton_path: String) -> AnimationLibrary:
+	var key := "%s|%s" % [lib_path, skeleton_path]
+	if _remap_cache.has(key):
+		return _remap_cache[key]
+	var out := AnimationLibrary.new()
+	for anim_name in lib.get_animation_list():
+		var anim: Animation = lib.get_animation(anim_name).duplicate()
+		for t in anim.get_track_count():
+			var track := String(anim.track_get_path(t))
+			var colon := track.find(":")
+			if colon >= 0:
+				anim.track_set_path(t, NodePath(
+					"%s:%s" % [skeleton_path, track.substr(colon + 1)]))
+		out.add_animation(anim_name, anim)
+	_remap_cache[key] = out
+	return out
+
+
+## Slash path from an ancestor to a descendant node ("Armature/
+## Skeleton3D"), built by hand so it works before entering the tree.
+static func _descendant_path(ancestor: Node, node: Node) -> String:
+	var parts: Array[String] = []
+	var walk := node
+	while walk != null and walk != ancestor:
+		parts.push_front(String(walk.name))
+		walk = walk.get_parent()
+	return "/".join(parts)
 
 
 ## First clip a player actually has from a candidate list — checked as

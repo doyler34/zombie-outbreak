@@ -305,23 +305,34 @@ static func _remapped_library(lib: AnimationLibrary, lib_path: String,
 	return out
 
 
-## First clip a player actually has from a candidate list — checked as
-## bare names first, then inside each animation library ("lib/name").
-## Returns "" when none match; callers treat that as "don't animate".
+## First clip a player actually has from a candidate list, matched
+## loosely: case-insensitive, ignoring library prefixes AND trailing
+## loop-marker suffixes — Godot's glTF importer strips "_Loop"/"-loop"/
+## "_Cycle" from clip names (using them to mark the clip looping), so
+## "Idle_FoldArms_Loop" imports as "Idle_FoldArms". Candidates are
+## checked in priority order. Returns "" when none match; callers treat
+## that as "don't animate".
 static func find_anim(player: AnimationPlayer, candidates: Array[String]) -> String:
 	if player == null:
 		return ""
+	var clips := player.get_animation_list()
 	for candidate in candidates:
-		if player.has_animation(candidate):
-			return candidate
-	for lib_name in player.get_animation_library_list():
-		if lib_name == "":
-			continue
-		for candidate in candidates:
-			var full := "%s/%s" % [lib_name, candidate]
-			if player.has_animation(full):
-				return full
+		var want := _anim_key(candidate)
+		for full in clips:
+			var bare := String(full).get_slice("/", String(full).get_slice_count("/") - 1)
+			if _anim_key(bare) == want:
+				return String(full)
 	return ""
+
+
+## Normalized comparison key for a clip name: lowercase, loop-marker
+## suffix removed.
+static func _anim_key(anim_name: String) -> String:
+	var n := anim_name.to_lower()
+	for suffix in ["_loop", "-loop", "_cycle", "-cycle"]:
+		if n.ends_with(suffix):
+			return n.substr(0, n.length() - suffix.length())
+	return n
 
 
 ## Extract (and cache) the AnimationLibrary resources inside a library

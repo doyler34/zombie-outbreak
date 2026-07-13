@@ -52,7 +52,7 @@ func _initialize() -> void:
 		var lib := player.get_animation_library(lib_name)
 		var clip_names := lib.get_animation_list()
 		print("library '", lib_name, "': ", clip_names.size(),
-			" clips, first=", clip_names.slice(0, 5))
+			" clips: ", clip_names)
 	print("player.get_animation_list()[0..7]=",
 		player.get_animation_list().slice(0, 7))
 	print("has 'shared/Idle_FoldArms_Loop' = ",

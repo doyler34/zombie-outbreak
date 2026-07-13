@@ -64,6 +64,14 @@ jobs:
             exit 1
           fi
 
+      - name: Animation smoke test
+        run: |
+          ./Godot_v4.4-stable_linux.x86_64 --headless --path . -s tools/debug_animations.gd 2>&1 | tee anim_debug.log
+          if ! grep -q "ANIMATION_OK" anim_debug.log; then
+            echo "::error::Character animation broken — see anim_debug.log above"
+            exit 1
+          fi
+
       - name: Build APK (Debug)
         run: |
           mkdir -p build

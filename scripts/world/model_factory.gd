@@ -262,11 +262,12 @@ static func apply_shared_animations(model: Node) -> void:
 	if root_node == null:
 		push_warning("[ModelFactory] AnimationPlayer.root_node didn't resolve; animations skipped.")
 		return
-	# Empty when root_node IS the skeleton (always true for a player we
-	# just created above); Node.get_path_to() handles any other case
+	# "." when root_node IS the skeleton (always true for a player we
+	# just created above) — an explicit self path, since an empty node
+	# part may not resolve. Node.get_path_to() handles any other case
 	# (a pre-existing player whose root_node sits higher up) correctly
 	# regardless of how deep the skeleton is nested under it.
-	var skeleton_rel := "" if root_node == skeleton else String(root_node.get_path_to(skeleton))
+	var skeleton_rel := "." if root_node == skeleton else String(root_node.get_path_to(skeleton))
 
 	var index := 0
 	for entry in SHARED_LIBRARIES:

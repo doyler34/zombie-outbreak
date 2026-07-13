@@ -74,6 +74,16 @@ tuned for the old Kenney rig — may need re-tuning on the mannequins.
    colors look off.
 7. **One-shot anims** (attack/die) must be forced non-looping and protected from
    locomotion anims interrupting them, or they show 1 frame / freeze.
+8. **Godot's glTF importer STRIPS `_Loop`/`-loop`/`_Cycle` suffixes from clip
+   names** (it uses them to set looping, then renames): "Idle_FoldArms_Loop"
+   imports as "Idle_FoldArms". Never match clip names verbatim — use
+   ModelFactory.find_anim (normalized keys). This caused days of silent T-pose.
+9. **Animation-less .gltf characters import with NO AnimationPlayer**;
+   ModelFactory.apply_shared_animations synthesizes one parented ON the
+   Skeleton3D so merged bone tracks are self-relative (".:bone").
+10. **CI is a usable Godot runtime**: tools/debug_animations.gd runs headless
+   in the workflow, plays a clip and fails the build if bones don't move —
+   extend it when debugging anything that needs real engine behaviour.
 
 ## Workflow (follow this)
 - Branch: **`claude/ground-menu-alignment-lbkm58`**. User pushes assets to `main`;

@@ -39,10 +39,12 @@ else a bright primitive placeholder.
   Watchtower→watchtower_skyscraper — Kenney City Kit.
 
 **Combat** (`data/roles`, `data/zombies`): each combatant has `model` +
-`model_scale`. Characters = Quaternius animation-library mannequins from
-`assets/animations/` (CC0): Commander + survivors on UAL1 (Rigify rig —
-Idle_Loop/Walk_Loop/Punch_Cross/Death01...), zombies on UAL2 (UE rig —
-Zombie_Idle/Walk_Fwd/Scratch, Hit_Knockback as death). Mannequins are gray, so
+`model_scale`. Shared animation libraries in `assets/animations/` (CC0
+Quaternius): AL_Standard.fbx = base set (Idle/Walk/Jog/Sprint/Punch_Cross/
+Death01...) on the UE rig, UAL2_Standard.glb = expansion (Zombie_Idle/
+Walk_Fwd/Scratch, chopping/farming/Consume) on the same UE rig, and
+AnimationLibrary_Godot_Standard.glb = the base set's Rigify edition (only
+merges into Rigify rigs). Mannequins are gray, so
 ModelFactory.combatant_model tints them with the definition color. Clip names
 resolve per rig via ModelFactory.find_anim candidate lists; the two libraries
 use DIFFERENT skeletons (UAL1 "DEF-hips", UAL2 "pelvis") and only merge into

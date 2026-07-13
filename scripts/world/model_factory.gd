@@ -23,6 +23,10 @@ const COMBATANT_PLACEHOLDER_HEIGHT := 0.85
 ## auto-merged — this game moves characters in code, not by root motion.
 const SHARED_LIBRARIES: Array[Dictionary] = [
 	{"path": "res://assets/animations/AnimationLibrary_Godot_Standard.glb", "bone": "DEF-hips"},
+	# The base library's Unreal-skeleton edition — same clips as the
+	# Godot/Rigify one above (Idle/Walk/Jog/Sprint/Punch/Death...) but on
+	# the UE rig the playable cast actually uses.
+	{"path": "res://assets/animations/AL_Standard.fbx", "bone": "pelvis"},
 	{"path": "res://assets/animations/UAL2_Standard.glb", "bone": "pelvis"},
 ]
 

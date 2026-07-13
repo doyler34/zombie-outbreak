@@ -46,6 +46,26 @@ func _initialize() -> void:
 		" root_node=", player.root_node,
 		" libraries=", player.get_animation_library_list())
 
+	# Deep dump: exactly which link between the source glb and
+	# has_animation() drops the clips.
+	for lib_name in player.get_animation_library_list():
+		var lib := player.get_animation_library(lib_name)
+		var clip_names := lib.get_animation_list()
+		print("library '", lib_name, "': ", clip_names.size(),
+			" clips, first=", clip_names.slice(0, 5))
+	print("player.get_animation_list()[0..7]=",
+		player.get_animation_list().slice(0, 7))
+	print("has 'shared/Idle_FoldArms_Loop' = ",
+		player.has_animation("shared/Idle_FoldArms_Loop"))
+	var skel_probe := _find_skeleton(model)
+	print("char find_bone pelvis=", skel_probe.find_bone("pelvis"),
+		" DEF-hips=", skel_probe.find_bone("DEF-hips"))
+	var source: Array = ModelFactory._libraries_from("res://assets/animations/UAL2_Standard.glb")
+	print("source libs from cache=", source.size())
+	if source.size() > 0:
+		var src_lib: AnimationLibrary = source[0]
+		print("source lib clip count=", src_lib.get_animation_list().size())
+
 	var idle := ModelFactory.find_anim(player, ModelFactory.IDLE_CANDIDATES)
 	var walk := ModelFactory.find_anim(player, ModelFactory.WALK_CANDIDATES)
 	print("resolved idle='", idle, "' walk='", walk, "'")

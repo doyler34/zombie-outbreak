@@ -25,8 +25,11 @@ const SHARED_LIBRARIES: Array[Dictionary] = [
 	{"path": "res://assets/animations/AnimationLibrary_Godot_Standard.glb", "bone": "DEF-hips"},
 	# The base library's Unreal-skeleton edition — same clips as the
 	# Godot/Rigify one above (Idle/Walk/Jog/Sprint/Punch/Death...) but on
-	# the UE rig the playable cast actually uses.
-	{"path": "res://assets/animations/AL_Standard.fbx", "bone": "pelvis"},
+	# the UE rig the playable cast actually uses. FBX position/scale
+	# tracks use FBX units and axes, which sank characters into the
+	# ground on the glTF rig — rotations carry the motion, so only they
+	# are kept (strip_positions).
+	{"path": "res://assets/animations/AL_Standard.fbx", "bone": "pelvis", "strip_positions": true},
 	{"path": "res://assets/animations/UAL2_Standard.glb", "bone": "pelvis"},
 ]
 
@@ -281,24 +284,32 @@ static func apply_shared_animations(model: Node) -> void:
 			var lib_name: String = "shared" if index == 0 else "shared%d" % index
 			if not player.has_animation_library(lib_name):
 				player.add_animation_library(lib_name,
-					_remapped_library(lib, String(entry.path), skeleton_rel))
+					_remapped_library(lib, String(entry.path), skeleton_rel,
+						bool(entry.get("strip_positions", false))))
 			index += 1
 
 
 ## Clone a library with every bone track re-pointed at [param
 ## skeleton_rel] (the path from the target AnimationPlayer's root_node
-## to the target skeleton — "" when root_node IS the skeleton). Bone
+## to the target skeleton — "." when root_node IS the skeleton). Bone
 ## names live in the sub-path after ":" and are rig-defined, so only
-## the node part is rewritten.
+## the node part is rewritten. With [param strip_positions], position
+## and scale tracks are dropped entirely — needed for FBX-sourced clips
+## whose translation units/axes don't match the glTF rig (characters
+## sank into the ground); rotation tracks carry the motion.
 static func _remapped_library(lib: AnimationLibrary, lib_path: String,
-		skeleton_rel: String) -> AnimationLibrary:
-	var key := "%s|%s" % [lib_path, skeleton_rel]
+		skeleton_rel: String, strip_positions: bool = false) -> AnimationLibrary:
+	var key := "%s|%s|%s" % [lib_path, skeleton_rel, strip_positions]
 	if _remap_cache.has(key):
 		return _remap_cache[key]
 	var out := AnimationLibrary.new()
 	for anim_name in lib.get_animation_list():
 		var anim: Animation = lib.get_animation(anim_name).duplicate()
-		for t in anim.get_track_count():
+		for t in range(anim.get_track_count() - 1, -1, -1):
+			if strip_positions and anim.track_get_type(t) in [
+					Animation.TYPE_POSITION_3D, Animation.TYPE_SCALE_3D]:
+				anim.remove_track(t)
+				continue
 			var track := String(anim.track_get_path(t))
 			var colon := track.find(":")
 			if colon >= 0:

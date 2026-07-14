@@ -100,8 +100,22 @@ func _initialize() -> void:
 		or not rot_before.is_equal_approx(rot_after)
 	print("hand_l pose before=", pos_before, " ", rot_before)
 	print("hand_l pose after =", pos_after, " ", rot_after)
-	print("ANIMATION_OK" if moved else "ANIMATION_BROKEN")
-	quit(0 if moved else 1)
+
+	# The animated pelvis must stay at a plausible standing height in the
+	# skeleton's own space — FBX-unit position tracks once sank the whole
+	# cast into the ground while bones technically still "moved".
+	var pelvis := skeleton.find_bone("pelvis")
+	var pelvis_y: float = skeleton.get_bone_global_pose(pelvis).origin.y
+	print("animated pelvis height=", pelvis_y)
+	var grounded_ok := pelvis_y > 0.4 and pelvis_y < 2.0
+
+	if not moved:
+		print("bones did not move -> ANIMATION_BROKEN")
+	elif not grounded_ok:
+		print("pelvis at implausible height -> ANIMATION_BROKEN")
+	else:
+		print("ANIMATION_OK")
+	quit(0 if moved and grounded_ok else 1)
 
 
 func _dump(node: Node, depth: int) -> void:

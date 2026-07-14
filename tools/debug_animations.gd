@@ -74,6 +74,13 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	# The base library ships proper locomotion — resolving the UAL2
+	# stand-ins (fold-arms idle / carry walk) means matching regressed.
+	if idle.findn("foldarms") != -1 or walk.findn("carry") != -1:
+		print("fallback clips resolved where base Idle/Walk exist -> ANIMATION_BROKEN")
+		quit(1)
+		return
+
 	var clip: Animation = player.get_animation(idle)
 	print("idle clip length=", clip.length, " tracks=", clip.get_track_count())
 	for t in mini(3, clip.get_track_count()):

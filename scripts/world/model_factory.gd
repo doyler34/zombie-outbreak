@@ -329,10 +329,14 @@ static func find_anim(player: AnimationPlayer, candidates: Array[String]) -> Str
 	return ""
 
 
-## Normalized comparison key for a clip name: lowercase, loop-marker
-## suffix removed.
+## Normalized comparison key for a clip name: lowercase, FBX animation-
+## stack prefix removed ("Rig|Idle" → "idle"), loop-marker suffix
+## removed ("Idle_Loop" → "idle").
 static func _anim_key(anim_name: String) -> String:
 	var n := anim_name.to_lower()
+	var pipe := n.rfind("|")
+	if pipe >= 0:
+		n = n.substr(pipe + 1)
 	for suffix in ["_loop", "-loop", "_cycle", "-cycle"]:
 		if n.ends_with(suffix):
 			return n.substr(0, n.length() - suffix.length())

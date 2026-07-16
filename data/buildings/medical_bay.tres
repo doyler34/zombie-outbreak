@@ -5,9 +5,8 @@
 
 [resource]
 script = ExtResource("1")
-model_path = "res://assets/buildings/commercial_building-h.glb"
+model_path = "res://scenes/buildings/medical_bay.tscn"
 color = Color(0.82, 0.83, 0.85, 1)
-flat_color = true
 id = "medical_bay"
 display_name = "Medical Bay"
 description = "Heals the injured and keeps disease at bay."

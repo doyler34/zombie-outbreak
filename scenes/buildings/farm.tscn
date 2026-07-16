@@ -1,0 +1,69 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.gltf" id="1"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Window.gltf" id="2"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_Door.gltf" id="3"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Interiors/SM_Wooden_Box_A.gltf" id="4"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Barrel_A_03.gltf" id="5"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Tools/SM_Bucket.gltf" id="6"]
+
+[node name="Farm" type="Node3D"]
+
+[node name="Floor1" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 0)
+
+[node name="Floor2" parent="." instance=ExtResource("1")]
+
+[node name="Floor3" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 3)
+
+[node name="Floor4" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+
+[node name="WallN1" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3.2)
+
+[node name="WallN2" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.2)
+
+[node name="WallW1" parent="." instance=ExtResource("2")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -3, 0, -3)
+
+[node name="WallW2" parent="." instance=ExtResource("2")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -3, 0, 0)
+
+[node name="WallE1" parent="." instance=ExtResource("2")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 3, 0, 0)
+
+[node name="WallE2" parent="." instance=ExtResource("2")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 3, 0, 3)
+
+[node name="WindowS" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 3)
+
+[node name="DoorS" parent="." instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+
+[node name="Planter1" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 0.35, 0, 0, 0, 1, -1.4, 0, -1.5)
+
+[node name="Planter2" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 0.35, 0, 0, 0, 1, 0.1, 0, -1.5)
+
+[node name="Planter3" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 0.35, 0, 0, 0, 1, 1.6, 0, -1.5)
+
+[node name="Planter4" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 0.35, 0, 0, 0, 1, -1.4, 0, 0.7)
+
+[node name="Planter5" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 0.35, 0, 0, 0, 1, 0.1, 0, 0.7)
+
+[node name="Planter6" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 0.35, 0, 0, 0, 1, 1.6, 0, 0.7)
+
+[node name="WaterBarrel" parent="." instance=ExtResource("5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 2.4)
+
+[node name="Bucket" parent="." instance=ExtResource("6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.95, 0, 2.55)

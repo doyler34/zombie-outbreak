@@ -5,9 +5,8 @@
 
 [resource]
 script = ExtResource("1")
-model_path = "res://assets/buildings/suburban_building-type-a.glb"
+model_path = "res://scenes/buildings/barracks.tscn"
 color = Color(0.62, 0.4, 0.28, 1)
-flat_color = true
 id = "barracks"
 display_name = "Barracks"
 description = "Bunk space for survivors. Crowded, but safe."

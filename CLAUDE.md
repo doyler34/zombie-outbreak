@@ -31,12 +31,20 @@ else a bright primitive placeholder.
 - `tables/*.json` — missions, world_generation, survivor_names.
 
 ## Current asset wiring
-**Buildings** (`model` field → auto-fit to grid plot unless `model_scale` set):
+**Buildings** (`model_path` → auto-fit to grid plot unless `model_scale` set):
 - Capital(id `safe_house`) capital.glb, Wall wall.glb, Gate gate.glb — Tripo,
   embedded textures.
-- Barracks→suburban_building-type-a, Farm→suburban_building-type-g,
-  Medical Bay→commercial_building-h, Workshop→commercial_building-c,
-  Watchtower→watchtower_skyscraper — Kenney City Kit.
+- Barracks, Farm, Medical Bay, Workshop, Watchtower → composite scenes in
+  `scenes/buildings/*.tscn`, assembled from the **POLY Survival Workshop**
+  modular kit (`assets/poly_survival_workshop/`): open-top interiors (floor +
+  3m wall panels + signature props) that read well on the top-down camera.
+  Kit gotchas: every gltf referenced a missing `New Palitra.jpg` — URIs were
+  rewritten to `Textures/Polygon_Texture2.png` (the palette atlas); pack
+  leftovers (Models_original FBX dupes, Unity Materials, foreign Prefabs/
+  Scenes/Demo_Profiles/terrain, per-dir `extracted/`) are `.gdignore`d.
+  Wall/floor pieces pivot at their min-X corner (panel runs +X, thickness
+  +Z, floor extends −Z); props pivot centered at Y=0. Kenney City Kit glbs
+  remain in assets, unused.
 
 **Combat** (`data/roles`, `data/zombies`): each combatant has `model` +
 `model_scale`. Shared animation libraries in `assets/animations/` (CC0

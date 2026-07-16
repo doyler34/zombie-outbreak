@@ -1,0 +1,60 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_3x3.gltf" id="1"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_Door.gltf" id="2"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Window.gltf" id="3"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Roofs/SM_Roof_3m.gltf" id="4"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.gltf" id="5"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Interiors/SM_Radio.gltf" id="6"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Metall_Box.gltf" id="7"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Barrel_A_01.gltf" id="8"]
+
+[node name="Watchtower" type="Node3D"]
+
+[node name="WallN" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, -1.7)
+
+[node name="DoorS" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 1.5)
+
+[node name="WallW" parent="." instance=ExtResource("1")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.5, 0, -1.5)
+
+[node name="WallE" parent="." instance=ExtResource("1")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.5, 0, 1.5)
+
+[node name="WindowN" parent="." instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 3, -1.7)
+
+[node name="WindowS" parent="." instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 3, 1.5)
+
+[node name="WindowW" parent="." instance=ExtResource("3")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.5, 3, -1.5)
+
+[node name="WindowE" parent="." instance=ExtResource("3")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.5, 3, 1.5)
+
+[node name="RimS" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 3, 1.5)
+
+[node name="RimN" parent="." instance=ExtResource("4")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 1.5, 3, -1.5)
+
+[node name="RimW" parent="." instance=ExtResource("4")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -1.5, 3, -1.5)
+
+[node name="RimE" parent="." instance=ExtResource("4")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.5, 3, 1.5)
+
+[node name="Platform" parent="." instance=ExtResource("5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 6, 1.5)
+
+[node name="Radio" parent="." instance=ExtResource("6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 6.05, 0.5)
+
+[node name="MetalBox" parent="." instance=ExtResource("7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 6.05, -0.4)
+
+[node name="Barrel" parent="." instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 6.05, 0.6)

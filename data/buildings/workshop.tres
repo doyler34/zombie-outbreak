@@ -5,9 +5,8 @@
 
 [resource]
 script = ExtResource("1")
-model_path = "res://assets/buildings/commercial_building-c.glb"
+model_path = "res://scenes/buildings/workshop.tscn"
 color = Color(0.48, 0.52, 0.58, 1)
-flat_color = true
 id = "workshop"
 display_name = "Workshop"
 description = "Salvage in, tools out. The heartbeat of the settlement."

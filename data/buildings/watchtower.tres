@@ -5,9 +5,8 @@
 
 [resource]
 script = ExtResource("1")
-model_path = "res://assets/buildings/watchtower_skyscraper.glb"
+model_path = "res://scenes/buildings/watchtower.tscn"
 color = Color(0.58, 0.58, 0.54, 1)
-flat_color = true
 id = "watchtower"
 display_name = "Watchtower"
 description = "Eyes on the wasteland. Spots hordes before they reach the walls."

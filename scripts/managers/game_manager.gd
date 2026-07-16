@@ -49,8 +49,11 @@ func notify_world_ready() -> void:
 		_load_after_world_ready = false
 		SaveManager.load_game()
 	else:
-		# Fresh map: scatter natural obstacles (saved games restore theirs)
-		# and the starter ground pickups (not persisted, so new games only).
+		# Fresh map: the ruined HQ compound claims its cells first, then
+		# natural obstacles scatter around it, then the starter ground
+		# pickups (not persisted, so new games only). Saved games restore
+		# all of it through the managers instead.
+		get_tree().call_group("hq_compound", "build_initial")
 		ObstacleManager.generate_initial_obstacles()
 		get_tree().call_group("ground_items", "scatter_initial")
 	EventBus.world_ready.emit()

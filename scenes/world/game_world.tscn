@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/building_placer.gd" id="2"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://scripts/ui/hotbar.gd" id="10"]
 [ext_resource type="Script" path="res://scripts/world/ground_items.gd" id="11"]
 [ext_resource type="Script" path="res://scripts/world/world_decorator.gd" id="12"]
+[ext_resource type="Script" path="res://scripts/world/hq_compound.gd" id="13"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -43,6 +44,9 @@ script = ExtResource("12")
 
 [node name="GroundItems" type="Node3D" parent="."]
 script = ExtResource("11")
+
+[node name="HqCompound" type="Node3D" parent="."]
+script = ExtResource("13")
 
 [node name="BuildingPlacer" type="Node3D" parent="." groups=["building_placer"]]
 script = ExtResource("2")

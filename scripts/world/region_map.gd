@@ -18,6 +18,9 @@ extends RefCounted
 
 var zones: Array = []      # {id, type, center: Vector2 (m), radius: float (m)}
 var roads: Array = []      # {a: Vector2, b: Vector2, width: float, surface}
+## Painted rectangles: {center: Vector2, half: Vector2, surface} — the
+## HQ compound's construction-zone gravel pads live here.
+var rect_pads: Array = []
 var pad_center := Vector2.ZERO
 var pad_radius := 0.0
 
@@ -43,6 +46,19 @@ static func load_default() -> RegionMap:
 	if not pad.is_empty():
 		map.pad_center = _cell_to_world(pad.get("center", [0, 0]), cs)
 		map.pad_radius = float(pad.get("radius", 0.0)) * cs
+
+	# The HQ compound's construction zones read as prepared gravel pads
+	# on the ground — same data the zone markers are built from.
+	var compound: Variant = DataManager.get_table("hq_compound")
+	if compound is Dictionary:
+		for z in compound.get("zones", []):
+			var corner := _cell_to_world(z.get("cell", [0, 0]), cs)
+			var size := Vector2(float(z.size[0]), float(z.size[1])) * cs
+			map.rect_pads.append({
+				"center": corner + size / 2.0,
+				"half": size / 2.0,
+				"surface": "gravel",
+			})
 	return map
 
 
@@ -66,6 +82,9 @@ static func _cell_to_world(pair: Array, cs: float) -> Vector2:
 func surface_at(xz: Vector2) -> String:
 	if pad_radius > 0.0 and xz.distance_to(pad_center) <= pad_radius:
 		return "concrete"
+	for rect in rect_pads:
+		if _rect_distance(xz, rect.center, rect.half) <= 0.0:
+			return rect.surface
 	var best := ""
 	var best_width := INF
 	for road in roads:
@@ -127,7 +146,18 @@ func surface_coverage(xz: Vector2) -> Dictionary:
 		var w := 1.0 - smoothstep(half - 0.4, half + 1.4, dist)
 		if w > 0.0:
 			weights[road.surface] = maxf(w, float(weights.get(road.surface, 0.0)))
+	for rect in rect_pads:
+		var d := _rect_distance(xz, rect.center, rect.half)
+		var w := 1.0 - smoothstep(-0.2, 1.0, d)
+		if w > 0.0:
+			weights[rect.surface] = maxf(w, float(weights.get(rect.surface, 0.0)))
 	return weights
+
+
+## Signed-ish distance outside an axis-aligned rectangle (0 inside).
+func _rect_distance(p: Vector2, center: Vector2, half: Vector2) -> float:
+	var d := (p - center).abs() - half
+	return Vector2(maxf(d.x, 0.0), maxf(d.y, 0.0)).length()
 
 
 func _distance_to_segment(p: Vector2, a: Vector2, b: Vector2) -> float:

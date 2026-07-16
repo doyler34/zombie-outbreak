@@ -291,6 +291,18 @@ Disposable view over manager state:
   counts, draw distance and sun shadows down on Android. The layout is
   renderer-agnostic: a future terrain backend (e.g. Terrain3D) replaces
   only the painting/mesh, not the design data or queries.
+- **HQ compound** — `HqCompound` builds the starting base from
+  `data/tables/hq_compound.json`: the ruined Capital pre-placed (worn
+  tint), a broken wall/gate perimeter with deterministic gaps and
+  rubble spills, authored debris, and six construction-zone markers
+  (foundation slab + corner stubs + name label) reserving spots for
+  future modules (hospital, workshop, power, storage, barracks,
+  garage). Structures spawn through BuildingManager/ObstacleManager on
+  NEW games only — they occupy the grid (walkability = collision),
+  interact (the gate opens) and save normally; zone markers are pure
+  scenery rebuilt every load, blocking nothing, and their footprints
+  double as gravel pads in the ground paint. The future base-building
+  system just places real buildings on the marked cells.
 - **Gathering + ground items** — gatherable data lives on
   ObstacleDefinition (`gather_item/stock/yield/time/tool/verb/anim`):
   interacting with a tree/rock/scrap pile/crate runs auto-repeating

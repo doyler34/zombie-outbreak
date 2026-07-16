@@ -52,9 +52,12 @@ func _ready() -> void:
 	_play_anim(_anim_idle)
 
 	# Buildings can appear on top of the spawn point (loading a save,
-	# the starting base, player placement) — step aside when they do.
+	# the pre-built HQ compound, player placement) — step aside when
+	# they do. world_ready covers world-gen structures, which don't
+	# emit placement events.
 	EventBus.load_completed.connect(func(_slot: int): _ensure_walkable())
 	EventBus.building_placed.connect(func(_entity): _ensure_walkable())
+	EventBus.world_ready.connect(_ensure_walkable)
 
 
 func _physics_process(delta: float) -> void:

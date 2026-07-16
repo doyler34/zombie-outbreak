@@ -62,6 +62,23 @@ func place(def: BuildingDefinition, cell: Vector2i, rotation: int = 0, instant: 
 	return entity
 
 
+## Spawn a building OUTSIDE the normal placement flow — world-gen
+## prebuilt structures like the ruined HQ compound. No cost, no
+## placement events, construction already finished; it still occupies
+## the grid, is selectable/upgradable and saves/loads like any other
+## building. Returns null (quietly) when the spot is blocked.
+func place_prebuilt(building_id: String, cell: Vector2i, rotation: int = 0) -> BuildingEntity:
+	var def := DataManager.get_building(building_id)
+	if def == null:
+		push_warning("[BuildingManager] Unknown prebuilt building: %s" % building_id)
+		return null
+	if not WorldManager.is_area_buildable(cell, _rotated_footprint(def, rotation)):
+		return null
+	var entity := _spawn(def, cell, rotation)
+	entity.finish_construction(true)
+	return entity
+
+
 static func _rotated_footprint(def: BuildingDefinition, rotation: int) -> Vector2i:
 	if posmod(rotation, 2) == 1:
 		return Vector2i(def.grid_size.y, def.grid_size.x)

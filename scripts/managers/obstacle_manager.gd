@@ -110,6 +110,19 @@ func _candidate_cell(region: RegionMap, home_zones: Array, def: ObstacleDefiniti
 	return cell
 
 
+## Authored placement (compound debris, scripted events) — the same
+## spawn path world generation uses, so the obstacle occupies the grid,
+## gathers and saves normally. Null when the spot is taken.
+func place(obstacle_id: String, cell: Vector2i) -> ObstacleEntity:
+	var def := DataManager.get_obstacle(obstacle_id)
+	if def == null:
+		push_warning("[ObstacleManager] Unknown authored obstacle: %s" % obstacle_id)
+		return null
+	if not WorldManager.is_area_free(cell, def.grid_size):
+		return null
+	return _spawn(def, cell)
+
+
 # ── Clearing flow ────────────────────────────────────────────────────────
 
 ## Start a timed clearing task. Validates tech, workers and cost;

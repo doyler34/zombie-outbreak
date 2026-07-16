@@ -126,6 +126,9 @@ func _splat_for(xz: Vector2) -> Color:
 	var open := 1.0 - minf(c.r + c.g + c.b + c.a, 1.0)
 	if open > 0.05:
 		match _region.zone_type_at(xz):
+			"clearing":
+				# Worn, trodden grass inside the compound.
+				c.r = maxf(c.r, 0.28 * _blotch(xz, 0.4) * open)
 			"rocky":
 				c.g = maxf(c.g, 0.4 * _blotch(xz, 0.22) * open)
 			"forest":

@@ -150,6 +150,14 @@ func set_selected(selected: bool) -> void:
 	_select_ring.visible = selected
 
 
+## Ruined/weathered look for world-gen prebuilt structures (the
+## abandoned HQ): darkens the model's materials. Purely cosmetic —
+## repairs/upgrades later can rebuild the model to clear it.
+func set_worn(tint: Color) -> void:
+	if _model_root != null:
+		ModelFactory.tint_model(_model_root, tint)
+
+
 # ── Construction ticking ─────────────────────────────────────────────────
 
 func _begin_construction(duration: float) -> void:

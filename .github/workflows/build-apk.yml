@@ -72,6 +72,14 @@ jobs:
             exit 1
           fi
 
+      - name: Compound smoke test
+        run: |
+          ./Godot_v4.4-stable_linux.x86_64 --headless --path . -s tools/debug_compound.gd 2>&1 | tee compound_debug.log
+          if ! grep -q "COMPOUND_OK" compound_debug.log; then
+            echo "::error::HQ compound broken — see compound_debug.log above"
+            exit 1
+          fi
+
       - name: Build APK (Debug)
         run: |
           mkdir -p build

@@ -117,10 +117,9 @@ func _build_action_bar() -> void:
 	_action_bar.add_theme_constant_override("separation", 14)
 	add_child(_action_bar)
 
-	var build_btn := UIStyle.make_button("⚙  BUILD")
-	build_btn.pressed.connect(func(): UIManager.push_screen(BUILD_MENU_SCENE))
-	_action_bar.add_child(build_btn)
-
+	# The modular piece system is THE building flow; the legacy
+	# whole-building menu (BUILD_MENU_SCENE) is retired from the HUD but
+	# its code stays for future prefab modules.
 	var base_btn := UIStyle.make_button("🧱  BASE")
 	base_btn.pressed.connect(func(): BaseManager.enter_build_mode())
 	_action_bar.add_child(base_btn)

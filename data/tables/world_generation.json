@@ -1,65 +1,29 @@
 {
- "spawn_clear_radius_cells": 6,
- "obstacles": [
-  {
-   "id": "tree",
-   "count": 46,
-   "zones": [
-    "forest"
-   ]
-  },
-  {
-   "id": "dead_tree",
-   "count": 14,
-   "zones": [
-    "forest",
-    "rocky"
-   ]
-  },
-  {
-   "id": "tree",
-   "count": 10
-  },
-  {
-   "id": "dead_tree",
-   "count": 6
-  }
- ],
- "ground_items": [
-  {
-   "id": "scrap",
-   "count": 2,
-   "nodes": 5
-  },
-  {
-   "id": "wood",
-   "count": 3,
-   "nodes": 4
-  },
-  {
-   "id": "ration",
-   "count": 1,
-   "nodes": 3
-  },
-  {
-   "id": "axe",
-   "count": 1,
-   "nodes": 1
-  },
-  {
-   "id": "pickaxe",
-   "count": 1,
-   "nodes": 1
-  },
-  {
-   "id": "cloth",
-   "count": 2,
-   "nodes": 3
-  },
-  {
-   "id": "electronics",
-   "count": 1,
-   "nodes": 3
-  }
- ]
+  "spawn_clear_radius_cells": 6,
+  "obstacles": [
+    {
+      "id": "tree",
+      "count": 46,
+      "zones": [
+        "forest"
+      ]
+    },
+    {
+      "id": "dead_tree",
+      "count": 14,
+      "zones": [
+        "forest",
+        "rocky"
+      ]
+    },
+    {
+      "id": "tree",
+      "count": 10
+    },
+    {
+      "id": "dead_tree",
+      "count": 6
+    }
+  ],
+  "ground_items": []
 }

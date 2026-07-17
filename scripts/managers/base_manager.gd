@@ -15,6 +15,10 @@ extends Node
 
 ## Vertical storeys available (ground floor = level 0).
 const MAX_LEVELS := 3
+## Requirement tokens that mean "fills an opening in a host edge piece"
+## (doors into doorways, barricades into doorways/windows). Fill pieces
+## share the host's edge slot on a separate layer, one fill per opening.
+const FILL_TOKENS := ["doorway", "window_slot"]
 
 var build_mode_active: bool = false
 
@@ -105,8 +109,9 @@ func zone_rect() -> Rect2i:
 ## nearest open doorway. Returns a spot Dictionary (PiecePlacement).
 func best_spot_for(piece: BuildingPiece, world_pos: Vector3, axis_lock: int = -1) -> Dictionary:
 	var cell := WorldManager.world_to_cell(world_pos)
-	if piece.needs("doorway"):
-		return _nearest_doorway_spot(cell, world_pos)
+	var fill := fill_token(piece)
+	if fill != "":
+		return _nearest_opening_spot(fill, cell, world_pos)
 	if piece.placement == "cell":
 		var level := 0
 		if piece.needs("roof_support"):
@@ -134,7 +139,15 @@ func _supported_level(cell: Vector2i, size: Vector2i) -> int:
 	return maxi(top, 1)
 
 
-func _nearest_doorway_spot(around: Vector2i, world_pos: Vector3) -> Dictionary:
+## The fill token a piece requires, or "" for normal pieces.
+func fill_token(piece: BuildingPiece) -> String:
+	for token: String in FILL_TOKENS:
+		if piece.needs(token):
+			return token
+	return ""
+
+
+func _nearest_opening_spot(token: String, around: Vector2i, world_pos: Vector3) -> Dictionary:
 	var flat := Vector3(world_pos.x, 0, world_pos.z)
 	var best := {}
 	var best_d := INF
@@ -144,7 +157,7 @@ func _nearest_doorway_spot(around: Vector2i, world_pos: Vector3) -> Dictionary:
 				for level in MAX_LEVELS:
 					var key := PiecePlacement.edge_key(edge, level)
 					var host: BasePieceEntity = _edges.get(key)
-					if host == null or not host.piece.offers("doorway") or _edge_fills.has(key):
+					if host == null or not host.piece.offers(token) or _edge_fills.has(key):
 						continue
 					var d := PiecePlacement.edge_center(edge).distance_squared_to(flat)
 					if d < best_d:
@@ -152,7 +165,7 @@ func _nearest_doorway_spot(around: Vector2i, world_pos: Vector3) -> Dictionary:
 						best = {"placement": "edge", "cell": Vector2i(x, z),
 							"edge": edge, "axis": edge.z, "level": level}
 	if best.is_empty():
-		# Nothing to fill nearby — park on the closest edge, invalid (red).
+		# No opening nearby — park on the closest edge, invalid (red).
 		var edge := PiecePlacement.nearest_edge(around, world_pos)
 		best = {"placement": "edge", "cell": around, "edge": edge,
 			"axis": edge.z, "level": 0}
@@ -206,10 +219,11 @@ func _can_place_edge(piece: BuildingPiece, spot: Dictionary) -> bool:
 	if not (zone_rect().has_point(beside[0]) or zone_rect().has_point(beside[1])):
 		return false
 
-	if piece.needs("doorway"):
+	var fill := fill_token(piece)
+	if fill != "":
 		var key := PiecePlacement.edge_key(edge, level)
 		var host: BasePieceEntity = _edges.get(key)
-		return host != null and host.piece.offers("doorway") \
+		return host != null and host.piece.offers(fill) \
 			and not _edge_fills.has(key)
 
 	if _edges.has(PiecePlacement.edge_key(edge, level)):
@@ -330,7 +344,7 @@ func _register(entity: BasePieceEntity) -> void:
 					WorldManager.occupy_area(c, Vector2i.ONE, entity)
 		return
 	var key := PiecePlacement.edge_key(spot.edge, spot.level)
-	if entity.piece.needs("doorway"):
+	if fill_token(entity.piece) != "":
 		_edge_fills[key] = entity
 	else:
 		_edges[key] = entity
@@ -350,7 +364,7 @@ func _unregister(entity: BasePieceEntity) -> void:
 					WorldManager.vacate_area(c, Vector2i.ONE)
 		return
 	var key := PiecePlacement.edge_key(spot.edge, spot.level)
-	if entity.piece.needs("doorway"):
+	if fill_token(entity.piece) != "":
 		_edge_fills.erase(key)
 	else:
 		_edges.erase(key)

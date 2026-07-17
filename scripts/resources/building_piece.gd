@@ -23,7 +23,10 @@ extends Resource
 ##                   (req)  cell piece that needs such support underneath
 ##   "doorway"       (prov) edge piece with an opening a door can fill
 ##                   (req)  door-type piece that only fits those openings
-## New tokens can be added without touching existing pieces.
+##   "window_slot"   (prov/req) same contract for window openings
+##                   (barricades board them up)
+## New tokens can be added without touching existing pieces; fill-type
+## tokens are listed in BaseManager.FILL_TOKENS.
 
 ## Unique id used in save files and lookups.
 @export var id: String = ""
@@ -54,6 +57,18 @@ extends Resource
 ##  "contain" — uniform scale to fit inside the footprint (props, stairs)
 ##  "edge"    — stretch X to the edge length, keep height/thickness
 @export var fit_mode: String = "edge"
+## How the mesh is anchored to its spot:
+##  "center"   — recenter the bounds on the spot (default, right for
+##               self-contained pieces)
+##  "authored" — keep the model's own coordinates and apply mesh_offset;
+##               for pieces authored IN another piece's frame (door
+##               leafs and barricades are modeled inside the kit's 3m
+##               wall panel, so they line up with its opening only if
+##               both use the same transform).
+@export var anchor: String = "center"
+## Translation applied instead of auto-recentring when anchor is
+## "authored" (use the host panel's fitted offset).
+@export var mesh_offset: Vector3 = Vector3.ZERO
 
 ## Footprint in grid cells (cell pieces only; edge pieces span 1 edge).
 @export var grid_size: Vector2i = Vector2i.ONE

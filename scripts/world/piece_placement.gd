@@ -176,8 +176,12 @@ static func _fit_for(piece: BuildingPiece, holder: Node3D) -> Dictionary:
 			_:  # "edge"
 				scale = Vector3(cs / maxf(bounds.size.x, 0.001), 1.0, 1.0)
 
-	var center := bounds.get_center()
-	var offset := Vector3(-center.x * scale.x, -bounds.position.y * scale.y, -center.z * scale.z)
+	var offset: Vector3
+	if piece.anchor == "authored":
+		offset = piece.mesh_offset
+	else:
+		var center := bounds.get_center()
+		offset = Vector3(-center.x * scale.x, -bounds.position.y * scale.y, -center.z * scale.z)
 	var fitted := AABB(bounds.position * scale + offset, bounds.size * scale)
 	var fit := {"scale": scale, "offset": offset, "aabb": fitted}
 	_fit_cache[piece.id] = fit

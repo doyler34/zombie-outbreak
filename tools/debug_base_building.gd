@@ -103,6 +103,16 @@ func _initialize() -> void:
 	elif bm.can_place(door, door_spot):
 		failures.append("second door allowed in a filled doorway")
 
+	# ── Barricades: window slots take window barricades only ──────────
+	var barricade_window: Resource = dm.get_piece("barricade_window")
+	var barricade_door: Resource = dm.get_piece("barricade_door")
+	var window_spot := {"placement": "edge", "cell": Vector2i(1, 0),
+		"edge": Vector3i(2, 0, 1), "axis": 1, "level": 0}
+	if bm.can_place(barricade_door, window_spot):
+		failures.append("door barricade allowed on a window opening")
+	if bm.place(barricade_window, window_spot, true) == null:
+		failures.append("window barricade refused on a window")
+
 	# ── Roof: needs walls, then attaches ──────────────────────────────
 	var roof_spot: Dictionary = bm.best_spot_for(roof, Vector3(0.5 * cs, 0, 0.5 * cs), -1)
 	if roof_spot.level != 1:

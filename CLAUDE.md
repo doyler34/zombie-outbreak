@@ -24,10 +24,16 @@ Player-built structures are **BuildingPiece** resources
 (`data/building_pieces/*.tres`, POLY kit wooden set) placed in build mode
 (HUD 🧱 BASE button, only inside the HQ zone; Commander freezes, camera
 free). Grid model: CELL pieces (foundation/floor/roof) on world cells,
-EDGE pieces (wall/doorway/window/door/gate) on cell borders
-(x,z,axis 0=−Z/1=−X), storeys = 3m levels. **BaseManager** owns occupancy,
-socket-based validation (piece.provides/requires: terrain, edge_support,
-stack, roof_support, doorway), snapping (`best_spot_for`), placement,
+EDGE pieces (wall/doorway/window/door/gate/barricades) on cell borders
+(x,z,axis 0=−Z/1=−X), storeys = 3m levels. Fills (door leafs,
+door/window barricades) share the host edge slot on a layer keyed by
+FILL_TOKENS (doorway, window_slot); they're authored INSIDE the kit's 3m
+panel frame → anchor="authored" + mesh_offset(−2,0,−0.1) +
+mesh_scale(4/3,1,1) lines them up with the stretched host panel.
+**BaseManager** owns occupancy, socket-based validation
+(piece.provides/requires: terrain, edge_support,
+stack, roof_support, doorway, window_slot), snapping (`best_spot_for`),
+placement,
 save section "base_pieces". `PiecePlacement` = grid/fit math (models
 auto-fit per fit_mode tile/contain/edge, fits cached);
 `BasePieceEntity` = placed node; `BuildModeController` = ghost preview

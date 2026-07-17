@@ -11,7 +11,7 @@ category = "window"
 placement = "edge"
 model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Window.gltf"
 fit_mode = "edge"
-provides = PackedStringArray("stack", "roof_support")
+provides = PackedStringArray("stack", "roof_support", "window_slot")
 requires = PackedStringArray("edge_support")
 cost = {
 "wood": 8

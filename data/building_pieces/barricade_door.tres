@@ -4,12 +4,12 @@
 
 [resource]
 script = ExtResource("1")
-id = "door_wood"
-display_name = "Wood Door"
-description = "A framed wooden door. Only fits into doorway sections; your people walk through, walkers scratch."
-category = "door"
+id = "barricade_door"
+display_name = "Door Barricade"
+description = "Planks nailed across a doorway. Cheap, ugly, and it keeps things out - including you."
+category = "barricade"
 placement = "edge"
-model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/SM_Door_A.gltf"
+model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/SM_Door_Baricade_A.gltf"
 mesh_scale = Vector3(1.3333, 1, 1)
 anchor = "authored"
 mesh_offset = Vector3(-2, 0, -0.1)
@@ -18,9 +18,9 @@ provides = PackedStringArray()
 requires = PackedStringArray("doorway")
 rotatable = false
 cost = {
-"wood": 4
+"wood": 3
 }
-max_health = 150
-blocks_movement = false
-sort_order = 40
-color = Color(0.75, 0.6, 0.35, 1)
+max_health = 120
+blocks_movement = true
+sort_order = 45
+color = Color(0.58, 0.44, 0.26, 1)

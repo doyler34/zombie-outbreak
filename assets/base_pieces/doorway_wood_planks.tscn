@@ -1,0 +1,171 @@
+[gd_scene load_steps=9 format=3]
+
+[sub_resource type="StandardMaterial3D" id="mat_beam"]
+albedo_color = Color(0.36, 0.20, 0.09, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="mat_plank_a"]
+albedo_color = Color(0.56, 0.34, 0.18, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="mat_plank_b"]
+albedo_color = Color(0.47, 0.27, 0.13, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="mat_plank_c"]
+albedo_color = Color(0.63, 0.40, 0.22, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="mat_metal"]
+albedo_color = Color(0.08, 0.08, 0.09, 1)
+metallic = 0.35
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="mesh_outer_h"]
+size = Vector3(3, 0.1, 0.2)
+
+[sub_resource type="BoxMesh" id="mesh_outer_v"]
+size = Vector3(0.18, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="mesh_jamb"]
+size = Vector3(0.18, 2.15, 0.2)
+
+[sub_resource type="BoxMesh" id="mesh_header"]
+size = Vector3(1.6, 0.18, 0.2)
+
+[sub_resource type="BoxMesh" id="mesh_side_plank"]
+size = Vector3(0.67, 0.37, 0.11)
+
+[sub_resource type="BoxMesh" id="mesh_top_plank"]
+size = Vector3(2.94, 0.37, 0.11)
+
+[sub_resource type="BoxMesh" id="mesh_nail"]
+size = Vector3(0.035, 0.035, 0.018)
+
+[node name="DoorwayWoodPlanks" type="Node3D"]
+
+[node name="BottomRail" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 0.05, 0.1)
+mesh = SubResource("mesh_outer_h")
+material_override = SubResource("mat_beam")
+
+[node name="TopRail" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 2.95, 0.1)
+mesh = SubResource("mesh_outer_h")
+material_override = SubResource("mat_beam")
+
+[node name="LeftOuterBeam" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, 1.5, 0.1)
+mesh = SubResource("mesh_outer_v")
+material_override = SubResource("mat_beam")
+
+[node name="RightOuterBeam" type="MeshInstance3D" parent="."]
+position = Vector3(2.86, 1.5, 0.1)
+mesh = SubResource("mesh_outer_v")
+material_override = SubResource("mat_beam")
+
+[node name="LeftDoorJamb" type="MeshInstance3D" parent="."]
+position = Vector3(0.79, 1.175, 0.1)
+mesh = SubResource("mesh_jamb")
+material_override = SubResource("mat_beam")
+
+[node name="RightDoorJamb" type="MeshInstance3D" parent="."]
+position = Vector3(2.21, 1.175, 0.1)
+mesh = SubResource("mesh_jamb")
+material_override = SubResource("mat_beam")
+
+[node name="DoorHeader" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 2.34, 0.1)
+mesh = SubResource("mesh_header")
+material_override = SubResource("mat_beam")
+
+[node name="LeftPlank0" type="MeshInstance3D" parent="."]
+position = Vector3(0.365, 0.305, 0.1)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_a")
+
+[node name="RightPlank0" type="MeshInstance3D" parent="."]
+position = Vector3(2.635, 0.305, 0.1)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_b")
+
+[node name="LeftPlank1" type="MeshInstance3D" parent="."]
+position = Vector3(0.365, 0.695, 0.102)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_c")
+
+[node name="RightPlank1" type="MeshInstance3D" parent="."]
+position = Vector3(2.635, 0.695, 0.098)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_a")
+
+[node name="LeftPlank2" type="MeshInstance3D" parent="."]
+position = Vector3(0.365, 1.085, 0.098)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_b")
+
+[node name="RightPlank2" type="MeshInstance3D" parent="."]
+position = Vector3(2.635, 1.085, 0.102)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_c")
+
+[node name="LeftPlank3" type="MeshInstance3D" parent="."]
+position = Vector3(0.365, 1.475, 0.101)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_a")
+
+[node name="RightPlank3" type="MeshInstance3D" parent="."]
+position = Vector3(2.635, 1.475, 0.099)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_b")
+
+[node name="LeftPlank4" type="MeshInstance3D" parent="."]
+position = Vector3(0.365, 1.865, 0.098)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_c")
+
+[node name="RightPlank4" type="MeshInstance3D" parent="."]
+position = Vector3(2.635, 1.865, 0.102)
+mesh = SubResource("mesh_side_plank")
+material_override = SubResource("mat_plank_a")
+
+[node name="TopPlank0" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 2.61, 0.1)
+mesh = SubResource("mesh_top_plank")
+material_override = SubResource("mat_plank_b")
+
+[node name="TopPlank1" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 2.81, 0.102)
+scale = Vector3(1, 0.45, 1)
+mesh = SubResource("mesh_top_plank")
+material_override = SubResource("mat_plank_c")
+
+[node name="NailL0" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, 0.305, 0.169)
+mesh = SubResource("mesh_nail")
+material_override = SubResource("mat_metal")
+
+[node name="NailR0" type="MeshInstance3D" parent="."]
+position = Vector3(2.86, 0.305, 0.169)
+mesh = SubResource("mesh_nail")
+material_override = SubResource("mat_metal")
+
+[node name="NailL1" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, 1.085, 0.169)
+mesh = SubResource("mesh_nail")
+material_override = SubResource("mat_metal")
+
+[node name="NailR1" type="MeshInstance3D" parent="."]
+position = Vector3(2.86, 1.085, 0.169)
+mesh = SubResource("mesh_nail")
+material_override = SubResource("mat_metal")
+
+[node name="NailJambL" type="MeshInstance3D" parent="."]
+position = Vector3(0.79, 1.475, 0.169)
+mesh = SubResource("mesh_nail")
+material_override = SubResource("mat_metal")
+
+[node name="NailJambR" type="MeshInstance3D" parent="."]
+position = Vector3(2.21, 1.475, 0.169)
+mesh = SubResource("mesh_nail")
+material_override = SubResource("mat_metal")

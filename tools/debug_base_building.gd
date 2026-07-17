@@ -145,20 +145,14 @@ func _initialize() -> void:
 		failures.append("restored wall did not re-block its edge")
 
 	# ── Textures really bound: kit panels must carry the palette ──────
-	# (the doorway still uses a kit panel; the wall is now the authored
-	# vertex-coloured plank model, checked separately below)
+	# (the doorway still uses a kit FBX panel with the New Palitra
+	# atlas; the wall is the authored vertex-coloured plank model,
+	# checked separately below)
 	var kit_scene: PackedScene = load(doorway.model_path)
 	var kit_model: Node = kit_scene.instantiate()
 	root.add_child(kit_model)
 	if not _has_textured_mesh(kit_model):
 		failures.append("kit panel imported without its palette texture")
-	# The panels' KHR_texture_transform shift moves their UVs off the
-	# gray palette swatch onto the wood one — if the importer drops it,
-	# they render gray again. Assert it survived the import.
-	var kit_material := _first_textured_material(kit_model)
-	if kit_material != null and absf(kit_material.uv1_offset.x - 0.123) > 0.01:
-		failures.append("kit palette shift lost in import (uv1_offset=%s)"
-			% kit_material.uv1_offset)
 	kit_model.queue_free()
 
 	# ── Authored plank models: exact kit bounds so grid math holds ────

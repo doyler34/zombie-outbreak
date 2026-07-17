@@ -1,13 +1,13 @@
 [gd_scene load_steps=9 format=3]
 
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_3x3.gltf" id="1"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_Door.gltf" id="2"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Window.gltf" id="3"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Roofs/SM_Roof_3m.gltf" id="4"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.gltf" id="5"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Interiors/SM_Radio.gltf" id="6"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Metall_Box.gltf" id="7"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Barrel_A_01.gltf" id="8"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_3x3.fbx" id="1"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_Door.fbx" id="2"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Window.fbx" id="3"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Roofs/SM_Roof_3m.fbx" id="4"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.fbx" id="5"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Interiors/SM_Radio.fbx" id="6"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Metall_Box.fbx" id="7"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Barrel_A_01.fbx" id="8"]
 
 [node name="Watchtower" type="Node3D"]
 

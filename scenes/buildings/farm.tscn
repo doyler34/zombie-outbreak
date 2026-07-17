@@ -1,11 +1,11 @@
 [gd_scene load_steps=7 format=3]
 
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.gltf" id="1"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Window.gltf" id="2"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_Door.gltf" id="3"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Interiors/SM_Wooden_Box_A.gltf" id="4"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Barrel_A_03.gltf" id="5"]
-[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Tools/SM_Bucket.gltf" id="6"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.fbx" id="1"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Window.fbx" id="2"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_Door.fbx" id="3"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Interiors/SM_Wooden_Box_A.fbx" id="4"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Props/SM_Barrel_A_03.fbx" id="5"]
+[ext_resource type="PackedScene" path="res://assets/poly_survival_workshop/Models/Tools/SM_Bucket.fbx" id="6"]
 
 [node name="Farm" type="Node3D"]
 

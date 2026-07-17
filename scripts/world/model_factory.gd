@@ -45,6 +45,11 @@ static var _library_cache: Dictionary = {}  # path -> Array[AnimationLibrary]
 ## Libraries re-pointed at a specific skeleton path: "glb|skel" -> lib.
 static var _remap_cache: Dictionary = {}
 
+## The POLY kit's shared palette atlas — every kit mesh UV-maps into it.
+const KIT_TEXTURE_PATH := "res://assets/poly_survival_workshop/Textures/Polygon_Texture2.png"
+## One material for every kit surface (great for draw-call batching).
+static var _kit_material: StandardMaterial3D = null
+
 
 ## [param footprint] is the building's world-space footprint in meters.
 static func building_model(def: BuildingDefinition, footprint: Vector2) -> Node3D:
@@ -53,8 +58,36 @@ static func building_model(def: BuildingDefinition, footprint: Vector2) -> Node3
 		var node := _fitted(scene, footprint * FOOTPRINT_FILL, def.model_scale)
 		if def.flat_color:
 			paint_model(node, def.color)
+		else:
+			restore_missing_textures(node)
 		return node
 	return _chunky_house(def.color, footprint)
+
+
+## Device safety net for atlas-textured kits: if an imported material
+## lost its albedo texture (a broken texture dependency imports silently
+## as null and renders flat gray — CI can't see it, only the exported
+## build), re-bind the shared palette. Materials that kept their texture
+## are left alone, so correctly imported assets are untouched.
+static func restore_missing_textures(node: Node) -> void:
+	if node is MeshInstance3D:
+		var mesh_node := node as MeshInstance3D
+		for i in mesh_node.get_surface_override_material_count():
+			var material := mesh_node.get_active_material(i)
+			if material is BaseMaterial3D \
+					and (material as BaseMaterial3D).albedo_texture == null:
+				mesh_node.set_surface_override_material(i, _palette_material())
+	for child in node.get_children():
+		restore_missing_textures(child)
+
+
+static func _palette_material() -> StandardMaterial3D:
+	if _kit_material == null:
+		_kit_material = StandardMaterial3D.new()
+		_kit_material.roughness = 0.9
+		if ResourceLoader.exists(KIT_TEXTURE_PATH):
+			_kit_material.albedo_texture = load(KIT_TEXTURE_PATH)
+	return _kit_material
 
 
 ## Replace every material on a model with a flat, lightly-shaded color.

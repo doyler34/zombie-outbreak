@@ -121,7 +121,11 @@ static func build_visual(piece: BuildingPiece) -> Node3D:
 	if piece.model_path != "" and ResourceLoader.exists(piece.model_path):
 		scene = load(piece.model_path) as PackedScene
 	if scene != null:
-		holder.add_child(scene.instantiate())
+		var model: Node = scene.instantiate()
+		holder.add_child(model)
+		# Re-bind the palette on any material whose texture dependency
+		# broke in the exported build (renders flat gray otherwise).
+		ModelFactory.restore_missing_textures(model)
 	else:
 		holder.add_child(_placeholder(piece))
 

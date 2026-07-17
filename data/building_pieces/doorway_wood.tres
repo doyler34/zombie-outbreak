@@ -13,10 +13,11 @@ model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Wall
 fit_mode = "edge"
 provides = PackedStringArray("stack", "roof_support", "doorway")
 requires = PackedStringArray("edge_support")
+variation_tints = PackedColorArray(0.66, 0.5, 0.3, 1, 0.6, 0.44, 0.26, 1, 0.72, 0.56, 0.34, 1, 0.64, 0.48, 0.28, 1)
 cost = {
 "wood": 8
 }
 max_health = 220
 blocks_movement = false
 sort_order = 30
-color = Color(0.7, 0.52, 0.3, 1)
+color = Color(0.66, 0.5, 0.3, 1)

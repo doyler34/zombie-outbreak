@@ -9,10 +9,11 @@ display_name = "Wood Floor"
 description = "An upper-storey floor. Needs a completed wall on its perimeter to rest on."
 category = "floor"
 placement = "cell"
-model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.fbx"
+model_path = "res://assets/base_pieces/foundation_wood_planks.gltf"
 fit_mode = "tile"
 provides = PackedStringArray("surface", "edge_support")
 requires = PackedStringArray("roof_support")
+variation_tints = PackedColorArray(1, 1, 1, 1, 0.92, 0.89, 0.85, 1, 1.06, 1.01, 0.95, 1)
 cost = {
 "wood": 12
 }

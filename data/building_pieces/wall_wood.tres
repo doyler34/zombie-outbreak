@@ -9,10 +9,11 @@ display_name = "Wood Wall"
 description = "A solid wooden wall panel. Snaps to foundation borders and stacks into upper storeys."
 category = "wall"
 placement = "edge"
-model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_3x3.fbx"
+model_path = "res://assets/base_pieces/wall_wood_planks.gltf"
 fit_mode = "edge"
 provides = PackedStringArray("stack", "roof_support")
 requires = PackedStringArray("edge_support")
+variation_tints = PackedColorArray(1, 1, 1, 1, 0.9, 0.86, 0.82, 1, 1.08, 1.03, 0.96, 1, 0.96, 0.93, 1, 1)
 cost = {
 "wood": 8
 }

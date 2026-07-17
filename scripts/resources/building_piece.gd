@@ -100,6 +100,13 @@ extends Resource
 ## doorways/gates don't — keeps the nav grid honest).
 @export var blocks_movement: bool = true
 
+## Optional per-instance colour variations: each placed piece picks one
+## of these tints deterministically from its spot, so a wall run reads
+## as individual boards instead of copy-paste. Empty = no variation.
+## Tints are shared materials (see PiecePlacement) — 4 tints cost 4
+## draw-call buckets total, not one per piece.
+@export var variation_tints: PackedColorArray = PackedColorArray()
+
 @export_group("Menu")
 @export var sort_order: int = 100
 ## Placeholder/menu accent color (also used when the model is missing).

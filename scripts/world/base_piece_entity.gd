@@ -19,7 +19,14 @@ func setup(new_piece: BuildingPiece, new_spot: Dictionary) -> void:
 	spot = new_spot
 	health = new_piece.max_health
 	transform = PiecePlacement.spot_transform(new_piece, new_spot)
-	add_child(PiecePlacement.build_visual(new_piece))
+	var visual := PiecePlacement.build_visual(new_piece)
+	add_child(visual)
+	# Deterministic per-spot colour variation (survives save/load — the
+	# spot IS the seed), so wall runs don't read as copy-paste.
+	if new_piece.variation_tints.size() > 0:
+		var tint: Color = new_piece.variation_tints[
+			absi(hash(new_spot)) % new_piece.variation_tints.size()]
+		_apply_tint(visual, PiecePlacement.variation_material(tint))
 
 	if new_piece.collision == "box":
 		var shape := CollisionShape3D.new()
@@ -37,6 +44,13 @@ func blocks_building() -> bool:
 
 func blocks_movement() -> bool:
 	return false
+
+
+func _apply_tint(node: Node, material: Material) -> void:
+	if node is MeshInstance3D:
+		(node as MeshInstance3D).material_override = material
+	for child in node.get_children():
+		_apply_tint(child, material)
 
 
 ## Future combat hook: chip health, collapse at zero.

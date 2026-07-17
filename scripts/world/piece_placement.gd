@@ -24,6 +24,10 @@ extends RefCounted
 static var _fit_cache: Dictionary = {}
 ## Shared collision shapes per piece id (thousands of walls, one shape).
 static var _shape_cache: Dictionary = {}
+## Shared variation-tint materials (Color -> StandardMaterial3D). They
+## keep vertex colours active, so the baked plank shading shows through
+## the tint. A handful of tints = a handful of materials, ever.
+static var _tint_materials: Dictionary = {}
 
 
 static func level_height() -> float:
@@ -143,6 +147,17 @@ static func fitted_aabb(piece: BuildingPiece) -> AABB:
 		# Force the cache through a throwaway visual.
 		build_visual(piece)
 	return _fit_cache[piece.id].aabb
+
+
+## Shared per-tint material for BuildingPiece.variation_tints.
+static func variation_material(tint: Color) -> StandardMaterial3D:
+	if not _tint_materials.has(tint):
+		var material := StandardMaterial3D.new()
+		material.vertex_color_use_as_albedo = true
+		material.albedo_color = tint
+		material.roughness = 0.95
+		_tint_materials[tint] = material
+	return _tint_materials[tint]
 
 
 ## Shared box collision shape for a piece type.

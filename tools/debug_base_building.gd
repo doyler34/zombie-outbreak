@@ -144,20 +144,30 @@ func _initialize() -> void:
 	if not wm.is_edge_blocked(Vector3i(0, 0, 0)):
 		failures.append("restored wall did not re-block its edge")
 
-	# ── Textures really bound: kit materials must carry the palette ───
-	var wall_scene: PackedScene = load(wall.model_path)
-	var wall_model: Node = wall_scene.instantiate()
-	root.add_child(wall_model)
-	if not _has_textured_mesh(wall_model):
-		failures.append("wall model imported without its palette texture")
-	# The wall's KHR_texture_transform shift moves its UVs off the gray
-	# palette swatch onto the wood one — if the importer drops it, the
-	# wall renders gray again. Assert it survived the import.
-	var wall_material := _first_textured_material(wall_model)
-	if wall_material != null and absf(wall_material.uv1_offset.x - 0.123) > 0.01:
-		failures.append("wall palette shift lost in import (uv1_offset=%s)"
-			% wall_material.uv1_offset)
-	wall_model.queue_free()
+	# ── Textures really bound: kit panels must carry the palette ──────
+	# (the doorway still uses a kit panel; the wall is now the authored
+	# vertex-coloured plank model, checked separately below)
+	var kit_scene: PackedScene = load(doorway.model_path)
+	var kit_model: Node = kit_scene.instantiate()
+	root.add_child(kit_model)
+	if not _has_textured_mesh(kit_model):
+		failures.append("kit panel imported without its palette texture")
+	# The panels' KHR_texture_transform shift moves their UVs off the
+	# gray palette swatch onto the wood one — if the importer drops it,
+	# they render gray again. Assert it survived the import.
+	var kit_material := _first_textured_material(kit_model)
+	if kit_material != null and absf(kit_material.uv1_offset.x - 0.123) > 0.01:
+		failures.append("kit palette shift lost in import (uv1_offset=%s)"
+			% kit_material.uv1_offset)
+	kit_model.queue_free()
+
+	# ── Authored plank models: exact kit bounds so grid math holds ────
+	var wall_aabb: AABB = load("res://scripts/world/piece_placement.gd").fitted_aabb(wall)
+	if absf(wall_aabb.size.x - cs) > 0.01 or absf(wall_aabb.size.y - 3.0) > 0.01:
+		failures.append("plank wall fitted size off: %s" % wall_aabb)
+	var found_aabb: AABB = load("res://scripts/world/piece_placement.gd").fitted_aabb(foundation)
+	if absf(found_aabb.size.x - cs) > 0.01 or absf(found_aabb.size.z - cs) > 0.01:
+		failures.append("plank foundation fitted size off: %s" % found_aabb)
 
 	# ── Ghost visuals really exist (fitted, non-empty) ─────────────────
 	for piece in [foundation, wall, doorway, door, window, roof]:

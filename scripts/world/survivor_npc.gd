@@ -151,12 +151,12 @@ func _seek(target: Vector3, delta: float) -> bool:
 	var moved := false
 	if not is_zero_approx(motion.x):
 		var probe := next + Vector3(motion.x + signf(motion.x) * WALL_PROBE, 0, 0)
-		if _is_walkable(probe):
+		if _can_step(next, probe):
 			next.x += motion.x
 			moved = true
 	if not is_zero_approx(motion.z):
 		var probe := next + Vector3(0, 0, motion.z + signf(motion.z) * WALL_PROBE)
-		if _is_walkable(probe):
+		if _can_step(next, probe):
 			next.z += motion.z
 			moved = true
 	next.y = WorldManager.ground_height(next)
@@ -175,6 +175,13 @@ func _seek(target: Vector3, delta: float) -> bool:
 
 func _is_walkable(world_pos: Vector3) -> bool:
 	return WorldManager.is_cell_walkable(WorldManager.world_to_cell(world_pos))
+
+
+## Player-built walls on cell borders block the step too.
+func _can_step(from_pos: Vector3, to_pos: Vector3) -> bool:
+	return WorldManager.is_move_allowed(
+		WorldManager.world_to_cell(from_pos),
+		WorldManager.world_to_cell(to_pos))
 
 
 func _face(direction: Vector3) -> void:

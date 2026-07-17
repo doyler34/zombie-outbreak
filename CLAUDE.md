@@ -7,17 +7,36 @@ hard-won gotchas + current asset wiring.
 ## What this is
 Godot 4.4, mobile-first (Android), Clash-style **orthographic 3D** top-down
 zombie survival game. Landscape 1280×720 base, `canvas_items`+`expand` stretch.
-Framework-first: 15 autoload managers, everything data-driven via `.tres` in
+Framework-first: 18 autoload managers, everything data-driven via `.tres` in
 `data/`. Adding content = drop a `.tres`, no code.
 
 ## Architecture in one breath
 Autoload **managers own all state; scenes are disposable views**. Managers never
 call each other directly for reactions — they emit on **EventBus** and others
 subscribe. Order in `project.godot` is dependency order (EventBus, DataManager,
-SaveManager first; GameManager last). The 15: EventBus, DataManager, SaveManager,
-TimeManager, ResourceManager, WorldManager, SurvivorManager, BuildingManager,
-ObstacleManager, CombatManager, WorldMapManager, AudioManager, InputManager,
-UIManager, GameManager.
+SaveManager first; GameManager last). The 18: EventBus, DataManager, SaveManager,
+TimeManager, ResourceManager, WorldManager, SurvivorManager, InventoryManager,
+CraftingManager, BuildingManager, BaseManager, ObstacleManager, CombatManager,
+WorldMapManager, AudioManager, InputManager, UIManager, GameManager.
+
+## Modular base building (LDoE/Rust-style, v1)
+Player-built structures are **BuildingPiece** resources
+(`data/building_pieces/*.tres`, POLY kit wooden set) placed in build mode
+(HUD 🧱 BASE button, only inside the HQ zone; Commander freezes, camera
+free). Grid model: CELL pieces (foundation/floor/roof) on world cells,
+EDGE pieces (wall/doorway/window/door/gate) on cell borders
+(x,z,axis 0=−Z/1=−X), storeys = 3m levels. **BaseManager** owns occupancy,
+socket-based validation (piece.provides/requires: terrain, edge_support,
+stack, roof_support, doorway), snapping (`best_spot_for`), placement,
+save section "base_pieces". `PiecePlacement` = grid/fit math (models
+auto-fit per fit_mode tile/contain/edge, fits cached);
+`BasePieceEntity` = placed node; `BuildModeController` = ghost preview
+(green/red, hover on PC, tap on touch, R/Enter/Esc);
+`BuildModeMenu` = category tabs auto-built from data. Walls block
+movement via WorldManager blocked-edges (`is_move_allowed`) — Commander
+and NPCs check crossings, doorways/gates don't block.
+`tools/debug_base_building.gd` smoke-tests the whole flow in CI
+(BASEBUILD_OK).
 
 World is 3D (Node3D + orthographic Camera3D pitch −55/yaw 45). Grid positions are
 **Vector3 on XZ plane, Y=0**, cell_size in meters (4.0). Taps raycast camera→ground.

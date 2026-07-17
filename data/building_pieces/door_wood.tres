@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="BuildingPiece" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_piece.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "door_wood"
+display_name = "Wood Door"
+description = "A salvaged plywood door leaf. Only fits into doorway sections."
+category = "door"
+placement = "edge"
+model_path = "res://assets/poly_survival_workshop/Models/Props/SM_Plywood_Board_A.gltf"
+mesh_rotation_degrees = Vector3(90, 0, 0)
+mesh_scale = Vector3(1.15, 1.45, 1.0)
+fit_mode = "edge"
+provides = PackedStringArray()
+requires = PackedStringArray("doorway")
+rotatable = false
+cost = {
+"wood": 4
+}
+max_health = 150
+blocks_movement = false
+sort_order = 40
+color = Color(0.75, 0.6, 0.35, 1)

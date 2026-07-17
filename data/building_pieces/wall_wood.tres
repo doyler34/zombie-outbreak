@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BuildingPiece" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_piece.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "wall_wood"
+display_name = "Wood Wall"
+description = "A solid wooden wall panel. Snaps to foundation borders and stacks into upper storeys."
+category = "wall"
+placement = "edge"
+model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_3x3.gltf"
+fit_mode = "edge"
+provides = PackedStringArray("stack", "roof_support")
+requires = PackedStringArray("edge_support")
+cost = {
+"wood": 8
+}
+tier = 0
+max_health = 250
+blocks_movement = true
+sort_order = 20
+color = Color(0.66, 0.5, 0.3, 1)

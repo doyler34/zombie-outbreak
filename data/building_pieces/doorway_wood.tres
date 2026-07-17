@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BuildingPiece" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_piece.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "doorway_wood"
+display_name = "Wood Doorway"
+description = "A wall panel with a door opening. Fit a door into it to keep the walkers out."
+category = "doorway"
+placement = "edge"
+model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Wall_Door.gltf"
+fit_mode = "edge"
+provides = PackedStringArray("stack", "roof_support", "doorway")
+requires = PackedStringArray("edge_support")
+cost = {
+"wood": 8
+}
+max_health = 220
+blocks_movement = false
+sort_order = 30
+color = Color(0.7, 0.52, 0.3, 1)

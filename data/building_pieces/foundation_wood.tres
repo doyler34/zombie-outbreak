@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BuildingPiece" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_piece.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "foundation_wood"
+display_name = "Wood Foundation"
+description = "Level ground to build on. Walls need one; neighbouring foundations merge into a single floor."
+category = "foundation"
+placement = "cell"
+model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.gltf"
+fit_mode = "tile"
+provides = PackedStringArray("surface", "edge_support")
+requires = PackedStringArray("terrain")
+cost = {
+"wood": 10
+}
+max_health = 300
+blocks_movement = false
+sort_order = 10
+color = Color(0.62, 0.45, 0.25, 1)

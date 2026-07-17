@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BuildingPiece" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_piece.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "stairs_wood"
+display_name = "Wood Stairs"
+description = "Scaffold stairs up to the first storey. Place on open ground beside your build."
+category = "stairs"
+placement = "cell"
+model_path = "res://assets/poly_survival_workshop/Models/Addons/SM_Stairs.gltf"
+fit_mode = "contain"
+provides = PackedStringArray()
+requires = PackedStringArray("terrain")
+cost = {
+"wood": 14
+}
+max_health = 200
+blocks_movement = false
+sort_order = 90
+color = Color(0.64, 0.48, 0.3, 1)

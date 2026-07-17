@@ -11,12 +11,17 @@ extends Node
 ## reference — buildings, future props and blockers all use the same API.
 
 var _occupancy: Dictionary = {}  # Vector2i -> Node
+## Cell borders walled off by base pieces: Vector3i(x, z, axis) -> Node.
+## Axis 0 = border along X at the cell's -Z side, 1 = along Z at -X
+## (see PiecePlacement). Movement code asks is_move_allowed().
+var _blocked_edges: Dictionary = {}
 ## Elevation source registered by the world scene (null = flat world).
 var _heightfield: Heightfield = null
 
 
 func reset() -> void:
 	_occupancy.clear()
+	_blocked_edges.clear()
 
 
 # ── Elevation ────────────────────────────────────────────────────────────
@@ -133,3 +138,38 @@ func vacate_area(cell: Vector2i, size_in_cells: Vector2i) -> void:
 ## The node occupying [param cell], or null.
 func occupant_at(cell: Vector2i) -> Node:
 	return _occupancy.get(cell)
+
+
+# ── Edge blocking (thin walls between walkable cells) ────────────────────
+
+func block_edge(edge: Vector3i, blocker: Node) -> void:
+	_blocked_edges[edge] = blocker
+
+
+func unblock_edge(edge: Vector3i) -> void:
+	_blocked_edges.erase(edge)
+
+
+func is_edge_blocked(edge: Vector3i) -> bool:
+	return _blocked_edges.has(edge)
+
+
+## Can a ground unit step from one cell into an adjacent one? True when
+## the target is walkable AND no wall-type piece blocks the shared
+## border. Same-cell moves are always allowed; axis-separated movement
+## (Commander, NPCs) never produces diagonals.
+func is_move_allowed(from_cell: Vector2i, to_cell: Vector2i) -> bool:
+	if not is_cell_walkable(to_cell):
+		return false
+	var step := to_cell - from_cell
+	if step == Vector2i.ZERO:
+		return true
+	if step.x != 0:
+		var x := maxi(from_cell.x, to_cell.x)
+		if _blocked_edges.has(Vector3i(x, from_cell.y, 1)):
+			return false
+	if step.y != 0:
+		var z := maxi(from_cell.y, to_cell.y)
+		if _blocked_edges.has(Vector3i(from_cell.x, z, 0)):
+			return false
+	return true

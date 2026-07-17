@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BuildingPiece" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_piece.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "floor_wood"
+display_name = "Wood Floor"
+description = "An upper-storey floor. Needs a completed wall on its perimeter to rest on."
+category = "floor"
+placement = "cell"
+model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Floors/SM_Floor_3x3.gltf"
+fit_mode = "tile"
+provides = PackedStringArray("surface", "edge_support")
+requires = PackedStringArray("roof_support")
+cost = {
+"wood": 12
+}
+max_health = 200
+blocks_movement = false
+sort_order = 60
+color = Color(0.6, 0.44, 0.26, 1)

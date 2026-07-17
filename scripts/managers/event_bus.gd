@@ -27,6 +27,13 @@ signal building_deselected()
 signal building_construction_finished(entity: BuildingEntity)
 signal building_upgraded(entity: BuildingEntity, new_level: int)
 
+# ── Base building (modular pieces) ───────────────────────────────────────
+signal build_mode_changed(active: bool)
+## The build menu chose a piece to place (null clears the preview).
+signal piece_selected(piece: BuildingPiece)
+signal piece_placed(entity: BasePieceEntity)
+signal piece_removed(entity: BasePieceEntity)
+
 # ── Obstacles / clearing ─────────────────────────────────────────────────
 signal obstacle_selected(entity: ObstacleEntity)
 signal obstacle_deselected()

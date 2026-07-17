@@ -16,6 +16,7 @@ const GROUND_SHADER := preload("res://assets/shaders/ground_tiles.gdshader")
 @onready var decorator: WorldDecorator = $WorldDecorator
 @onready var sun: DirectionalLight3D = $Sun
 @onready var buildings: Node3D = $Buildings
+@onready var base_pieces: Node3D = $BasePieces
 @onready var obstacles: Node3D = $Obstacles
 @onready var placer: BuildingPlacer = $BuildingPlacer
 @onready var camera_rig: CameraController = $CameraRig
@@ -28,6 +29,7 @@ const GROUND_SHADER := preload("res://assets/shaders/ground_tiles.gdshader")
 
 func _ready() -> void:
 	BuildingManager.register_container(buildings)
+	BaseManager.register_container(base_pieces)
 	ObstacleManager.register_container(obstacles)
 
 	# Angled sun for big readable shadows (mobile may disable them).
@@ -41,6 +43,7 @@ func _ready() -> void:
 
 	InputManager.tapped.connect(_on_world_tapped)
 	EventBus.game_tick.connect(_update_day_night)
+	EventBus.build_mode_changed.connect(_on_build_mode_changed)
 
 	# The camera tracks the Commander; a manual pan pauses the follow and
 	# the Commander moving again resumes it.
@@ -71,9 +74,21 @@ func _setup_ground() -> void:
 	ground.material_override = material
 
 
+## Build mode: the Commander parks, the camera roams free, taps belong
+## to the piece preview, and the joystick gets out of the way.
+func _on_build_mode_changed(active: bool) -> void:
+	joystick.visible = not active
+	if active:
+		BuildingManager.deselect()
+		ObstacleManager.deselect()
+		camera_rig.follow(null)
+	else:
+		camera_rig.follow(commander)
+
+
 ## Taps select buildings or obstacles — unless the placer is using them.
 func _on_world_tapped(_screen_pos: Vector2, world_pos: Vector3) -> void:
-	if placer.is_active():
+	if placer.is_active() or BaseManager.build_mode_active:
 		return
 	var cell := WorldManager.world_to_cell(world_pos)
 	var occupant := WorldManager.occupant_at(cell)

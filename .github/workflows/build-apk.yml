@@ -80,6 +80,14 @@ jobs:
             exit 1
           fi
 
+      - name: Base building smoke test
+        run: |
+          ./Godot_v4.4-stable_linux.x86_64 --headless --path . -s tools/debug_base_building.gd 2>&1 | tee basebuild_debug.log
+          if ! grep -q "BASEBUILD_OK" basebuild_debug.log; then
+            echo "::error::Base building system broken — see basebuild_debug.log above"
+            exit 1
+          fi
+
       - name: Build APK (Debug)
         run: |
           mkdir -p build

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/building_placer.gd" id="2"]
@@ -13,6 +13,8 @@
 [ext_resource type="Script" path="res://scripts/world/ground_items.gd" id="11"]
 [ext_resource type="Script" path="res://scripts/world/world_decorator.gd" id="12"]
 [ext_resource type="Script" path="res://scripts/world/hq_compound.gd" id="13"]
+[ext_resource type="Script" path="res://scripts/world/build_mode_controller.gd" id="14"]
+[ext_resource type="Script" path="res://scripts/ui/build_mode_menu.gd" id="15"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -42,6 +44,8 @@ script = ExtResource("12")
 
 [node name="Buildings" type="Node3D" parent="."]
 
+[node name="BasePieces" type="Node3D" parent="."]
+
 [node name="GroundItems" type="Node3D" parent="."]
 script = ExtResource("11")
 
@@ -50,6 +54,9 @@ script = ExtResource("13")
 
 [node name="BuildingPlacer" type="Node3D" parent="." groups=["building_placer"]]
 script = ExtResource("2")
+
+[node name="BuildModeController" type="Node3D" parent="."]
+script = ExtResource("14")
 
 [node name="Commander" type="Node3D" parent="."]
 script = ExtResource("5")
@@ -98,3 +105,10 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("10")
+
+[node name="BuildModeMenu" type="Control" parent="HUDLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("15")

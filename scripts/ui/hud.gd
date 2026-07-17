@@ -38,6 +38,8 @@ func _ready() -> void:
 	EventBus.population_changed.connect(_on_population_changed)
 	EventBus.building_placement_started.connect(func(_def): _set_placement_mode(true))
 	EventBus.building_placement_ended.connect(func(_ok): _set_placement_mode(false))
+	# Build mode swaps the whole action bar for the BuildModeMenu.
+	EventBus.build_mode_changed.connect(_on_build_mode_changed)
 	EventBus.building_selected.connect(_on_building_selected)
 	EventBus.building_deselected.connect(func(): _info_panel.visible = false)
 	EventBus.building_upgraded.connect(_on_building_upgraded)
@@ -118,6 +120,10 @@ func _build_action_bar() -> void:
 	var build_btn := UIStyle.make_button("⚙  BUILD")
 	build_btn.pressed.connect(func(): UIManager.push_screen(BUILD_MENU_SCENE))
 	_action_bar.add_child(build_btn)
+
+	var base_btn := UIStyle.make_button("🧱  BASE")
+	base_btn.pressed.connect(func(): BaseManager.enter_build_mode())
+	_action_bar.add_child(base_btn)
 
 	var bag_btn := UIStyle.make_button("🎒  BAG")
 	bag_btn.pressed.connect(func(): UIManager.push_screen(INVENTORY_SCENE))
@@ -208,6 +214,12 @@ func _on_population_changed(count: int, cap: int) -> void:
 func _set_placement_mode(placing: bool) -> void:
 	_placement_bar.visible = placing
 	_action_bar.visible = not placing
+
+
+func _on_build_mode_changed(active: bool) -> void:
+	_action_bar.visible = not active
+	if active:
+		_info_panel.visible = false
 
 
 func _on_building_selected(entity: BuildingEntity) -> void:

@@ -114,6 +114,7 @@ func _reset_session() -> void:
 	WorldMapManager.reset()
 	ObstacleManager.reset()
 	BuildingManager.reset()
+	BaseManager.reset()
 	WorldManager.reset()
 	SurvivorManager.reset()
 	InventoryManager.reset()

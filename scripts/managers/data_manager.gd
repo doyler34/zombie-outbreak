@@ -12,6 +12,7 @@ extends Node
 
 const SETTINGS_PATH := "res://data/settings/game_settings.tres"
 const BUILDINGS_DIR := "res://data/buildings"
+const BUILDING_PIECES_DIR := "res://data/building_pieces"
 const RESOURCES_DIR := "res://data/resources"
 const OBSTACLES_DIR := "res://data/obstacles"
 const ITEMS_DIR := "res://data/items"
@@ -24,6 +25,7 @@ const TABLES_DIR := "res://data/tables"
 var settings: GameSettings
 
 var _buildings: Dictionary = {}  # id -> BuildingDefinition
+var _building_pieces: Dictionary = {}  # id -> BuildingPiece
 var _resources: Dictionary = {}  # id -> ResourceDefinition
 var _obstacles: Dictionary = {}  # id -> ObstacleDefinition
 var _items: Dictionary = {}      # id -> ItemDefinition
@@ -38,6 +40,7 @@ func _ready() -> void:
 	settings = load(SETTINGS_PATH)
 	assert(settings != null, "Missing game settings at %s" % SETTINGS_PATH)
 	_load_definitions(BUILDINGS_DIR, _buildings)
+	_load_definitions(BUILDING_PIECES_DIR, _building_pieces)
 	_load_definitions(RESOURCES_DIR, _resources)
 	_load_definitions(OBSTACLES_DIR, _obstacles)
 	_load_definitions(ITEMS_DIR, _items)
@@ -63,6 +66,25 @@ func all_buildings() -> Array[BuildingDefinition]:
 	for def: BuildingDefinition in _buildings.values():
 		list.append(def)
 	list.sort_custom(func(a, b): return a.sort_order < b.sort_order)
+	return list
+
+
+# ── Building pieces (modular base building) ─────────────────────────────
+
+func get_piece(id: String) -> BuildingPiece:
+	return _building_pieces.get(id)
+
+
+## All pieces in menu order (sort_order, then category as tiebreak).
+## The build menu derives its category tabs from this order.
+func all_pieces() -> Array[BuildingPiece]:
+	var list: Array[BuildingPiece] = []
+	for piece: BuildingPiece in _building_pieces.values():
+		list.append(piece)
+	list.sort_custom(func(a, b):
+		if a.sort_order != b.sort_order:
+			return a.sort_order < b.sort_order
+		return a.category < b.category)
 	return list
 
 

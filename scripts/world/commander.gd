@@ -87,7 +87,7 @@ func _physics_process(delta: float) -> void:
 ## Screen-space movement vector (x right, y down), length 0..1.
 ## Joystick wins when deflected; keyboard is the desktop fallback.
 func _gather_input() -> Vector2:
-	if UIManager.has_open_screen():
+	if UIManager.has_open_screen() or BaseManager.build_mode_active:
 		return Vector2.ZERO
 	if joystick != null and joystick.direction != Vector2.ZERO:
 		return joystick.direction
@@ -116,18 +116,23 @@ func _step(direction: Vector3, strength: float, delta: float) -> void:
 	var next := position
 	if not is_zero_approx(motion.x):
 		var probe := next + Vector3(motion.x + signf(motion.x) * WALL_PROBE, 0, 0)
-		if _is_walkable(probe):
+		if _can_step(next, probe):
 			next.x += motion.x
 	if not is_zero_approx(motion.z):
 		var probe := next + Vector3(0, 0, motion.z + signf(motion.z) * WALL_PROBE)
-		if _is_walkable(probe):
+		if _can_step(next, probe):
 			next.z += motion.z
 	next.y = WorldManager.ground_height(next)
 	position = next
 
 
-func _is_walkable(world_pos: Vector3) -> bool:
-	return WorldManager.is_cell_walkable(WorldManager.world_to_cell(world_pos))
+## Blocked cells AND player-built walls on cell borders both stop the
+## step (each probe moves along a single axis, so the crossing is
+## always between edge-adjacent cells).
+func _can_step(from_pos: Vector3, to_pos: Vector3) -> bool:
+	return WorldManager.is_move_allowed(
+		WorldManager.world_to_cell(from_pos),
+		WorldManager.world_to_cell(to_pos))
 
 
 func _face(direction: Vector3) -> void:

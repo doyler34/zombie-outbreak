@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 		_press_time += delta
 		if _press_time >= DataManager.settings.long_press_duration:
 			_long_press_fired = true
-			long_pressed.emit(_press_pos, _to_world(_press_pos))
+			long_pressed.emit(_press_pos, screen_to_world(_press_pos))
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -114,10 +114,10 @@ func _end_single_gesture(is_tap: bool, release_pos: Vector2 = Vector2.ZERO) -> v
 		var time_since_last := now - _last_tap_time
 		var distance_to_last := release_pos.distance_to(_last_tap_pos)
 		if time_since_last < DOUBLE_TAP_THRESHOLD and distance_to_last < DOUBLE_TAP_DISTANCE:
-			double_tapped.emit(release_pos, _to_world(release_pos))
+			double_tapped.emit(release_pos, screen_to_world(release_pos))
 			_last_tap_time = -10.0
 		else:
-			tapped.emit(release_pos, _to_world(release_pos))
+			tapped.emit(release_pos, screen_to_world(release_pos))
 			_last_tap_pos = release_pos
 			_last_tap_time = now
 	_pressing = false
@@ -139,7 +139,8 @@ func _touch_center() -> Vector2:
 ## the ray is parallel to the ground. Terrain relief is handled by
 ## re-intersecting against the local ground height a couple of times —
 ## exact enough for tap selection on gentle hills without physics.
-func _to_world(screen_pos: Vector2) -> Vector3:
+## Public: the build-mode preview uses it for mouse-hover tracking.
+func screen_to_world(screen_pos: Vector2) -> Vector3:
 	var camera := get_viewport().get_camera_3d()
 	if camera == null:
 		return Vector3.ZERO

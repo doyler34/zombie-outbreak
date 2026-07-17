@@ -48,6 +48,13 @@ extends Resource
 ## Knob deflections below this fraction of the radius are ignored.
 @export var joystick_dead_zone: float = 0.2
 
+@export_group("Base building")
+## Height of one building storey in meters (kit wall panels are 3m).
+@export var build_level_height: float = 3.0
+## Max ground-height difference across a piece's footprint before the
+## terrain counts as too steep to build on.
+@export var build_max_terrain_step: float = 0.8
+
 @export_group("Interaction")
 ## Extra reach (m) beyond an object's footprint radius from which the
 ## Commander can interact with it. Individual objects can still override

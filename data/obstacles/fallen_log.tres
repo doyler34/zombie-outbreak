@@ -1,7 +1,6 @@
-[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/textures/obstacles/fallen_log.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -9,7 +8,6 @@ model_kind = "log"
 id = "fallen_log"
 display_name = "Fallen Log"
 description = "Came down years ago. Easy timber."
-texture = ExtResource("2")
 grid_size = Vector2i(2, 1)
 clear_cost = {
 "food": 4

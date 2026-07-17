@@ -22,27 +22,11 @@ const FOLIAGE_SEED := 1337
 
 ## Foliage catalog: model, base instance count (desktop, before the
 ## quality multiplier), zone density weights (unlisted zone types use
-## "default"), and scale jitter.
-const FOLIAGE_RULES: Array[Dictionary] = [
-	{
-		"model": "res://assets/nature/Grass_Common_Short.gltf",
-		"count": 2600,
-		"weights": {"forest": 1.5, "clearing": 0.45, "rocky": 0.3, "town": 0.25, "default": 1.0},
-		"scale_min": 0.8, "scale_max": 1.4,
-	},
-	{
-		"model": "res://assets/nature/Grass_Common_Tall.gltf",
-		"count": 1100,
-		"weights": {"forest": 1.7, "clearing": 0.2, "rocky": 0.25, "town": 0.3, "default": 1.0},
-		"scale_min": 0.9, "scale_max": 1.6,
-	},
-	{
-		"model": "res://assets/nature/Flower_4_Group.gltf",
-		"count": 220,
-		"weights": {"forest": 1.2, "clearing": 0.5, "rocky": 0.1, "default": 1.0},
-		"scale_min": 0.8, "scale_max": 1.2,
-	},
-]
+## "default"), and scale jitter. Currently empty — the grass/flower
+## clutter models were culled from the assets; drop new entries here
+## (same keys as before) and the MultiMesh scatter machinery below
+## picks them up unchanged.
+const FOLIAGE_RULES: Array[Dictionary] = []
 
 ## Terrain mesh density: one vertex every this many meters.
 const TERRAIN_STEP := 2.0

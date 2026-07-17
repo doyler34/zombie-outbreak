@@ -1,8 +1,6 @@
-[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="ObstacleDefinition" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/obstacle_definition.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/nature/Rock_Medium_3.gltf" id="3"]
-[ext_resource type="Texture2D" path="res://assets/textures/obstacles/boulder.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -10,8 +8,6 @@ model_kind = "boulder"
 id = "boulder"
 display_name = "Boulder"
 description = "A monolith of granite. Needs demolitions research and a full crew."
-model = ExtResource("3")
-texture = ExtResource("2")
 grid_size = Vector2i(2, 2)
 clear_cost = {
 "food": 20,

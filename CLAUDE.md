@@ -57,8 +57,9 @@ else a bright primitive placeholder.
 
 ## Current asset wiring
 **Buildings** (`model_path` → auto-fit to grid plot unless `model_scale` set):
-- Capital(id `safe_house`) capital.glb, Wall wall.glb, Gate gate.glb — Tripo,
-  embedded textures.
+- Capital(id `safe_house`), Wall, Gate: model_path is EMPTY (their Tripo
+  models were culled in the 2026-07 asset purge) → they render as the
+  data-driven chunky placeholder until replacement art is wired.
 - Barracks, Farm, Medical Bay, Workshop, Watchtower → composite scenes in
   `scenes/buildings/*.tscn`, assembled from the **POLY Survival Workshop**
   modular kit (`assets/poly_survival_workshop/`): open-top interiors (floor +
@@ -80,8 +81,7 @@ else a bright primitive placeholder.
   leftovers (Models_original FBX dupes, Unity Materials, foreign Prefabs/
   Scenes/Demo_Profiles/terrain, per-dir `extracted/`) are `.gdignore`d.
   Wall/floor pieces pivot at their min-X corner (panel runs +X, thickness
-  +Z, floor extends −Z); props pivot centered at Y=0. Kenney City Kit glbs
-  remain in assets, unused.
+  +Z, floor extends −Z); props pivot centered at Y=0.
 
 **Combat** (`data/roles`, `data/zombies`): each combatant has `model` +
 `model_scale`. Shared animation libraries in `assets/animations/` (CC0
@@ -93,7 +93,7 @@ merges into Rigify rigs). Mannequins are gray, so
 ModelFactory.combatant_model tints them with the definition color. Clip names
 resolve per rig via ModelFactory.find_anim candidate lists; the two libraries
 use DIFFERENT skeletons (UAL1 "DEF-hips", UAL2 "pelvis") and only merge into
-matching rigs. Kenney mini-characters (32 anims) remain in assets as a fallback. Playable
+matching rigs. Playable
 cast now = Universal Base Characters (superhero male/female GLTF, UE rig,
 assets/characters/universal_base) - UAL2 clips drive them; zombies are the
 same models tinted per-type.
@@ -154,7 +154,13 @@ combat parse-error, invisible attack anim, giant/missing weapons. All resolved a
 CI-green. If a "feature doesn't show on device," first suspect: stale APK (old run)
 or a silent parse/import error — check the latest CI run's validate step.
 
-## Unused assets available (not yet wired)
-80+ Kenney city models (skyscrapers, fences, paths, driveways, trees), 6 farm crop
-FBX, extra weapons (ak47, smg, sniper, fire_axe, hammer, grenade, ammo). Ask before
-assuming which to use.
+## Assets on disk (after the 2026-07 purge)
+animations/, audio/, characters/ (Universal Base), nature/ (trees only —
+grass/flower clutter, bushes and loose rocks are gone; those obstacles
+fall back to procedural primitives), poly_survival_workshop/ (FBX Models
++ Textures), shaders/, weapons/, base_pieces/ (authored plank models).
+Kenney city kit, Tripo capital/wall/gate, farm crops, Kenney
+mini-characters and the old building/obstacle icon PNGs were deleted —
+never re-reference them. Building icons: BuildingDefinition.texture is
+now unset; the build menu renders rows without thumbnails until new
+icons land.

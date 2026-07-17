@@ -1,15 +1,13 @@
-[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="BuildingDefinition" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/building_definition.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/textures/buildings/gate.png" id="2"]
 
 [resource]
 script = ExtResource("1")
-model_path = "res://assets/models/gate.glb"
+model_path = ""
 id = "gate"
 display_name = "Gate"
 description = "A reinforced gate for the perimeter. Lets your people through and keeps everything else out. (Passage mechanics arrive with the movement system.)"
-texture = ExtResource("2")
 grid_size = Vector2i(2, 1)
 max_level = 3
 build_time = 25.0

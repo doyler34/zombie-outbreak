@@ -150,6 +150,13 @@ func _initialize() -> void:
 	root.add_child(wall_model)
 	if not _has_textured_mesh(wall_model):
 		failures.append("wall model imported without its palette texture")
+	# The wall's KHR_texture_transform shift moves its UVs off the gray
+	# palette swatch onto the wood one — if the importer drops it, the
+	# wall renders gray again. Assert it survived the import.
+	var wall_material := _first_textured_material(wall_model)
+	if wall_material != null and absf(wall_material.uv1_offset.x - 0.123) > 0.01:
+		failures.append("wall palette shift lost in import (uv1_offset=%s)"
+			% wall_material.uv1_offset)
 	wall_model.queue_free()
 
 	# ── Ghost visuals really exist (fitted, non-empty) ─────────────────
@@ -170,6 +177,20 @@ func _initialize() -> void:
 			print("FAIL: ", failure)
 		print("BASEBUILD_BROKEN")
 	quit(0 if failures.is_empty() else 1)
+
+
+func _first_textured_material(node: Node) -> BaseMaterial3D:
+	if node is MeshInstance3D:
+		var mesh_node := node as MeshInstance3D
+		for i in mesh_node.get_surface_override_material_count():
+			var material := mesh_node.get_active_material(i)
+			if material is BaseMaterial3D and (material as BaseMaterial3D).albedo_texture != null:
+				return material
+	for child in node.get_children():
+		var found := _first_textured_material(child)
+		if found != null:
+			return found
+	return null
 
 
 func _has_textured_mesh(node: Node) -> bool:

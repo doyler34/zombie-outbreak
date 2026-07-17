@@ -144,6 +144,14 @@ func _initialize() -> void:
 	if not wm.is_edge_blocked(Vector3i(0, 0, 0)):
 		failures.append("restored wall did not re-block its edge")
 
+	# ── Textures really bound: kit materials must carry the palette ───
+	var wall_scene: PackedScene = load(wall.model_path)
+	var wall_model: Node = wall_scene.instantiate()
+	root.add_child(wall_model)
+	if not _has_textured_mesh(wall_model):
+		failures.append("wall model imported without its palette texture")
+	wall_model.queue_free()
+
 	# ── Ghost visuals really exist (fitted, non-empty) ─────────────────
 	for piece in [foundation, wall, doorway, door, window, roof]:
 		var visual: Node3D = load("res://scripts/world/piece_placement.gd").build_visual(piece)
@@ -162,3 +170,16 @@ func _initialize() -> void:
 			print("FAIL: ", failure)
 		print("BASEBUILD_BROKEN")
 	quit(0 if failures.is_empty() else 1)
+
+
+func _has_textured_mesh(node: Node) -> bool:
+	if node is MeshInstance3D:
+		var mesh_node := node as MeshInstance3D
+		for i in mesh_node.get_surface_override_material_count():
+			var material := mesh_node.get_active_material(i)
+			if material is BaseMaterial3D and (material as BaseMaterial3D).albedo_texture != null:
+				return true
+	for child in node.get_children():
+		if _has_textured_mesh(child):
+			return true
+	return false

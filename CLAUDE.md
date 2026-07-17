@@ -63,8 +63,13 @@ else a bright primitive placeholder.
   `scenes/buildings/*.tscn`, assembled from the **POLY Survival Workshop**
   modular kit (`assets/poly_survival_workshop/`): open-top interiors (floor +
   3m wall panels + signature props) that read well on the top-down camera.
-  Kit gotchas: every gltf referenced a missing `New Palitra.jpg` — URIs were
-  rewritten to `Textures/Polygon_Texture2.png` (the palette atlas); pack
+  Kit gotchas: every gltf referenced a missing `New Palitra.jpg` — the
+  palette atlas (`Polygon_Texture2.png`) now sits COPIED BESIDE the models
+  in every gltf directory and URIs point at it same-dir. NEVER use `../`
+  in gltf texture URIs: the editor/CI import resolves them (CI stays
+  green) but the exported APK's remap lookup doesn't → textures silently
+  null on device, models render gray. Same lesson as Kenney gotcha #6:
+  texture beside the model, always; pack
   leftovers (Models_original FBX dupes, Unity Materials, foreign Prefabs/
   Scenes/Demo_Profiles/terrain, per-dir `extracted/`) are `.gdignore`d.
   Wall/floor pieces pivot at their min-X corner (panel runs +X, thickness

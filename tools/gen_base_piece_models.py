@@ -12,7 +12,8 @@ math, snapping, collision and the composite scenes stay untouched:
 Style: low-poly boxes only — individual planks with per-plank colour
 jitter (baked as vertex colours: ONE untextured material, one draw
 call, zero texture fetches on mobile), small gaps, support beams and
-rails, nail-head quads, slight end-wear insets. Deterministic RNG so
+rails and nail-head quads, all reaching the tile borders so adjacent
+pieces join seamlessly. Deterministic RNG so
 regeneration is reproducible.
 
 Run from the repo root:  python3 tools/gen_base_piece_models.py
@@ -116,15 +117,19 @@ def jitter(rng, color, amount=0.10):
 def build_wall():
     rng = random.Random(20260717)
     m = MeshBuilder()
-    # Frame: bottom/top rails and two vertical beams, full 0.2 depth so
-    # they read as supports on BOTH faces without growing the bounds.
+    # Frame: rails and END posts, all running to the panel borders so
+    # neighbouring walls butt seamlessly — two adjacent end posts read
+    # as one chunky shared stud at every joint instead of a gap.
     beam_lin = srgb_to_linear(BEAM)
     m.box(0.0, 3.0, 0.0, 0.10, 0.0, 0.2, beam_lin)      # bottom rail
     m.box(0.0, 3.0, 2.90, 3.0, 0.0, 0.2, beam_lin)      # top rail
-    m.box(0.05, 0.23, 0.0, 3.0, 0.0, 0.2, beam_lin)     # left beam
-    m.box(2.77, 2.95, 0.0, 3.0, 0.0, 0.2, beam_lin)     # right beam
+    m.box(0.0, 0.18, 0.0, 3.0, 0.0, 0.2, beam_lin)      # left end post
+    m.box(2.82, 3.0, 0.0, 3.0, 0.0, 0.2, beam_lin)      # right end post
 
-    # 7 horizontal planks between the rails, small gaps, worn ends.
+    # 7 horizontal planks between the rails, small gaps between rows.
+    # Planks span the FULL width: siding continues across panel joints
+    # (weathering comes from shade variation, not end insets, so there
+    # is never a see-through slit where two walls meet).
     n, gap = 7, 0.02
     y0, y1 = 0.11, 2.89
     h = (y1 - y0 - gap * (n - 1)) / n
@@ -133,19 +138,17 @@ def build_wall():
         py0 = y0 + i * (h + gap) + rng.uniform(-0.004, 0.004)
         base = PLANK_DARK if i % 3 == 2 else PLANK
         color = jitter(rng, base)
-        x0 = 0.02 + rng.uniform(0.0, 0.035)
-        x1 = 2.98 - rng.uniform(0.0, 0.035)
-        z_j = rng.uniform(-0.004, 0.004)
-        m.box(x0, x1, py0, py0 + h, 0.045 + z_j, 0.155 + z_j, color)
+        z_j = rng.uniform(-0.003, 0.003)
+        m.box(0.0, 3.0, py0, py0 + h, 0.045 + z_j, 0.155 + z_j, color)
         nail_rows.append(py0 + h / 2.0)
 
-    # Nail heads: tiny front-facing quads where planks meet the beams.
+    # Nail heads: tiny front-facing quads where planks meet the posts.
     nail_lin = srgb_to_linear(NAIL)
     s = 0.016
     for py in nail_rows:
-        for nx in (0.14, 2.86):
-            m.quad((nx - s, py - s, 0.162), (nx + s, py - s, 0.162),
-                   (nx + s, py + s, 0.162), (nx - s, py + s, 0.162),
+        for nx in (0.09, 2.91):
+            m.quad((nx - s, py - s, 0.201), (nx + s, py - s, 0.201),
+                   (nx + s, py + s, 0.201), (nx - s, py + s, 0.201),
                    (0, 0, 1), nail_lin)
     m.write("wall_wood_planks")
 
@@ -154,31 +157,34 @@ def build_foundation():
     rng = random.Random(20260718)
     m = MeshBuilder()
     beam_lin = srgb_to_linear(BEAM)
-    # Perimeter skirt beams + corner posts (posts flush with the deck
-    # top, so the walkable surface stays a clean plane).
-    m.box(0.0, 3.0, 0.0, 0.17, -0.14, 0.0, beam_lin)      # south
-    m.box(0.0, 3.0, 0.0, 0.17, -3.0, -2.86, beam_lin)     # north
-    m.box(0.0, 0.14, 0.0, 0.17, -3.0, 0.0, beam_lin)      # west
-    m.box(2.86, 3.0, 0.0, 0.17, -3.0, 0.0, beam_lin)      # east
+    # Perimeter skirt beams + corner posts, all UNDER the board layer
+    # (y < 0.16): the deck top is boards edge to edge, so neighbouring
+    # foundations merge into one continuous floor with no recessed
+    # channel at tile borders. Skirts show only from the side.
+    m.box(0.0, 3.0, 0.0, 0.16, -0.14, 0.0, beam_lin)      # south
+    m.box(0.0, 3.0, 0.0, 0.16, -3.0, -2.86, beam_lin)     # north
+    m.box(0.0, 0.14, 0.0, 0.16, -3.0, 0.0, beam_lin)      # west
+    m.box(2.86, 3.0, 0.0, 0.16, -3.0, 0.0, beam_lin)      # east
     for cx0, cz0 in ((0.0, -0.2), (2.8, -0.2), (0.0, -3.0), (2.8, -3.0)):
-        m.box(cx0, cx0 + 0.2, 0.0, 0.22, cz0, cz0 + 0.2, beam_lin)
+        m.box(cx0, cx0 + 0.2, 0.0, 0.16, cz0, cz0 + 0.2, beam_lin)
 
-    # 8 floorboards running along X, gaps between, a few split boards.
+    # 8 floorboards running along X. Boards reach the tile borders on
+    # every side so adjacent foundations join board-to-board; the thin
+    # row gaps stay INSIDE the tile as plank lines. Split-board seams
+    # keep the deck from looking machine-made.
     n, gap = 8, 0.012
-    w = (2.96 - gap * (n - 1)) / n
+    w = (3.0 - gap * (n - 1)) / n
     for i in range(n):
-        z1 = -0.02 - i * (w + gap)
+        z1 = -i * (w + gap)
         z0 = z1 - w
         base = PLANK_DARK if i % 4 == 3 else PLANK
         color = jitter(rng, base, 0.08)
-        x0 = 0.02 + rng.uniform(0.0, 0.02)
-        x1 = 2.98 - rng.uniform(0.0, 0.02)
         if i in (1, 4, 6):  # split board: two segments, offset seam
             seam = rng.uniform(0.9, 2.1)
-            m.box(x0, seam - 0.008, 0.16, 0.22, z0, z1, color)
-            m.box(seam + 0.008, x1, 0.16, 0.22, z0, z1, jitter(rng, base, 0.08))
+            m.box(0.0, seam - 0.008, 0.16, 0.22, z0, z1, color)
+            m.box(seam + 0.008, 3.0, 0.16, 0.22, z0, z1, jitter(rng, base, 0.08))
         else:
-            m.box(x0, x1, 0.16, 0.22, z0, z1, color)
+            m.box(0.0, 3.0, 0.16, 0.22, z0, z1, color)
     m.write("foundation_wood_planks")
 
 

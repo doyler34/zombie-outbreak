@@ -171,10 +171,10 @@ func _initialize() -> void:
 		failures.append("legacy save door did not default to closed")
 
 	# ── Textures really bound: kit panels must carry the palette ──────
-	# (the doorway still uses a kit FBX panel with the New Palitra
-	# atlas; the wall is the authored vertex-coloured plank model,
-	# checked separately below)
-	var kit_scene: PackedScene = load(doorway.model_path)
+	# (the WINDOW still uses a kit FBX panel with the New Palitra atlas;
+	# wall/foundation/doorway are authored plank models with plain or
+	# vertex-colour materials and legitimately carry no texture)
+	var kit_scene: PackedScene = load(window.model_path)
 	var kit_model: Node = kit_scene.instantiate()
 	root.add_child(kit_model)
 	if not _has_textured_mesh(kit_model):

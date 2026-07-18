@@ -96,12 +96,26 @@ func _initialize() -> void:
 		"edge": Vector3i(0, 0, 0), "axis": 0, "level": 0}
 	if bm.can_place(door, door_on_wall):
 		failures.append("door allowed on a plain wall")
+	# The empty doorway is walkable BEFORE a door fills it.
+	if not wm.is_move_allowed(Vector2i(0, 1), Vector2i(0, 2)):
+		failures.append("empty doorway blocks movement")
 	var door_spot := {"placement": "edge", "cell": Vector2i(0, 1),
 		"edge": Vector3i(0, 2, 0), "axis": 0, "level": 0}
-	if bm.place(door, door_spot, true) == null:
+	var door_entity: Node = bm.place(door, door_spot, true)
+	if door_entity == null:
 		failures.append("door refused in a doorway")
 	elif bm.can_place(door, door_spot):
 		failures.append("second door allowed in a filled doorway")
+
+	# ── Door states: closed blocks, open lets everyone through ───────
+	if door_entity != null:
+		if wm.is_move_allowed(Vector2i(0, 1), Vector2i(0, 2)):
+			failures.append("closed door does not block movement")
+		door_entity.set_open(true, false)
+		if not wm.is_move_allowed(Vector2i(0, 1), Vector2i(0, 2)):
+			failures.append("open door blocks movement")
+		if not door_entity.is_open:
+			failures.append("door state did not flip to open")
 
 	# ── Barricades: window slots take window barricades only ──────────
 	var barricade_window: Resource = dm.get_piece("barricade_window")
@@ -122,15 +136,13 @@ func _initialize() -> void:
 	if bm.can_place(roof, {"placement": "cell", "cell": Vector2i(3, 3), "axis": 0, "level": 1}):
 		failures.append("roof allowed over an unwalled cell")
 
-	# ── Navigation: solid wall blocks the crossing, doorway doesn't ───
+	# ── Navigation: solid wall blocks the crossing ────────────────────
 	if wm.is_move_allowed(Vector2i(0, 0), Vector2i(0, -1)):
 		failures.append("north wall does not block movement")
-	if not wm.is_move_allowed(Vector2i(0, 1), Vector2i(0, 2)):
-		failures.append("doorway wrongly blocks movement")
 	if not wm.is_move_allowed(Vector2i(0, 0), Vector2i(0, 1)):
 		failures.append("open interior crossing wrongly blocked")
 
-	# ── Save round-trip ────────────────────────────────────────────────
+	# ── Save round-trip (door left OPEN going in) ─────────────────────
 	var placed: int = bm.piece_count()
 	var saved: Array = bm.get_save_data()
 	bm.reset()
@@ -143,6 +155,20 @@ func _initialize() -> void:
 		failures.append("save round-trip lost pieces: %d -> %d" % [placed, bm.piece_count()])
 	if not wm.is_edge_blocked(Vector3i(0, 0, 0)):
 		failures.append("restored wall did not re-block its edge")
+	if not wm.is_move_allowed(Vector2i(0, 1), Vector2i(0, 2)):
+		failures.append("door open state lost in save round-trip")
+
+	# Old saves have no "open" key — the door must come back CLOSED.
+	var legacy: Array = []
+	for entry: Dictionary in saved:
+		var copy: Dictionary = entry.duplicate()
+		copy.erase("open")
+		legacy.append(copy)
+	bm.reset()
+	bm.register_container(container)
+	bm.apply_save_data(legacy)
+	if wm.is_move_allowed(Vector2i(0, 1), Vector2i(0, 2)):
+		failures.append("legacy save door did not default to closed")
 
 	# ── Textures really bound: kit panels must carry the palette ──────
 	# (the doorway still uses a kit FBX panel with the New Palitra

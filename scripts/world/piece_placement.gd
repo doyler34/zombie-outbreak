@@ -169,6 +169,38 @@ static func collision_shape(piece: BuildingPiece) -> BoxShape3D:
 	return _shape_cache[piece.id]
 
 
+## Frame collider layout (collision "frame"): left post, right post and
+## top beam around the piece's opening_size hole, so the middle is
+## physically walkable. Returns cached [{"shape": BoxShape3D,
+## "position": Vector3}] shared by every instance of the piece.
+static func frame_shapes(piece: BuildingPiece) -> Array:
+	var key := piece.id + "|frame"
+	if _shape_cache.has(key):
+		return _shape_cache[key]
+	var bounds := fitted_aabb(piece)
+	var half_opening := piece.opening_size.x / 2.0
+	var opening_top := piece.opening_size.y
+	var depth := maxf(bounds.size.z, 0.05)
+	var z_center := bounds.get_center().z
+	var parts := []
+	for side in [[bounds.position.x, -half_opening], [half_opening, bounds.end.x]]:
+		var width: float = side[1] - side[0]
+		if width <= 0.01:
+			continue
+		var shape := BoxShape3D.new()
+		shape.size = Vector3(width, bounds.size.y, depth)
+		parts.append({"shape": shape,
+			"position": Vector3(side[0] + width / 2.0, bounds.size.y / 2.0, z_center)})
+	var beam_height := bounds.end.y - opening_top
+	if beam_height > 0.01:
+		var beam := BoxShape3D.new()
+		beam.size = Vector3(bounds.size.x, beam_height, depth)
+		parts.append({"shape": beam,
+			"position": Vector3(bounds.get_center().x, opening_top + beam_height / 2.0, z_center)})
+	_shape_cache[key] = parts
+	return parts
+
+
 static func _fit_for(piece: BuildingPiece, holder: Node3D) -> Dictionary:
 	if _fit_cache.has(piece.id):
 		return _fit_cache[piece.id]

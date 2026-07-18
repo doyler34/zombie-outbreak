@@ -21,6 +21,7 @@ cost = {
 "wood": 4
 }
 max_health = 150
-blocks_movement = false
+blocks_movement = true
+openable = true
 sort_order = 40
 color = Color(0.75, 0.6, 0.35, 1)

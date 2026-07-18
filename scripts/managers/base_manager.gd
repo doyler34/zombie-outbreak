@@ -399,3 +399,7 @@ func apply_save_data(data: Array) -> void:
 		var entity := place(piece, spot, true)
 		if entity != null:
 			entity.health = int(entry.get("hp", piece.max_health))
+			# Doors restore their hinge state; old saves lack the key
+			# and default closed.
+			if piece.openable and bool(entry.get("open", false)):
+				entity.set_open(true, false)

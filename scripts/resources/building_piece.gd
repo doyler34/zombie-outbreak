@@ -94,8 +94,17 @@ extends Resource
 
 @export_group("Combat / physics")
 @export var max_health: int = 200
-## "box" = auto box collider from the fitted bounds; "none" = no body.
+## "box" = auto box collider from the fitted bounds; "frame" = three
+## colliders (left post, right post, top beam) leaving `opening_size`
+## walkable in the middle (doorways); "none" = no body.
 @export var collision: String = "box"
+## The walkable hole for collision "frame": width x height in fitted
+## meters, centered on the piece, from the ground up.
+@export var opening_size: Vector2 = Vector2.ZERO
+## Hinged piece (door leafs): interactable open/close with a 90° swing.
+## Closed blocks movement across its edge iff blocks_movement is true;
+## open always lets everyone through. State persists in the save.
+@export var openable: bool = false
 ## Placed piece blocks ground movement across its edge (walls do,
 ## doorways/gates don't — keeps the nav grid honest).
 @export var blocks_movement: bool = true

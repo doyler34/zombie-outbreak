@@ -333,6 +333,16 @@ func piece_count() -> int:
 	return _entities.size()
 
 
+## Height of the walkable deck a ground-level surface piece puts on
+## [param cell] (0 when the cell has no foundation). The build plane
+## and character feet both stand on this.
+func deck_height(cell: Vector2i) -> float:
+	var entity: BasePieceEntity = _cells.get(PiecePlacement.cell_key(cell, 0))
+	if entity == null or not entity.piece.offers("surface"):
+		return 0.0
+	return PiecePlacement.fitted_aabb(entity.piece).size.y
+
+
 func _register(entity: BasePieceEntity) -> void:
 	var spot: Dictionary = entity.spot
 	if spot.placement == "cell":
@@ -342,6 +352,9 @@ func _register(entity: BasePieceEntity) -> void:
 				_cells[PiecePlacement.cell_key(c, spot.level)] = entity
 				if spot.level == 0:
 					WorldManager.occupy_area(c, Vector2i.ONE, entity)
+					if entity.piece.offers("surface"):
+						WorldManager.set_cell_surface(c,
+							PiecePlacement.fitted_aabb(entity.piece).size.y)
 		return
 	var key := PiecePlacement.edge_key(spot.edge, spot.level)
 	if fill_token(entity.piece) != "":
@@ -362,6 +375,8 @@ func _unregister(entity: BasePieceEntity) -> void:
 				_cells.erase(PiecePlacement.cell_key(c, spot.level))
 				if spot.level == 0:
 					WorldManager.vacate_area(c, Vector2i.ONE)
+					if entity.piece.offers("surface"):
+						WorldManager.clear_cell_surface(c)
 		return
 	var key := PiecePlacement.edge_key(spot.edge, spot.level)
 	if fill_token(entity.piece) != "":

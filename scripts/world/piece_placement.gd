@@ -95,17 +95,28 @@ static func nearest_edge(cell: Vector2i, world_pos: Vector3, axis_lock: int = -1
 ## World transform for a piece at [param spot]: origin on the spot
 ## center at the spot's storey height, yawed so edge pieces lie along
 ## their edge (axis 1 = rotated 90°).
+##
+## The foundation TOP is the build plane: ground-level cell pieces
+## (foundations, stairs) sit on the terrain, while walls, fills and
+## upper storeys start on the deck of the foundation beneath them — so
+## bottom rails rest ON the floorboards instead of sinking through, and
+## door openings keep their full height above the deck.
 static func spot_transform(piece: BuildingPiece, spot: Dictionary) -> Transform3D:
 	var origin: Vector3
+	var deck := 0.0
 	if spot.placement == "cell":
 		var cs := WorldManager.cell_size()
 		var cell: Vector2i = spot.cell
 		origin = Vector3(
 			(cell.x + piece.grid_size.x * 0.5) * cs, 0.0,
 			(cell.y + piece.grid_size.y * 0.5) * cs)
+		if spot.level > 0:
+			deck = BaseManager.deck_height(cell)
 	else:
 		origin = edge_center(spot.edge)
-	origin.y = WorldManager.ground_height(origin) + spot.level * level_height()
+		for cell: Vector2i in cells_beside_edge(spot.edge):
+			deck = maxf(deck, BaseManager.deck_height(cell))
+	origin.y = WorldManager.ground_height(origin) + deck + spot.level * level_height()
 	var basis := Basis.IDENTITY
 	if spot.placement == "edge" and (spot.edge as Vector3i).z == 1:
 		basis = Basis(Vector3.UP, -PI / 2.0)  # +X → +Z: run along Z

@@ -159,7 +159,8 @@ func _seek(target: Vector3, delta: float) -> bool:
 		if _can_step(next, probe):
 			next.z += motion.z
 			moved = true
-	next.y = WorldManager.ground_height(next)
+	# Feet on the terrain OR a built foundation deck, whichever is here.
+	next.y = WorldManager.stand_height(next)
 	position = next
 
 	if not moved:

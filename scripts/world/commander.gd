@@ -122,7 +122,8 @@ func _step(direction: Vector3, strength: float, delta: float) -> void:
 		var probe := next + Vector3(0, 0, motion.z + signf(motion.z) * WALL_PROBE)
 		if _can_step(next, probe):
 			next.z += motion.z
-	next.y = WorldManager.ground_height(next)
+	# Feet on the terrain OR a built foundation deck, whichever is here.
+	next.y = WorldManager.stand_height(next)
 	position = next
 
 

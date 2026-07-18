@@ -196,6 +196,22 @@ func _initialize() -> void:
 		failures.append("kit panel imported without its palette texture")
 	kit_model.queue_free()
 
+	# ── Deck elevation: feet and walls stand ON the foundation top ────
+	var deck: float = bm.deck_height(Vector2i(0, 0))
+	if deck < 0.15:
+		failures.append("foundation registered no deck height (%f)" % deck)
+	var stand: float = wm.stand_height(Vector3(0.5 * cs, 0, 0.5 * cs))
+	if absf(stand - deck) > 0.01:
+		failures.append("stand_height on foundation is %f, wanted deck %f" % [stand, deck])
+	if wm.stand_height(Vector3(20.5 * cs, 0, 20.5 * cs)) > 0.01:
+		failures.append("stand_height off-foundation should be terrain level")
+	# A wall between two foundations starts at deck height, not terrain.
+	var wall_lift: float = load("res://scripts/world/piece_placement.gd") \
+		.spot_transform(wall, {"placement": "edge", "cell": Vector2i(0, 0),
+			"edge": Vector3i(0, 1, 0), "axis": 0, "level": 0}).origin.y
+	if absf(wall_lift - deck) > 0.01:
+		failures.append("wall base at %f, should sit on the %f deck" % [wall_lift, deck])
+
 	# ── Authored plank models: exact kit bounds so grid math holds ────
 	var wall_aabb: AABB = load("res://scripts/world/piece_placement.gd").fitted_aabb(wall)
 	if absf(wall_aabb.size.x - cs) > 0.01 or absf(wall_aabb.size.y - 3.0) > 0.01:

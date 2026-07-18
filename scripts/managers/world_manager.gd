@@ -22,6 +22,7 @@ var _heightfield: Heightfield = null
 func reset() -> void:
 	_occupancy.clear()
 	_blocked_edges.clear()
+	_cell_surfaces.clear()
 
 
 # ── Elevation ────────────────────────────────────────────────────────────
@@ -37,6 +38,28 @@ func ground_height(world_pos: Vector3) -> float:
 	if _heightfield == null:
 		return 0.0
 	return _heightfield.height_at(Vector2(world_pos.x, world_pos.z))
+
+
+# ── Standing surfaces (base-piece decks on top of the terrain) ───────────
+## BaseManager registers each foundation's deck height per cell, so
+## characters stand ON player-built floors instead of wading through
+## them. Kept here so movement code has a single elevation authority.
+
+var _cell_surfaces: Dictionary = {}  # Vector2i -> deck height (m)
+
+
+func set_cell_surface(cell: Vector2i, height: float) -> void:
+	_cell_surfaces[cell] = height
+
+
+func clear_cell_surface(cell: Vector2i) -> void:
+	_cell_surfaces.erase(cell)
+
+
+## Terrain height plus any built deck at this position — where feet go.
+func stand_height(world_pos: Vector3) -> float:
+	return ground_height(world_pos) \
+		+ float(_cell_surfaces.get(world_to_cell(world_pos), 0.0))
 
 
 # ── Grid math ────────────────────────────────────────────────────────────

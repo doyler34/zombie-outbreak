@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1")
 model = ExtResource("2")
-model_scale = 1.5
+model_scale = 0.94
 id = "infected"
 display_name = "Infected"
 icon = "🧟"

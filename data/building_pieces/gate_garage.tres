@@ -6,7 +6,7 @@
 script = ExtResource("1")
 id = "gate_garage"
 display_name = "Garage Gate"
-description = "A rolling gate wide enough for vehicles. Connects into wall and fence runs."
+description = "A rolling gate wide enough for vehicles. Slides open for your people, drops shut against the dead."
 category = "gate"
 placement = "edge"
 model_path = "res://assets/poly_survival_workshop/Models/Walls_Floors_Roofs/Walls/SM_Garage_Door.fbx"
@@ -18,6 +18,9 @@ cost = {
 "metal": 5
 }
 max_health = 350
-blocks_movement = false
+blocks_movement = true
+openable = true
+open_motion = "slide"
+open_noun = "Gate"
 sort_order = 80
 color = Color(0.55, 0.55, 0.58, 1)

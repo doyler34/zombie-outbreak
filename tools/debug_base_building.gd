@@ -136,6 +136,21 @@ func _initialize() -> void:
 	if bm.can_place(roof, {"placement": "cell", "cell": Vector2i(3, 3), "axis": 0, "level": 1}):
 		failures.append("roof allowed over an unwalled cell")
 
+	# ── Gate: slides open, same block/pass contract as doors ──────────
+	var gate: Resource = dm.get_piece("gate_garage")
+	var gate_spot := {"placement": "edge", "cell": Vector2i(1, 1),
+		"edge": Vector3i(1, 1, 0), "axis": 0, "level": 0}
+	var gate_entity: Node = bm.place(gate, gate_spot, true)
+	if gate_entity == null:
+		failures.append("gate refused on a foundation edge")
+	else:
+		if wm.is_move_allowed(Vector2i(1, 0), Vector2i(1, 1)):
+			failures.append("closed gate does not block movement")
+		gate_entity.set_open(true, false)
+		if not wm.is_move_allowed(Vector2i(1, 0), Vector2i(1, 1)):
+			failures.append("open gate blocks movement")
+		gate_entity.set_open(false, false)
+
 	# ── Navigation: solid wall blocks the crossing ────────────────────
 	if wm.is_move_allowed(Vector2i(0, 0), Vector2i(0, -1)):
 		failures.append("north wall does not block movement")

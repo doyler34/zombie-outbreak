@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1")
 model = ExtResource("2")
-model_scale = 1.6
+model_scale = 1.0
 id = "commander"
 display_name = "Commander"
 icon = "★"

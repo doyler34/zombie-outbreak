@@ -101,10 +101,16 @@ extends Resource
 ## The walkable hole for collision "frame": width x height in fitted
 ## meters, centered on the piece, from the ground up.
 @export var opening_size: Vector2 = Vector2.ZERO
-## Hinged piece (door leafs): interactable open/close with a 90° swing.
-## Closed blocks movement across its edge iff blocks_movement is true;
-## open always lets everyone through. State persists in the save.
+## Hinged piece (door leafs, gates): interactable open/close. Closed
+## blocks movement across its edge iff blocks_movement is true; open
+## always lets everyone through. State persists in the save.
 @export var openable: bool = false
+## How an openable piece opens: "swing" = 90° hinge on its left edge
+## (doors); "slide" = the whole leaf rises out of the way (roll-up
+## garage gates).
+@export var open_motion: String = "swing"
+## Noun in the interaction prompt: "Open Door" / "Open Gate" / ...
+@export var open_noun: String = "Door"
 ## Placed piece blocks ground movement across its edge (walls do,
 ## doorways/gates don't — keeps the nav grid honest).
 @export var blocks_movement: bool = true

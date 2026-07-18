@@ -40,15 +40,18 @@ func setup(new_piece: BuildingPiece, new_spot: Dictionary) -> void:
 		_apply_tint(visual, PiecePlacement.variation_material(tint))
 
 	if new_piece.openable:
-		# Swing around the leaf's own left edge: hinge sits on it, the
-		# visual is offset back so the closed pose renders identically.
-		var left := PiecePlacement.fitted_aabb(new_piece).position.x
+		# The moving part sits under a mover node. Swing: the mover is a
+		# hinge on the leaf's own left edge (visual offset back so the
+		# closed pose renders identically). Slide: the mover lifts the
+		# whole leaf straight up, roll-up style.
 		_hinge = Node3D.new()
-		_hinge.position = Vector3(left, 0, 0)
-		visual.position = Vector3(-left, 0, 0)
+		if new_piece.open_motion == "swing":
+			var left := PiecePlacement.fitted_aabb(new_piece).position.x
+			_hinge.position = Vector3(left, 0, 0)
+			visual.position = Vector3(-left, 0, 0)
 		_hinge.add_child(visual)
 		add_child(_hinge)
-		_interactable = Interactable.attach(self, "Open Door",
+		_interactable = Interactable.attach(self, "Open " + new_piece.open_noun,
 			DataManager.settings.interaction_reach,
 			func(_actor: Node3D) -> void: set_open(not is_open))
 	else:
@@ -88,19 +91,29 @@ func set_open(open: bool, animate: bool = true) -> void:
 		return
 	is_open = open
 	if _interactable != null:
-		_interactable.prompt = "Close Door" if open else "Open Door"
+		_interactable.prompt = ("Close " if open else "Open ") + piece.open_noun
 	if spot.level == 0 and piece.blocks_movement:
 		if open:
 			WorldManager.unblock_edge(spot.edge)
 		else:
 			WorldManager.block_edge(spot.edge, self)
-	var target := OPEN_ANGLE if open else 0.0
+	var sliding := piece.open_motion == "slide"
+	# Slide leaves a lip visible so the raised gate still reads as one.
+	var lift := PiecePlacement.fitted_aabb(piece).size.y - 0.4
+	var property := "position:y" if sliding else "rotation:y"
+	var target: float
+	if sliding:
+		target = lift if open else 0.0
+	else:
+		target = OPEN_ANGLE if open else 0.0
 	if _swing_tween != null:
 		_swing_tween.kill()
 	if animate and is_inside_tree():
 		_swing_tween = create_tween()
-		_swing_tween.tween_property(_hinge, "rotation:y", target, SWING_SECONDS) \
+		_swing_tween.tween_property(_hinge, property, target, SWING_SECONDS) \
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	elif sliding:
+		_hinge.position.y = target
 	else:
 		_hinge.rotation.y = target
 
